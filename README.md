@@ -48,7 +48,7 @@ Money flows to the company once, at the raise, and back to holders as dividends 
 | [`circuits/`](circuits/) | Circom residence circuit, trusted-setup scripts and browser/Node prover |
 | [`scripts/testnet/`](scripts/testnet/) | Deploy and end-to-end demo scripts |
 | [`deployments/`](deployments/) | Testnet contract IDs and [transaction evidence](deployments/evidence.md) |
-| [`app/`](app/) | Next.js web app (in progress) |
+| [`app/`](app/) | Next.js web app: investor and company flows wired to the testnet contracts |
 | [`docs/`](docs/) | Design brief |
 | [`research_notes/`](research_notes/), [`reports/`](reports/) | Research behind the design |
 
@@ -103,7 +103,25 @@ scripts/testnet/demo-investor.sh investor-ben 276 600       # Germany
 scripts/testnet/demo-lifecycle.sh ANDES company-andes investor-ana 600 investor-ben 400 80
 ```
 
-The app's environment variables will be documented here once the app is connected (network, RPC URL, and the contract IDs from `deployments/testnet.env`).
+### Click through it in the app
+
+```sh
+cd app
+echo "DVDND_ADMIN_SECRET=$(stellar keys show admin)" > .env.local   # testnet issuer key for the mock KYC/KYB routes
+pnpm install && pnpm dev                                           # http://localhost:3000
+```
+
+1. **Investor:** Sign in → I'm an investor (a testnet wallet is created in your browser and funded with test XLM) → verify residence (mock KYC, then a real Groth16 proof generated in the browser and verified on-chain) → Discover → open a raise → Invest (Add money swaps test XLM for Circle testnet USDC).
+2. **Company:** Sign in → I'm raising for my company → register → verify ownership → sign the agreement → Set up raise (issues the share token with compliance flags and opens the raise).
+3. **Close and pay:** once a raise is full or past its deadline, anyone can close it → investors claim tokens in Portfolio and lock them → the company starts the first period and pays a dividend → investors claim USDC.
+
+| Variable | Where | Purpose |
+|---|---|---|
+| `DVDND_ADMIN_SECRET` | server only (`app/.env.local`) | Testnet platform key used by `/api/kyc` (adds credential leaves to the gate) and `/api/kyb` (verifies companies in the registry). |
+| `NEXT_PUBLIC_REGISTRY`, `NEXT_PUBLIC_GATE`, `NEXT_PUBLIC_OFFERING`, `NEXT_PUBLIC_VAULT`, `NEXT_PUBLIC_USDC_SAC` | optional | Override the testnet contract IDs (defaults in `app/src/lib/config.ts`). |
+| `NEXT_PUBLIC_RPC_URL`, `NEXT_PUBLIC_HORIZON_URL` | optional | Override the testnet RPC / Horizon endpoints. |
+
+Live tests against testnet (with the app running): `LIVE=1 APP_URL=http://localhost:3000 pnpm vitest run` in `app/`.
 
 ## Built during HackMeridian
 
