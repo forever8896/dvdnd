@@ -209,6 +209,7 @@ html { scroll-behavior: smooth; }
       <li><a href="#money">How the raise works</a></li>
       <li><a href="#unlocked">Stellar primitives</a></li>
       <li><a href="#compliance">Compliance gating</a></li>
+      <li><a href="#legal">US strategy</a></li>
       <li><a href="#anchors">Anchors &amp; ramps</a></li>
       <li><a href="#architecture">Architecture</a></li>
       <li><a href="#pricing">Fixed price vs curve</a></li>
@@ -255,16 +256,21 @@ html { scroll-behavior: smooth; }
             <tr><td>Share token issued with compliance flags, admin handed to the escrow</td><td><span class="pill ok">Built, real</span></td><td>AUTH_REQUIRED, REVOCABLE, CLAWBACK; supply fixed by code</td></tr>
             <tr class="status-group"><th colspan="3">Raise</th></tr>
             <tr><td>Fixed-price, all-or-nothing escrow with min, max and deadline</td><td><span class="pill ok">Built, real</span></td><td>Offering contract</td></tr>
-            <tr><td>Company receives the raise minus the 5% fee; refunds on failure</td><td><span class="pill ok">Built, real</span></td><td>Verified on testnet, two full runs</td></tr>
+            <tr><td>Company receives the full raise; flat listing fee at open; refunds on failure</td><td><span class="pill ok">Built, real</span></td><td>No share of the raise (§4(b)); verified on testnet</td></tr>
+            <tr><td>Each raise picks its exemption and rules</td><td><span class="pill ok">Built, real</span></td><td>Reg S or Reg D 506(c), minimum ticket, holder cap, lock-up date, compliance account</td></tr>
             <tr class="status-group"><th colspan="3">Investor eligibility</th></tr>
             <tr><td>ZK proof of non-US residence verified on-chain</td><td><span class="pill ok">Built, real</span></td><td>Groth16 on BN254, Poseidon Merkle tree kept on-chain</td></tr>
             <tr><td>One wallet per credential</td><td><span class="pill ok">Built, real</span></td><td>Pinned nullifier scope</td></tr>
             <tr><td>Residence checked by a real KYC vendor</td><td><span class="pill prog">In progress</span></td><td>idOS integrated: relay KYC (identity on an EVM wallet, since the relay is EVM-only; investing stays on Stellar), credential shared to dvdnd, issuer signature checked, verified residence builds the leaf. First real run pending (playground)</td></tr>
-            <tr><td>Issuer-signed credentials</td><td><span class="pill todo">Not started</span></td><td>Closes the trust gap on the declared country</td></tr>
+            <tr><td>Issuer builds the credential from the verified country</td><td><span class="pill ok">Built, real</span></td><td>Circuit v2: the investor only sends Poseidon(secret); the issuer adds the leaf from the KYC result</td></tr>
+            <tr><td>506(c) accreditation: signed statement plus $200k minimum, or a verifier's attestation</td><td><span class="pill mid">Testnet stand-in</span></td><td>Contract rules are real; the verifier is a testnet stand-in</td></tr>
+            <tr><td>Accreditation verification service</td><td><span class="pill ext">Needs vendor or legal</span></td><td>VerifyInvestor, Parallel Markets or similar</td></tr>
             <tr><td>Sanctions screening of investor addresses</td><td><span class="pill todo">Not started</span></td><td>OFAC's published crypto addresses</td></tr>
             <tr><td>Credential tree survives RPC event retention</td><td><span class="pill mid">Testnet stand-in</span></td><td>Events plus a bundled seed; needs an on-chain view or indexer</td></tr>
             <tr class="status-group"><th colspan="3">Holding and trading</th></tr>
-            <tr><td>Only verified wallets can hold the token, on every venue</td><td><span class="pill ok">Built, real</span></td><td>Enforced by Stellar's authorization flags</td></tr>
+            <tr><td>Only eligible wallets can hold the token, on every venue</td><td><span class="pill ok">Built, real</span></td><td>Enforced by Stellar's authorization flags, per the raise's exemption</td></tr>
+            <tr><td>Lock-up enforced on-chain</td><td><span class="pill ok">Built, real</span></td><td>Claimed tokens go into the dividend vault and the wallet is frozen until the date; checked on testnet</td></tr>
+            <tr><td>Holder cap under the §12(g) trigger</td><td><span class="pill ok">Built, real</span></td><td>Counts primary and secondary holders, at most 2,000</td></tr>
             <tr><td>Secondary trading screen (order book, path payments)</td><td><span class="pill todo">Not started</span></td><td>Contract support exists</td></tr>
             <tr><td>Optional liquidity pool seeded from the raise</td><td><span class="pill todo">Not started</span></td><td></td></tr>
             <tr class="status-group"><th colspan="3">Dividends</th></tr>
@@ -279,17 +285,19 @@ html { scroll-behavior: smooth; }
             <tr><td>Demo wallet with backup and restore</td><td><span class="pill ok">Built, real</span></td><td>Testnet only</td></tr>
             <tr><td>Passkey smart wallets</td><td><span class="pill todo">Not started</span></td><td>Needs reworking classic operations</td></tr>
             <tr class="status-group"><th colspan="3">Compliance operations</th></tr>
-            <tr><td>Freeze and unfreeze a holder</td><td><span class="pill ok">Built, real</span></td><td>Compliance role on the offering contract, with a recorded reason</td></tr>
+            <tr><td>Freeze and unfreeze a holder</td><td><span class="pill ok">Built, real</span></td><td>Each raise's own compliance account (company or transfer agent), with a recorded reason</td></tr>
             <tr><td>Clawback with a recorded reason</td><td><span class="pill ok">Built, real</span></td><td>Burns from the holder's wallet; reason emitted as an on-chain event</td></tr>
-            <tr><td>Admin powers behind a multisig</td><td><span class="pill ok">Built, real</span></td><td>Council account, 2 of 3 signers, master key disabled; platform key keeps only verification and credential issuing</td></tr>
+            <tr><td>Admin powers behind a multisig</td><td><span class="pill ok">Built, real</span></td><td>Council account, 2 of 3 signers, master key disabled; it sets the listing fee and has no power over holders</td></tr>
             <tr><td>Timelock on admin changes</td><td><span class="pill todo">Not started</span></td><td></td></tr>
-            <tr><td>Compliance console with audit log</td><td><span class="pill prog">In progress</span></td><td>Contract actions and events exist; the screen with multisig signing is next</td></tr>
+            <tr><td>Compliance console with audit log</td><td><span class="pill prog">In progress</span></td><td>Contract actions and events exist; a console for each company's compliance account is next</td></tr>
             <tr><td>stellar.toml (SEP-1) for dvdnd and its assets</td><td><span class="pill ok">Built, real</span></td><td>Generated from the chain at <a href="https://dvdnd.vercel.app/.well-known/stellar.toml">/.well-known/stellar.toml</a>; issuers point to it</td></tr>
             <tr><td>Contract and ZK circuit audit</td><td><span class="pill ext">Needs vendor or legal</span></td><td>Veridise, Certora, Runtime Verification, OtterSec, Halborn</td></tr>
             <tr><td>Multi-party trusted setup ceremony</td><td><span class="pill prog">In progress</span></td><td>Phase 1: PSE Perpetual Powers of Tau (80 contributors). Phase 2: scripted ceremony with a Stellar-ledger beacon, one contributor so far; key live on the testnet gate</td></tr>
             <tr class="status-group"><th colspan="3">Legal</th></tr>
             <tr><td>Legal wrapper per company (SPV or profit-participation agreement)</td><td><span class="pill ext">Needs vendor or legal</span></td><td>Counsel</td></tr>
-            <tr><td>Offering rules: Reg S, EU crowdfunding licence or prospectus</td><td><span class="pill ext">Needs vendor or legal</span></td><td>Counsel</td></tr>
+            <tr><td>Offering rules: Reg S, EU crowdfunding licence or prospectus</td><td><span class="pill ext">Needs vendor or legal</span></td><td>Counsel; confirm the §4(b) fee design and that code-held escrow isn't holding customer funds</td></tr>
+            <tr><td>Form D filed for each 506(c) raise</td><td><span class="pill ext">Needs vendor or legal</span></td><td>The company files within 15 days of the first sale, plus state notice filings</td></tr>
+            <tr><td>Reg CF retail raises through a licensed funding portal</td><td><span class="pill ext">Needs vendor or legal</span></td><td>Partner portal using dvdnd's contracts</td></tr>
             <tr><td>Transfer agent / registrar of holders</td><td><span class="pill ext">Needs vendor or legal</span></td><td></td></tr>
             <tr class="status-group"><th colspan="3">Product and submission</th></tr>
             <tr><td>Scroll-driven landing film</td><td><span class="pill ok">Built, real</span></td><td></td></tr>
@@ -355,7 +363,7 @@ html { scroll-behavior: smooth; }
         <div class="lane">
           <h4>Minimum reached by deadline</h4>
           <ol class="steps">
-            <li><span class="chip money">USDC released to company<small>minus 5% platform fee</small></span></li>
+            <li><span class="chip money">USDC released to company<small>in full; flat listing fee paid at open</small></span></li>
             <li><span class="chip">Tokens minted to investors<small>exactly the amount sold</small></span></li>
             <li><span class="chip">Mint power removed<small>supply fixed forever</small></span></li>
           </ol>
@@ -387,7 +395,7 @@ html { scroll-behavior: smooth; }
           </tbody>
         </table>
       </div>
-      <p>The platform takes a <strong>5% fee on successful raises only</strong>. A raise that misses its minimum costs nobody anything. In the base case the company nets $528k of the $556k raised.</p>
+      <p>The platform charges a <strong>flat listing fee per raise</strong>, never a share of what is raised, so it isn't paid like a broker (Securities Act §4(b)). In the base case the company keeps the full $556k raised.</p>
       <div class="callout">
         <strong>Why a company signs up</strong>
         <p>Cash upfront that never has to be repaid. It costs a share of profits that only exist if the business actually earns them. For comparison, bank loans run about 8–12% and need collateral, and revenue-based financing works out to about 25–38% effective.</p>
@@ -467,6 +475,48 @@ html { scroll-behavior: smooth; }
       <p>Option A's costs: every investor needs a proof before buying, each holder needs a 0.5 XLM trustline reserve (the platform can cover it), and the issuer's clawback power is visible on-chain. Present clawback as investor protection, with a governance timelock around it. It is the same model BENJI and most of Stellar's $4B in real-world assets use.</p>
     </section>
 
+    <section id="legal">
+      <p class="kicker">Legal strategy · draft, not legal advice</p>
+      <h2>Software, not a broker</h2>
+      <p>Decentralizing doesn't remove liability: regulators look at what the team does (Ooki DAO, Tornado Cash). Matching companies with investors, curating raises and taking a cut of each raise is what makes a platform a broker. So dvdnd keeps the code open and drops the role. Each company, or the licensed intermediary it hires, gates its own raise, and the contracts enforce that raise's rules.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Route</th><th>Who can invest</th><th>Public marketing</th><th>Fit</th></tr></thead>
+          <tbody>
+            <tr class="pick"><td>Reg D 506(c)</td><td>Verified accredited investors</td><td>Allowed</td><td>Built. Verification by an accreditation service, or the March 2025 route: $200k minimum plus a written statement</td></tr>
+            <tr class="pick"><td>Reg S</td><td>Non-US residents</td><td>Outside the US</td><td>Built. ZK residence proof; runs alongside 506(c)</td></tr>
+            <tr><td>Reg CF</td><td>Anyone, with income-based caps; $5M per 12 months</td><td>Through a portal</td><td>Later, through a registered funding portal</td></tr>
+            <tr><td>Reg D 506(b)</td><td>Accredited, plus up to 35 sophisticated</td><td>Not allowed</td><td>Doesn't fit a public listing site</td></tr>
+            <tr><td>Reg A+ Tier 2</td><td>Anyone; $75M per 12 months</td><td>Allowed</td><td>Too heavy for small businesses</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Staying outside the broker role (Securities Act §4(b))</h3>
+      <ul>
+        <li><b>No pay tied to sales.</b> A flat listing fee per raise, never a share of what is raised. Built.</li>
+        <li><b>Never holds investor money.</b> Escrowed USDC can only go to the company on success or back to investors. Built; untested for smart contracts, so counsel must confirm.</li>
+        <li><b>No bad actors</b> among the people behind the platform or a raise. A process, not code.</li>
+      </ul>
+      <h3>What the contracts enforce</h3>
+      <ul>
+        <li>Eligibility per exemption: the ZK residence proof for Reg S; for 506(c), a signed accreditation statement plus a verifier's attestation or at least 200,000 USDC.</li>
+        <li>Lock-up: Reg D raises need at least a year after the deadline (Rule 144). Claimed tokens earn in the dividend vault while the wallet is frozen; afterwards they trade only between eligible holders.</li>
+        <li>A holder cap under the Exchange Act §12(g) trigger (2,000 holders, with $10M+ in assets).</li>
+        <li>Freeze and clawback belong to each raise's compliance account, with a recorded reason, never to dvdnd.</li>
+      </ul>
+      <h3>Path</h3>
+      <ol>
+        <li><b>Hackathon:</b> testnet only, no real money.</li>
+        <li><b>Protocol + 506(c):</b> companies raise under 506(c) (and Reg S), use an accreditation service and file Form D. dvdnd is software with no transaction fee.</li>
+        <li><b>Retail through a partner:</b> Reg CF raises through a registered funding portal using dvdnd's contracts.</li>
+        <li><b>Own licences</b> (funding portal, then possibly an ATS for secondary trading) once revenue justifies them.</li>
+      </ol>
+      <div class="callout">
+        <strong>Before any mainnet launch</strong>
+        <p>A US securities lawyer should confirm the §4(b) fee design and whether code-held escrow counts as never holding investor money.</p>
+      </div>
+    </section>
+
     <section id="anchors">
       <p class="kicker">Anchors &amp; ramps</p>
       <h2>Circle Mint in, MoneyGram out, test anchor for the demo</h2>
@@ -529,7 +579,7 @@ html { scroll-behavior: smooth; }
             <tr><td>Company verification</td><td>Live Companies House / GLEIF lookup + DNS TXT / stellar.toml check; KYB simulated</td><td>Sumsub/Persona KYB with beneficial-owner checks, vLEI, audited financials</td></tr>
             <tr><td>Agreement</td><td>PDF hash + SEP-10-signed acceptance on-chain</td><td>Legal profit-participation contract (SPV), Reg S category analysis, EU crowdfunding licence</td></tr>
             <tr><td>Eligibility</td><td>idOS KYC (testnet demo check as fallback), issuer builds the leaf from the verified country, real Groth16 residence circuit, nullifier, gate → <code>set_authorized</code></td><td>Real KYC vendor, document proofs plus residence, sanctions screening, re-proof on expiry</td></tr>
-            <tr><td>Raise</td><td>Escrow with min/max/deadline and 5% fee on success; one successful raise and one refunded raise</td><td>Audit, investor limits, cooling-off period</td></tr>
+            <tr><td>Raise</td><td>Escrow with min/max/deadline and a flat listing fee; per-raise exemption, lock-up and holder cap</td><td>Audit, Form D filings, accreditation service, cooling-off period</td></tr>
             <tr><td>Trading</td><td>SDEX offer + one path-payment trade; optional seeded pool</td><td>Aquarius/Soroswap via aggregator, market-maker programme</td></tr>
             <tr><td>Lock + dividends</td><td>Epoch vault; company deposit and investor withdrawal via test anchor SEP-24</td><td>Circle Mint treasury, MoneyGram + regional anchors, SDP, transfer-agent reconciliation</td></tr>
             <tr><td>Simulation</td><td>Separate page in the web app, interactive</td><td>Calibrated against real raise and dividend data</td></tr>
@@ -710,7 +760,8 @@ html { scroll-behavior: smooth; }
         <li class="done"><b>Investor eligibility</b><p>A real ZK residence proof: Circom Groth16, verified on BN254 in Soroban.</p></li>
         <li class="done"><b>Simulation</b><p>Its own interactive page inside the web app.</p></li>
         <li class="done"><b>Buyback clause</b><p>None. Investors exit on the secondary market; the obligation follows the business if it is sold.</p></li>
-        <li class="done"><b>Platform fee</b><p>5% of successful raises, taken by the escrow at close. Failed raises are refunded in full. Pool seeding stays optional and off by default.</p></li>
+        <li class="done"><b>Platform fee</b><p>A flat listing fee per raise, paid when it opens (replaces the earlier 5% of successful raises). Failed raises are refunded in full. Pool seeding stays optional and off by default.</p></li>
+        <li class="done"><b>Compliance model</b><p>dvdnd is open compliance software, not a broker. Each raise picks Reg S or Reg D 506(c), with a lock-up, a holder cap and its own compliance account (the company or its transfer agent).</p></li>
       </ol>
     </section>
 

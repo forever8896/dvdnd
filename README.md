@@ -2,7 +2,7 @@
 
 **Own a share of real, profitable businesses. Get paid in dollars.**
 
-dvdnd is tokenized private equity on Stellar. Profitable small and mid-sized businesses raise USDC at a fixed price by selling a share of their future profits. Investors who lock their tokens for a full period receive that period's dividends in USDC, pro-rata. Investors prove they are not US residents with a zero-knowledge proof, and the Stellar protocol itself then limits holding the token to verified investors.
+dvdnd is tokenized private equity on Stellar. Profitable small and mid-sized businesses raise USDC at a fixed price by selling a share of their future profits. Investors who lock their tokens for a full period receive that period's dividends in USDC, pro-rata. Each raise runs under a securities exemption: **Reg S** (investors prove with a zero-knowledge proof that they live outside the US) or **Reg D 506(c)** (verified accredited investors). The Stellar protocol itself then limits holding the token to eligible investors.
 
 **Live demo (Stellar testnet): https://dvdnd.vercel.app**
 
@@ -19,18 +19,27 @@ Real businesses, meanwhile, struggle to raise growth capital without giving up c
 
 ## How dvdnd works
 
-1. **A company signs up.** It proves it owns the business (company registry match and domain check) and signs an agreement committing X% of yearly net profit to token holders. The agreement's hash is recorded on-chain.
-2. **The company opens a fixed-price raise.** It sets a price (for example 1.00 USDC per token, set from a target yield), a minimum, a maximum and a deadline.
-3. **Verified investors put USDC into escrow.**
-   - If the minimum is reached, the company receives the raise minus a 5% platform fee, and investors claim their tokens.
-   - If it isn't, everyone is refunded automatically.
-4. **Holders trade with each other afterwards.** Only verified investors can hold the token, on Stellar's built-in order book and through path payments.
+1. **A company signs up.** It proves it owns the business (domain check, plus GLEIF when it has an LEI) and signs an agreement committing X% of yearly net profit to token holders. The agreement's hash is recorded on-chain.
+2. **The company opens a fixed-price raise** and pays a flat listing fee. It sets a price (for example 1.00 USDC per token, set from a target yield), a minimum, a maximum and a deadline, plus the raise's rules: exemption (Reg S or 506(c)), minimum investment, holder cap, lock-up date, and who holds the compliance role (the company or its transfer agent).
+3. **Eligible investors put USDC into escrow.**
+   - **Reg S:** identity checked once through idOS, then a zero-knowledge proof of non-US residence verified on-chain.
+   - **506(c):** a signed accreditation statement on-chain, plus either a verifier's attestation or at least 200,000 USDC invested (the SEC staff's March 2025 route).
+   - If the minimum is reached, the company receives everything raised and investors claim their tokens. If it isn't, everyone is refunded.
+4. **Lock-up, then trading between eligible holders.** Until the lock-up date, claimed tokens sit in the dividend vault, earning, and the holder's wallet is frozen. Afterwards, holders release them and trade only with other eligible holders, on Stellar's order book and through path payments.
 5. **Dividends.**
    - Holders lock tokens in the vault.
    - At the end of each period the company pays X% of its profit in USDC.
    - Only tokens locked for the whole period share it, so locking right before a payout earns nothing.
 
 Money flows to the company once, at the raise, and back to holders as dividends from real profits. There is no bonding curve, no sniper advantage and no company buyback.
+
+## Compliance model
+
+dvdnd aims to be open compliance software, not a broker (draft strategy, not legal advice):
+- **No transaction-based pay.** A flat listing fee per raise, never a share of what is raised (Securities Act §4(b)).
+- **No control over investor money.** Escrowed USDC can only go to the company on success or back to investors on failure.
+- **Gatekeeping per raise.** Each raise names its own compliance account, which alone can freeze, unfreeze or claw back, with a recorded reason.
+- **Rules in the contract:** exemption-specific eligibility, the Reg D one-year lock-up (Rule 144), and a holder cap under the §12(g) trigger.
 
 ## Why Stellar (Stellar Unlocked)
 
@@ -60,13 +69,13 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for how the pieces fit together.
 
 | Contract | ID |
 |---|---|
-| registry | [`CDWUC63EYRCEVQISAN7MZNAAOMT76VW6PTSVIUXTX3PDPXWJBNWJFJXY`](https://stellar.expert/explorer/testnet/contract/CDWUC63EYRCEVQISAN7MZNAAOMT76VW6PTSVIUXTX3PDPXWJBNWJFJXY) |
+| registry | [`CCL5K3BT7EKT47SLRIHL23AMKELXPY34WATWMRLKGW2ZWYOALE66Y2TZ`](https://stellar.expert/explorer/testnet/contract/CCL5K3BT7EKT47SLRIHL23AMKELXPY34WATWMRLKGW2ZWYOALE66Y2TZ) |
 | gate | [`CBPU52XUHU4UQ3MUBOXITFNHQMOON3SDEWN2IVKPGRCZSQTRTCLGDB7N`](https://stellar.expert/explorer/testnet/contract/CBPU52XUHU4UQ3MUBOXITFNHQMOON3SDEWN2IVKPGRCZSQTRTCLGDB7N) |
-| offering | [`CB5EJPS7K33FE3IGEFW6VINJD5MBL3HJ32I2JOAN34AMICBW73MZED3L`](https://stellar.expert/explorer/testnet/contract/CB5EJPS7K33FE3IGEFW6VINJD5MBL3HJ32I2JOAN34AMICBW73MZED3L) |
-| vault | [`CCTY5CZFMXTBH4EPWKFHRVWDEHOFVEEWE3EPOGJEPKR65AJIG5CFLWX4`](https://stellar.expert/explorer/testnet/contract/CCTY5CZFMXTBH4EPWKFHRVWDEHOFVEEWE3EPOGJEPKR65AJIG5CFLWX4) |
+| offering | [`CCBMO6FN53CBZILJ6PBU4DODLRYK27RQH5ESWVDPMNPVH5VILUZV4E5C`](https://stellar.expert/explorer/testnet/contract/CCBMO6FN53CBZILJ6PBU4DODLRYK27RQH5ESWVDPMNPVH5VILUZV4E5C) |
+| vault | [`CDU5CGRWVSMFKQWRNJLP5XAKHQAF624QTLUNCONHJ4GQHOZOVAQROHKM`](https://stellar.expert/explorer/testnet/contract/CDU5CGRWVSMFKQWRNJLP5XAKHQAF624QTLUNCONHJ4GQHOZOVAQROHKM) |
 | USDC (Circle testnet) | [`CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA`](https://stellar.expert/explorer/testnet/contract/CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA) |
 
-A complete cycle ran on testnet: ZK eligibility, raise, 5% fee, token claims, locks, and an 80 USDC dividend split 60/20 by locked amount. Every transaction link is in [deployments/evidence.md](deployments/evidence.md).
+A complete cycle ran on testnet: ZK eligibility, raise, flat listing fee, token claims straight into the vault under lock-up, and an 80 USDC dividend split 60/40 by locked amount. The lock-up was checked on-chain: the frozen wallet can't unlock or move tokens. Every transaction link is in [deployments/evidence.md](deployments/evidence.md).
 
 ## Setup
 
@@ -93,13 +102,17 @@ pnpm dev
 
 ```sh
 # Funded testnet identities
-for k in admin treasury company-andes issuer-andes investor-ana investor-ben; do
+for k in admin treasury company-andes issuer-andes company-harbor issuer-harbor investor-ana investor-ben; do
   stellar keys generate $k --network testnet --fund
 done
 
+scripts/testnet/council.sh                                   # 2-of-3 council (registry and offering admin)
 scripts/testnet/deploy.sh                                    # deploy all four contracts
 scripts/testnet/demo-company.sh ANDES company-andes issuer-andes \
-  "Andes Craft Brewing" 152 5000 300 1000 259200             # issue token, verify, sign, open raise
+  "Andes Craft Brewing" 152 5000 300 1000 259200             # issue token, verify, sign, open a Reg S raise
+EXEMPTION=506c LOCKUP_SECS=31536000 VERIFIER=admin \
+  scripts/testnet/demo-company.sh HARBOR company-harbor issuer-harbor \
+  "Harbor & Hearth Bakeries" 620 5000 1000 5000 604800      # a 506(c) raise with a one-year lock-up
 scripts/testnet/demo-investor.sh investor-ana 620 800       # Portugal: credential, ZK proof, USDC
 scripts/testnet/demo-investor.sh investor-ben 276 600       # Germany
 scripts/testnet/demo-lifecycle.sh ANDES company-andes investor-ana 600 investor-ben 400 80
@@ -111,11 +124,12 @@ Open https://dvdnd.vercel.app, or run it locally:
 
 ```sh
 cd app
-echo "DVDND_ADMIN_SECRET=$(stellar keys show admin)" > .env.local   # testnet issuer key for the mock KYC/KYB routes
+cp .env.example .env.local   # then set DVDND_ADMIN_SECRET=$(stellar keys show admin) and the idOS keys
 pnpm install && pnpm dev                                           # http://localhost:3000
 ```
 
-1. **Investor:** Sign in → I'm an investor (a testnet wallet is created in your browser and funded with test XLM) → verify residence (mock KYC, then a real Groth16 proof generated in the browser and verified on-chain) → Discover → open a raise → Invest (Add money swaps test XLM for Circle testnet USDC).
+1. **Investor (Reg S):** Sign in → I'm an investor → verify residence (idOS identity check with an EVM wallet such as MetaMask, or the testnet demo check; then a real Groth16 proof generated in the browser and verified on-chain) → Discover → open a raise → Invest (Add money swaps test XLM for Circle testnet USDC).
+   **Investor (506(c)):** open the Harbor & Hearth raise → sign the accreditation statement → get verified by the testnet verifier → Invest.
 2. **Company:** Sign in → I'm raising for my company → register → verify ownership → sign the agreement → Set up raise (issues the share token with compliance flags and opens the raise).
 3. **Close and pay:** once a raise is full or past its deadline, anyone can close it → investors claim tokens in Portfolio and lock them → the company starts the first period and pays a dividend → investors claim USDC.
 
@@ -129,7 +143,7 @@ Live tests against testnet (with the app running): `LIVE=1 APP_URL=http://localh
 
 ## Built during HackMeridian
 
-Everything in this repository was built during the event, starting 25 October 2026: research, contracts, circuit, scripts and app. No prior code was reused. The circuit's trusted setup is a single-contributor development setup and is not secure for production.
+Everything in this repository was built during the event, starting 25 October 2026: research, contracts, circuit, scripts and app. No prior code was reused. The circuit's trusted setup uses the public PSE Powers of Tau and a recorded phase-2 ceremony (circuits/ceremony/TRANSCRIPT.md) with one contributor so far; more independent contributors are needed before production.
 
 ## License
 
