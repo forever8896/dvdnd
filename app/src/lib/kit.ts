@@ -29,12 +29,28 @@ export function getKit(): Promise<Kit> {
 
 export type ExternalWallet = { address: string; walletId: string; walletName: string };
 
+/** The kit and wallets reject with plain `{ code, message }` objects; turn them into Errors. */
+export function walletError(e: unknown): Error {
+  if (e instanceof Error) return e;
+  const o = (e ?? {}) as { message?: unknown; error?: { message?: unknown } };
+  const message = o.error?.message ?? o.message ?? (typeof e === "string" ? e : null);
+  return new Error(typeof message === "string" && message ? message : "The wallet returned an unexpected error.");
+}
+
+/** True when the person closed the picker or declined in their wallet. */
+export const isUserCancel = (e: unknown) =>
+  /closed the modal|user (declined|rejected|denied|cancel)|rejected by the user|request rejected|cancelled/i.test(walletError(e).message);
+
 /** Opens the kit's wallet picker and returns the chosen account. */
 export async function connectExternal(): Promise<ExternalWallet> {
   const kit = await getKit();
-  const { address } = await kit.authModal();
-  const m = kit.selectedModule;
-  return { address, walletId: m.productId, walletName: m.productName };
+  try {
+    const { address } = await kit.authModal();
+    const m = kit.selectedModule;
+    return { address, walletId: m.productId, walletName: m.productName };
+  } catch (e) {
+    throw walletError(e);
+  }
 }
 
 /** Network the external wallet is on, so we can ask the user to switch to testnet. */
@@ -55,12 +71,17 @@ export function externalSigner(w: ExternalWallet): Signer {
     label: w.walletName,
     sign: async (tx: Transaction) => {
       const kit = await getKit();
-      kit.setWallet(w.walletId);
-      const { signedTxXdr } = await kit.signTransaction(tx.toXDR(), {
-        networkPassphrase: NETWORK.passphrase,
-        address: w.address,
-      });
-      return TransactionBuilder.fromXDR(signedTxXdr, NETWORK.passphrase) as Transaction;
+      try {
+        kit.setWallet(w.walletId);
+        const { signedTxXdr } = await kit.signTransaction(tx.toXDR(), {
+          networkPassphrase: NETWORK.passphrase,
+          address: w.address,
+        });
+        return TransactionBuilder.fromXDR(signedTxXdr, NETWORK.passphrase) as Transaction;
+      } catch (e) {
+        const err = walletError(e);
+        throw isUserCancel(err) ? new Error(`You declined the request in ${w.walletName}. Nothing was sent.`) : err;
+      }
     },
   };
 }

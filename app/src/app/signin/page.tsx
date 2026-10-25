@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Toast } from "@/components/ui";
 import { eligibleUntil } from "@/lib/chain";
+import { isUserCancel, walletError } from "@/lib/kit";
 import type { Signer } from "@/lib/stellar";
 import { isEligible, useWallet, type Role } from "@/lib/wallet";
 
@@ -39,9 +40,8 @@ export default function SignIn() {
       if (role === "company") router.push("/company");
       else router.push(isEligible(await eligibleUntil(s.publicKey)) ? "/discover" : "/verify");
     } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      // Closing the wallet picker isn't an error worth showing.
-      if (!/closed|cancel|rejected by the user/i.test(msg)) setError(msg);
+      // Closing the wallet picker or declining in the wallet isn't an error worth showing.
+      if (!isUserCancel(e)) setError(walletError(e).message);
       setBusy(null);
     }
   }
