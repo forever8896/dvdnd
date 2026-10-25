@@ -1,0 +1,8 @@
+target/
+node_modules/
+.next/
+.env
+.env.local
+circuits/build/*.ptau
+deployments/credentials/
+contracts/contracts/*/test_snapshots/
