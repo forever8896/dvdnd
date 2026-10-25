@@ -48,11 +48,14 @@ export async function recentTrades(asset: Asset): Promise<Trade[]> {
 export async function standing(account: string, asset: Asset): Promise<Standing> {
   const res = await fetch(`${NETWORK.horizonUrl}/accounts/${account}`);
   if (!res.ok) return { status: "none", tokens: 0, usdc: 0 };
-  const a = (await res.json()) as { balances: { asset_code?: string; asset_issuer?: string; balance: string; is_authorized?: boolean }[] };
+  type Line = { asset_code?: string; asset_issuer?: string; balance: string; selling_liabilities?: string; is_authorized?: boolean };
+  const a = (await res.json()) as { balances: Line[] };
+  // What's free to sell or spend: the balance less what open orders hold back.
+  const free = (b?: Line) => (b ? Number(b.balance) - Number(b.selling_liabilities ?? 0) : 0);
   const line = a.balances.find((b) => sameAsset(b, asset));
-  const usdc = Number(a.balances.find((b) => sameAsset(b, USDC))?.balance ?? 0);
+  const usdc = free(a.balances.find((b) => sameAsset(b, USDC)));
   if (!line) return { status: "none", tokens: 0, usdc };
-  return { status: line.is_authorized ? "authorized" : "frozen", tokens: Number(line.balance), usdc };
+  return { status: line.is_authorized ? "authorized" : "frozen", tokens: free(line), usdc };
 }
 
 /** The account's open orders for this token. */

@@ -10,7 +10,7 @@ import { useWallet } from "@/lib/wallet";
 export function LockModal({ holding, mode, onClose, onDone }: { holding: Holding; mode: "lock" | "unlock"; onClose: () => void; onDone: () => void }) {
   const { signer } = useWallet();
   const investor = signer.investor!;
-  const max = mode === "lock" ? holding.wallet : holding.locked + holding.pending;
+  const max = mode === "lock" ? holding.wallet - holding.inOrders : holding.locked + holding.pending;
   const [amount, setAmount] = useState(String(max));
   const [state, setState] = useState<"idle" | "busy" | "done">("idle");
   const [error, setError] = useState<string | null>(null);

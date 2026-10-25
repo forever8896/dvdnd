@@ -142,6 +142,7 @@ export default function PortfolioPage() {
                               )}
                               {h.pending > 0 && <span className="pill pill-accent">{fmt(h.pending)} from next period</span>}
                               {h.wallet > 0 && <span className="pill pill-outline">{fmt(h.wallet)} unlocked</span>}
+                              {h.inOrders > 0 && <span className="pill pill-outline">{fmt(h.inOrders)} in sell orders</span>}
                               {lockedUp(h.listing.raise) && (
                                 <span className="pill pill-outline">Lock-up until {new Date(Number(h.listing.raise.terms.lockup_until) * 1000).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</span>
                               )}
@@ -164,9 +165,9 @@ export default function PortfolioPage() {
                                 {busy === `release-${h.listing.raise.id}` ? "Releasing…" : "Release lock-up"}
                               </button>
                             )}
-                            {h.wallet > 0 && !h.frozen && (
+                            {h.wallet - h.inOrders > 0 && !h.frozen && (
                               <button className="btn btn-primary btn-sm" onClick={() => setModal({ h, mode: "lock" })}>
-                                Lock {fmt(h.wallet)}
+                                Lock {fmt(h.wallet - h.inOrders)}
                               </button>
                             )}{" "}
                             {h.locked + h.pending > 0 && !h.frozen && (
