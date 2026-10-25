@@ -67,7 +67,15 @@ export function parseProfile(company: Pick<Company, "name" | "profile_uri">): Pr
   const uri = company.profile_uri;
   if (uri.startsWith("data:application/json;base64,")) {
     try {
-      return JSON.parse(atob(uri.slice("data:application/json;base64,".length)));
+      const bytes = Uint8Array.from(atob(uri.slice("data:application/json;base64,".length)), (c) => c.charCodeAt(0));
+      // UTF-8; profiles written before this fix were Latin-1.
+      let text: string;
+      try {
+        text = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+      } catch {
+        text = new TextDecoder("latin1").decode(bytes);
+      }
+      return JSON.parse(text);
     } catch {
       /* fall through */
     }
@@ -76,7 +84,8 @@ export function parseProfile(company: Pick<Company, "name" | "profile_uri">): Pr
 }
 
 export function encodeProfile(p: Profile) {
-  return "data:application/json;base64," + btoa(JSON.stringify(p));
+  const bytes = new TextEncoder().encode(JSON.stringify(p));
+  return "data:application/json;base64," + btoa(Array.from(bytes, (b) => String.fromCharCode(b)).join(""));
 }
 
 // Profiles for the companies onboarded by the testnet scripts before the
