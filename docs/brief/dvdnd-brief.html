@@ -1,0 +1,766 @@
+<title>Stellar Dividend Equity Research</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: an investor-memo reading column with a sticky contents rail; dividend green marks money flowing to holders, amber marks risk. */
+:root {
+  --bg: #f6f7f4;
+  --surface: #ffffff;
+  --sunk: #eceee8;
+  --ink: #15201c;
+  --muted: #5b6862;
+  --line: #d8ddd6;
+  --accent: #0f7a55;
+  --accent-soft: #dcefe5;
+  --warn: #a35a00;
+  --warn-soft: #f7ead7;
+  --bad: #a3322a;
+  --bad-soft: #f6e0dd;
+  --chart-a: #a3322a;
+  --chart-b: #0f7a55;
+  --chart-c: #4a6fa5;
+  --f-display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101614; --surface: #17201d; --sunk: #1d2724; --ink: #e6ece8; --muted: #9aa8a1; --line: #2c3934;
+    --accent: #4cc893; --accent-soft: #173a2c; --warn: #e6a352; --warn-soft: #3a2a14; --bad: #ef8a80; --bad-soft: #3d1e1b;
+    --chart-a: #ef8a80; --chart-b: #4cc893; --chart-c: #8fb0e0; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101614; --surface: #17201d; --sunk: #1d2724; --ink: #e6ece8; --muted: #9aa8a1; --line: #2c3934;
+  --accent: #4cc893; --accent-soft: #173a2c; --warn: #e6a352; --warn-soft: #3a2a14; --bad: #ef8a80; --bad-soft: #3d1e1b;
+  --chart-a: #ef8a80; --chart-b: #4cc893; --chart-c: #8fb0e0; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 16px/1.65 var(--f-body); }
+a { color: var(--accent); text-underline-offset: 2px; }
+a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+code, .mono { font-family: var(--f-mono); font-size: 0.86em; }
+code { background: var(--sunk); padding: 0.1em 0.35em; border-radius: 4px; overflow-wrap: anywhere; }
+
+.page {
+  max-width: 1180px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 40px 96px;
+  display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 56px;
+}
+nav.toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); align-self: start; font-size: 0.85rem; }
+nav.toc p { font-family: var(--f-mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+nav.toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; counter-reset: s; }
+nav.toc li { counter-increment: s; }
+nav.toc a { display: flex; gap: 10px; padding: 5px 8px; border-radius: 6px; color: var(--ink); text-decoration: none; }
+nav.toc a::before { content: counter(s, decimal-leading-zero); font-family: var(--f-mono); font-size: 0.75rem; color: var(--muted); padding-top: 2px; }
+nav.toc a:hover { background: var(--sunk); }
+main { min-width: 0; max-width: 780px; }
+
+header.hero { padding-bottom: 32px; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+.eyebrow { font-family: var(--f-mono); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+h1 { font-family: var(--f-display); font-weight: 800; font-size: clamp(2.1rem, 5vw, 3.4rem); line-height: 1.04; letter-spacing: -0.02em; margin: 0 0 18px; text-wrap: balance; }
+h1 em { font-style: normal; color: var(--accent); }
+.lede { font-size: 1.15rem; color: var(--ink); margin: 0 0 28px; max-width: 64ch; }
+h2 { font-family: var(--f-display); font-weight: 700; font-size: clamp(1.5rem, 3vw, 2rem); line-height: 1.15; letter-spacing: -0.01em; margin: 0 0 14px; text-wrap: balance; }
+h3 { font-family: var(--f-display); font-weight: 700; font-size: 1.15rem; margin: 28px 0 8px; }
+section { padding-block: 48px 8px; scroll-margin-top: 24px; }
+section > p, section > ul { max-width: 68ch; }
+.kicker { font-family: var(--f-mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin: 0 0 8px; }
+
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.stat { background: var(--surface); padding: 16px 18px; display: grid; gap: 4px; align-content: start; }
+.stat b { font-family: var(--f-display); font-size: 1.9rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 0.85rem; color: var(--muted); line-height: 1.4; }
+.stat.good b { color: var(--accent); }
+.stat.bad b { color: var(--bad); }
+
+.callout { border-left: 3px solid var(--accent); background: var(--accent-soft); padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 22px 0; max-width: 68ch; }
+.callout.warn { border-color: var(--warn); background: var(--warn-soft); }
+.callout p { margin: 0; }
+.callout p + p { margin-top: 8px; }
+.callout strong:first-child { display: block; font-family: var(--f-display); margin-bottom: 4px; }
+
+/* Flow lanes */
+.lanes { display: grid; gap: 14px; margin: 22px 0; }
+.lane { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+.lane h4 { margin: 0 0 12px; font-family: var(--f-mono); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.steps { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.steps li { display: flex; align-items: center; gap: 8px; }
+.steps li + li::before { content: "→"; color: var(--muted); }
+.chip { background: var(--sunk); border-radius: 6px; padding: 6px 10px; font-size: 0.88rem; line-height: 1.3; }
+.chip small { display: block; font-family: var(--f-mono); font-size: 0.7rem; color: var(--muted); }
+.chip.money { background: var(--accent-soft); }
+
+/* Money diagram */
+.money { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 22px 0; }
+.box { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 6px; align-content: start; }
+.box .label { font-family: var(--f-mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.box b { font-family: var(--f-display); font-size: 1.05rem; }
+.box p { margin: 0; font-size: 0.9rem; color: var(--muted); }
+.box.zero b { color: var(--muted); }
+.box.out { border-color: var(--accent); }
+.box.out b { color: var(--accent); }
+
+/* Tables */
+.table-wrap { overflow-x: auto; margin: 20px 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 0.88rem; line-height: 1.45; }
+th, td { text-align: left; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+th { font-family: var(--f-mono); font-weight: 500; font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); background: var(--sunk); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td:first-child { font-weight: 600; }
+.wide table { min-width: 720px; }
+td.num { font-variant-numeric: tabular-nums; font-family: var(--f-mono); white-space: nowrap; }
+.pill { display: inline-block; font-family: var(--f-mono); font-size: 0.7rem; padding: 2px 8px; border-radius: 99px; white-space: nowrap; font-weight: 500; }
+.pill.ok { background: var(--accent-soft); color: var(--accent); }
+.pill.mid { background: var(--warn-soft); color: var(--warn); }
+.pill.no { background: var(--bad-soft); color: var(--bad); }
+tr.pick td { background: var(--accent-soft); }
+
+/* Anchor cards */
+.cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 20px 0; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 8px; align-content: start; }
+.card .role { font-family: var(--f-mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.card h4 { margin: 0; font-family: var(--f-display); font-size: 1.2rem; }
+.card p { margin: 0; font-size: 0.9rem; }
+.card ul { margin: 0; padding-left: 18px; font-size: 0.88rem; color: var(--muted); }
+.avoid { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 0; padding: 0; list-style: none; }
+.avoid li { background: var(--bad-soft); color: var(--bad); border-radius: 6px; padding: 4px 10px; font-size: 0.85rem; }
+
+/* Contracts */
+.contracts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 20px 0; }
+.contract { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+.contract h4 { margin: 0 0 6px; font-family: var(--f-display); font-size: 1.05rem; display: flex; justify-content: space-between; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.contract h4 span { font-family: var(--f-mono); font-size: 0.7rem; color: var(--muted); font-weight: 400; }
+.contract p { margin: 0; font-size: 0.9rem; color: var(--muted); }
+.contract.keeper { border-style: dashed; }
+
+/* Chart */
+figure { margin: 24px 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px 18px 12px; }
+figcaption { font-size: 0.85rem; color: var(--muted); margin-top: 8px; }
+.chart-wrap { overflow-x: auto; }
+#curve { display: block; width: 100%; min-width: 520px; height: auto; }
+#curve text { fill: var(--muted); font: 11px var(--f-mono); }
+#curve .grid { stroke: var(--line); stroke-width: 1; }
+#curve .axis { stroke: var(--muted); stroke-width: 1; }
+.legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 0.82rem; margin-bottom: 8px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+
+/* Evidence list */
+.ev { display: grid; gap: 8px; margin: 18px 0; padding: 0; list-style: none; max-width: 68ch; }
+.ev li { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 12px; align-items: baseline; font-size: 0.92rem; }
+
+/* Decisions */
+.decisions { display: grid; gap: 12px; margin: 20px 0; padding: 0; list-style: none; counter-reset: d; }
+.decisions li { counter-increment: d; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px 16px 56px; position: relative; }
+.decisions li::before { content: counter(d); position: absolute; left: 18px; top: 14px; font-family: var(--f-display); font-weight: 800; font-size: 1.4rem; color: var(--accent); }
+.decisions li.done { opacity: 0.75; }
+.decisions li.done::before { content: "✓"; }
+.decisions b { font-family: var(--f-display); }
+.decisions p { margin: 4px 0 0; font-size: 0.92rem; color: var(--muted); }
+
+details { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; margin: 14px 0; }
+summary { cursor: pointer; padding: 12px 16px; font-weight: 600; }
+details > div { padding: 0 16px 8px; }
+details .table-wrap { border: 0; margin: 0 -16px; border-radius: 0; border-top: 1px solid var(--line); }
+
+
+/* Build status */
+.pill.todo { background: var(--sunk); color: var(--muted); }
+.pill.prog { background: #e3ecf8; color: #24508a; }
+.pill.ext { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .pill.prog { background: #1c2b40; color: #8fb0e0; } }
+:root[data-theme="dark"] .pill.prog { background: #1c2b40; color: #8fb0e0; }
+.meter { display: flex; height: 10px; border-radius: 99px; overflow: hidden; background: var(--sunk); margin: 14px 0 10px; }
+.meter i { display: block; height: 100%; }
+.meter-legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.82rem; color: var(--muted); }
+.meter-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.meter-legend b { font-family: var(--f-mono); color: var(--ink); font-weight: 500; }
+.status-table td:first-child { font-weight: 500; width: 46%; }
+.status-table td:nth-child(2) { white-space: nowrap; }
+.status-table td:last-child { color: var(--muted); font-size: 0.85rem; }
+.status-group th { background: var(--surface); color: var(--ink); font-family: var(--f-display); font-size: 0.95rem; letter-spacing: 0; text-transform: none; padding-top: 16px; }
+.updated { font-family: var(--f-mono); font-size: 0.75rem; color: var(--muted); }
+
+footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 0.82rem; color: var(--muted); }
+
+@media (max-width: 960px) {
+  .page { grid-template-columns: minmax(0, 1fr); gap: 0; padding-block: 24px 64px; }
+  nav.toc { display: none; }
+}
+@media (max-width: 640px) {
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .money, .cards, .contracts { grid-template-columns: minmax(0, 1fr); }
+  .ev li { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+html { scroll-behavior: smooth; }
+</style>
+
+<div class="page">
+  <nav class="toc" aria-label="Contents">
+    <p>Contents</p>
+    <ol>
+      <li><a href="#status">Build status</a></li>
+      <li><a href="#flow">The product flow</a></li>
+      <li><a href="#money">How the raise works</a></li>
+      <li><a href="#unlocked">Stellar primitives</a></li>
+      <li><a href="#compliance">Compliance gating</a></li>
+      <li><a href="#anchors">Anchors &amp; ramps</a></li>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#pricing">Fixed price vs curve</a></li>
+      <li><a href="#simulation">Simulation spec</a></li>
+      <li><a href="#evidence">Data to avoid</a></li>
+      <li><a href="#production">Path to production</a></li>
+      <li><a href="#decisions">Decisions</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <p class="eyebrow">HackMeridian · Genesis · Stellar Unlocked · Research brief, 25 Oct 2026</p>
+      <h1>Tokenized private equity that pays <em>USDC dividends</em> on Stellar</h1>
+      <p class="lede">Profitable real businesses raise USDC at a fixed price by selling a share of their future profits. Investors who lock their tokens for the full period get paid pro-rata in USDC. The protocol itself keeps every holder compliant. It works the way private equity works, and runs on Stellar.</p>
+      <div class="stats">
+        <div class="stat bad"><b>~1%</b><span>of pump.fun launches graduate (0.63–1.89%)</span></div>
+        <div class="stat bad"><b>~60%</b><span>of active pump.fun wallets lost money over 6 months</span></div>
+        <div class="stat bad"><b>14.7×</b><span>first vs. last buyer price on pump.fun's curve. Here: 1×</span></div>
+        <div class="stat good"><b>~18%</b><span>gross yield on a small business priced at ~4× profit, 70% payout</span></div>
+        <div class="stat good"><b>$4.0B</b><span>tokenized real-world assets on Stellar (Aug 2026)</span></div>
+        <div class="stat"><b>0</b><span>live tokenized private-equity products on Stellar today</span></div>
+      </div>
+    </header>
+
+    <section id="status">
+      <p class="kicker">Live checklist</p>
+      <h2>What's built against the vision</h2>
+      <p>Every piece of the plan below, with where it stands in the live app at <a href="https://dvdnd.vercel.app">dvdnd.vercel.app</a> and on Stellar testnet. "Built, real" means it runs for real on testnet; stand-ins are marked; the last group needs vendors, auditors or lawyers rather than code.</p>
+      <p class="updated">Updated 25 Oct 2026 · 16 of 40 built for real</p>
+      <div class="meter" role="img" aria-label="16 built, 3 stand-ins, 5 in progress, 9 not started, 7 need vendors or legal"><i style="width:40.00%;background:var(--accent)" title="Built, real"></i><i style="width:7.50%;background:var(--warn)" title="Testnet stand-in"></i><i style="width:12.50%;background:#4a6fa5" title="In progress"></i><i style="width:22.50%;background:var(--line)" title="Not started"></i><i style="width:17.50%;background:transparent" title="Needs vendor or legal"></i></div>
+      <div class="meter-legend"><span><span class="pill ok">Built, real</span> <b>16</b></span><span><span class="pill mid">Testnet stand-in</span> <b>3</b></span><span><span class="pill prog">In progress</span> <b>5</b></span><span><span class="pill todo">Not started</span> <b>9</b></span><span><span class="pill ext">Needs vendor or legal</span> <b>7</b></span></div>
+      <div class="table-wrap wide">
+        <table class="status-table">
+          <thead><tr><th>Piece</th><th>Status</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr class="status-group"><th colspan="3">Company side</th></tr>
+            <tr><td>Register a company with its profile stored on-chain</td><td><span class="pill ok">Built, real</span></td><td>Registry contract; profile as an on-chain data URI</td></tr>
+            <tr><td>Prove domain ownership with a DNS TXT record</td><td><span class="pill ok">Built, real</span></td><td>Live DNS-over-HTTPS check, bound to company ID and wallet</td></tr>
+            <tr><td>Check the company against the GLEIF LEI registry</td><td><span class="pill ok">Built, real</span></td><td>Active, issued, same country, matching legal name</td></tr>
+            <tr><td>Director / national registry match</td><td><span class="pill mid">Testnet stand-in</span></td><td>Self-declared and recorded as evidence; needs Companies House or OpenCorporates</td></tr>
+            <tr><td>Profit-share agreement signed, hash on-chain</td><td><span class="pill ok">Built, real</span></td><td>SHA-256 of the agreement in the registry</td></tr>
+            <tr><td>Agreement document anyone can verify against the hash</td><td><span class="pill todo">Not started</span></td><td></td></tr>
+            <tr><td>Share token issued with compliance flags, admin handed to the escrow</td><td><span class="pill ok">Built, real</span></td><td>AUTH_REQUIRED, REVOCABLE, CLAWBACK; supply fixed by code</td></tr>
+            <tr class="status-group"><th colspan="3">Raise</th></tr>
+            <tr><td>Fixed-price, all-or-nothing escrow with min, max and deadline</td><td><span class="pill ok">Built, real</span></td><td>Offering contract</td></tr>
+            <tr><td>Company receives the raise minus the 5% fee; refunds on failure</td><td><span class="pill ok">Built, real</span></td><td>Verified on testnet, two full runs</td></tr>
+            <tr class="status-group"><th colspan="3">Investor eligibility</th></tr>
+            <tr><td>ZK proof of non-US residence verified on-chain</td><td><span class="pill ok">Built, real</span></td><td>Groth16 on BN254, Poseidon Merkle tree kept on-chain</td></tr>
+            <tr><td>One wallet per credential</td><td><span class="pill ok">Built, real</span></td><td>Pinned nullifier scope</td></tr>
+            <tr><td>Residence checked by a real KYC vendor</td><td><span class="pill ext">Needs vendor or legal</span></td><td>Mock issuer today; Sumsub, Persona or Didit</td></tr>
+            <tr><td>Issuer-signed credentials</td><td><span class="pill todo">Not started</span></td><td>Closes the trust gap on the declared country</td></tr>
+            <tr><td>Sanctions screening of investor addresses</td><td><span class="pill todo">Not started</span></td><td>OFAC's published crypto addresses</td></tr>
+            <tr><td>Credential tree survives RPC event retention</td><td><span class="pill mid">Testnet stand-in</span></td><td>Events plus a bundled seed; needs an on-chain view or indexer</td></tr>
+            <tr class="status-group"><th colspan="3">Holding and trading</th></tr>
+            <tr><td>Only verified wallets can hold the token, on every venue</td><td><span class="pill ok">Built, real</span></td><td>Enforced by Stellar's authorization flags</td></tr>
+            <tr><td>Secondary trading screen (order book, path payments)</td><td><span class="pill todo">Not started</span></td><td>Contract support exists</td></tr>
+            <tr><td>Optional liquidity pool seeded from the raise</td><td><span class="pill todo">Not started</span></td><td></td></tr>
+            <tr class="status-group"><th colspan="3">Dividends</th></tr>
+            <tr><td>Lock vault where only full-period lockers earn</td><td><span class="pill ok">Built, real</span></td><td>Reward-per-share accumulator</td></tr>
+            <tr><td>Company pays a dividend, holders claim USDC</td><td><span class="pill ok">Built, real</span></td><td>End to end in the app</td></tr>
+            <tr class="status-group"><th colspan="3">Money in and out</th></tr>
+            <tr><td>Add money</td><td><span class="pill mid">Testnet stand-in</span></td><td>Testnet XLM to USDC path payment, standing in for an anchor</td></tr>
+            <tr><td>SEP-24 deposit and withdrawal with an anchor</td><td><span class="pill todo">Not started</span></td><td>Stellar test anchor first</td></tr>
+            <tr><td>Circle Mint, MoneyGram and regional anchors</td><td><span class="pill ext">Needs vendor or legal</span></td><td>Business accounts and partner agreements</td></tr>
+            <tr class="status-group"><th colspan="3">Wallets</th></tr>
+            <tr><td>External wallets: Freighter, xBull, Lobstr, Albedo</td><td><span class="pill ok">Built, real</span></td><td>Stellar Wallets Kit; MetaMask hidden</td></tr>
+            <tr><td>Demo wallet with backup and restore</td><td><span class="pill ok">Built, real</span></td><td>Testnet only</td></tr>
+            <tr><td>Passkey smart wallets</td><td><span class="pill todo">Not started</span></td><td>Needs reworking classic operations</td></tr>
+            <tr class="status-group"><th colspan="3">Compliance operations</th></tr>
+            <tr><td>Freeze and unfreeze a holder</td><td><span class="pill prog">In progress</span></td><td>In the contract; console and role split in progress</td></tr>
+            <tr><td>Clawback with a recorded reason</td><td><span class="pill prog">In progress</span></td><td>Contract update in progress</td></tr>
+            <tr><td>Admin powers behind a multisig</td><td><span class="pill prog">In progress</span></td><td>In progress</td></tr>
+            <tr><td>Timelock on admin changes</td><td><span class="pill todo">Not started</span></td><td></td></tr>
+            <tr><td>Compliance console with audit log</td><td><span class="pill prog">In progress</span></td><td>In progress</td></tr>
+            <tr><td>stellar.toml (SEP-1) for dvdnd and its assets</td><td><span class="pill prog">In progress</span></td><td>In progress</td></tr>
+            <tr><td>Contract and ZK circuit audit</td><td><span class="pill ext">Needs vendor or legal</span></td><td>Veridise, Certora, Runtime Verification, OtterSec, Halborn</td></tr>
+            <tr><td>Multi-party trusted setup ceremony</td><td><span class="pill ext">Needs vendor or legal</span></td><td>Today: single-contributor development setup</td></tr>
+            <tr class="status-group"><th colspan="3">Legal</th></tr>
+            <tr><td>Legal wrapper per company (SPV or profit-participation agreement)</td><td><span class="pill ext">Needs vendor or legal</span></td><td>Counsel</td></tr>
+            <tr><td>Offering rules: Reg S, EU crowdfunding licence or prospectus</td><td><span class="pill ext">Needs vendor or legal</span></td><td>Counsel</td></tr>
+            <tr><td>Transfer agent / registrar of holders</td><td><span class="pill ext">Needs vendor or legal</span></td><td></td></tr>
+            <tr class="status-group"><th colspan="3">Product and submission</th></tr>
+            <tr><td>Scroll-driven landing film</td><td><span class="pill ok">Built, real</span></td><td></td></tr>
+            <tr><td>Simulation page: dvdnd vs the memecoin meta</td><td><span class="pill todo">Not started</span></td><td>Engine started</td></tr>
+            <tr><td>Live demo, README, architecture and on-chain evidence</td><td><span class="pill ok">Built, real</span></td><td>dvdnd.vercel.app</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="flow">
+      <p class="kicker">The product</p>
+      <h2>Three journeys, one ledger</h2>
+      <p>Companies and investors sign in separately. The raise funds the company, and dividends pay investors back from real profits.</p>
+      <div class="lanes">
+        <div class="lane">
+          <h4>Company</h4>
+          <ol class="steps">
+            <li><span class="chip">Sign in<small>SEP-10 / passkey</small></span></li>
+            <li><span class="chip">Prove ownership<small>registry + domain</small></span></li>
+            <li><span class="chip">Sign X% profit agreement<small>hash on-chain</small></span></li>
+            <li><span class="chip">Set raise terms<small>price, min, max, deadline</small></span></li>
+            <li><span class="chip money">Receive USDC<small>at successful close</small></span></li>
+          </ol>
+        </div>
+        <div class="lane">
+          <h4>Investor</h4>
+          <ol class="steps">
+            <li><span class="chip">Sign in<small>passkey wallet</small></span></li>
+            <li><span class="chip">Prove non-US residence<small>ZK proof</small></span></li>
+            <li><span class="chip">Trustline approved<small>set_authorized</small></span></li>
+            <li><span class="chip">Browse companies<small>socials, financials</small></span></li>
+            <li><span class="chip money">Invest at fixed price<small>USDC into escrow</small></span></li>
+            <li><span class="chip">Trade after close<small>order book / pool</small></span></li>
+          </ol>
+        </div>
+        <div class="lane">
+          <h4>Dividend loop</h4>
+          <ol class="steps">
+            <li><span class="chip">Holder locks tokens<small>full epoch</small></span></li>
+            <li><span class="chip money">Company deposits profits<small>fiat → USDC</small></span></li>
+            <li><span class="chip money">distribute()<small>pro-rata to lockers</small></span></li>
+            <li><span class="chip money">Holder claims USDC<small>or cashes out</small></span></li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <section id="money">
+      <p class="kicker">The model</p>
+      <h2>A fixed-price raise, the way private equity works</h2>
+      <p>Private companies raise money in a <strong>primary sale</strong>: they issue new shares at a fixed price, set from a negotiated valuation, and the cash goes to the company. Later, investors can sell to each other in a <strong>secondary sale</strong>, and that cash goes to the seller, not the company. This platform does both on-chain.</p>
+
+      <h3>The raise: all-or-nothing escrow</h3>
+      <div class="lanes">
+        <div class="lane">
+          <h4>During the raise</h4>
+          <ol class="steps">
+            <li><span class="chip">Company sets price, min, max, deadline</span></li>
+            <li><span class="chip money">Investors deposit USDC<small>Soroban escrow</small></span></li>
+          </ol>
+        </div>
+        <div class="lane">
+          <h4>Minimum reached by deadline</h4>
+          <ol class="steps">
+            <li><span class="chip money">USDC released to company<small>minus 5% platform fee</small></span></li>
+            <li><span class="chip">Tokens minted to investors<small>exactly the amount sold</small></span></li>
+            <li><span class="chip">Mint power removed<small>supply fixed forever</small></span></li>
+          </ol>
+        </div>
+        <div class="lane">
+          <h4>Minimum missed</h4>
+          <ol class="steps">
+            <li><span class="chip">Every investor refunded<small>automatically, in full</small></span></li>
+            <li><span class="chip">No tokens exist</span></li>
+          </ol>
+        </div>
+      </div>
+      <div class="money">
+        <div class="box out"><span class="label">Into the company</span><b>The raise, in USDC</b><p>Upfront growth capital. No loan, no collateral, no loss of voting control.</p></div>
+        <div class="box"><span class="label">Between investors</span><b>Secondary trading</b><p>Order book and an optional seeded pool. The company isn't involved.</p></div>
+        <div class="box out"><span class="label">Out of the company</span><b>X% of profits, in USDC</b><p>Paid each epoch to holders locked for the whole period.</p></div>
+      </div>
+
+      <h3>Pricing from yield: a worked example</h3>
+      <p>The company commits X% of profits, so the raise is priced as that profit stream divided by the yield investors want. Take a business earning $200k a year that commits 50%, which is $100k a year to holders.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investor target yield</th><th>Company raises</th><th>Paid to holders each year</th><th>Implied cost of capital</th></tr></thead>
+          <tbody>
+            <tr><td>22%</td><td class="num">$455k</td><td class="num">$100k</td><td class="num">22%</td></tr>
+            <tr class="pick"><td>18% (base case)</td><td class="num">$556k</td><td class="num">$100k</td><td class="num">18%</td></tr>
+            <tr><td>15%</td><td class="num">$667k</td><td class="num">$100k</td><td class="num">15%</td></tr>
+            <tr><td>12%</td><td class="num">$833k</td><td class="num">$100k</td><td class="num">12%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>The platform takes a <strong>5% fee on successful raises only</strong>. A raise that misses its minimum costs nobody anything. In the base case the company nets $528k of the $556k raised.</p>
+      <div class="callout">
+        <strong>Why a company signs up</strong>
+        <p>Cash upfront that never has to be repaid. It costs a share of profits that only exist if the business actually earns them. For comparison, bank loans run about 8–12% and need collateral, and revenue-based financing works out to about 25–38% effective.</p>
+        <p>There is no buyback. Investors exit by selling to other investors on the secondary market. If the business is sold, the agreement passes the dividend obligation to the buyer.</p>
+      </div>
+      <div class="callout warn">
+        <strong>This is now clearly a securities offering</strong>
+        <p>Selling profit rights for cash is a primary offering. Reg S already handles excluding US persons. In the EU, crowdfunding rules cap raises at about €5M per year (not verified in this research). For a testnet hackathon that belongs on a slide, not on the blocker list. This is not legal advice.</p>
+      </div>
+    </section>
+
+    <section id="unlocked">
+      <p class="kicker">Stellar Unlocked</p>
+      <h2>Five core primitives do the heavy lifting</h2>
+      <p>Most of the design runs on features built into the protocol, not on custom contracts. The ZK functions are new. The asset flags and the order book date from 2015. Combining them is what makes the project fit Stellar Unlocked.</p>
+      <ul>
+        <li><strong>BN254 + Poseidon host functions</strong> (CAP-74/75, Protocol 25, live since 22 Jan 2026; CAP-80 added MSM and field arithmetic in Protocol 26). Used to verify the investor's residence proof on-chain.</li>
+        <li><strong>Classic asset flags</strong> <code>AUTH_REQUIRED | AUTH_REVOCABLE | AUTH_CLAWBACK_ENABLED</code>. A protocol-level allowlist on every venue.</li>
+        <li><strong>Stellar Asset Contract (SAC)</strong>. Lets the escrow mint the exact amount sold and lets the gate call <code>set_authorized</code>. Since Protocol 26 it can also create trustlines (CAP-73).</li>
+        <li><strong>Native order book (SDEX) + path payments</strong>. Secondary trading with no pool required: investors pay in XLM or any asset and receive the share token, among verified holders only.</li>
+        <li><strong>Clawback and claimable balances</strong> (CAP-35, CAP-23). Recovery for court orders and lost keys, plus an alternative dividend payout path.</li>
+      </ul>
+      <div class="table-wrap wide">
+        <table>
+          <thead><tr><th>Feature</th><th>Primitive / contract</th><th>Supporting pieces</th><th>Caveat</th></tr></thead>
+          <tbody>
+            <tr><td>Company login</td><td>SEP-10 (G-accounts), SEP-45 (C-accounts)</td><td>Stellar Wallets Kit; smart-account-kit passkeys</td><td>SEP-45 is still a draft (v0.1.1)</td></tr>
+            <tr><td>Prove business ownership</td><td>Off-chain ladder: registry director/PSC match → LEI/vLEI → domain control → KYB vendor</td><td>SEP-9 <code>organization.*</code> fields; <code>home_domain</code> + stellar.toml</td><td>Domain control proves the domain, not legal ownership</td></tr>
+            <tr><td>Sign X% agreement</td><td>PDF hash in registry contract (or OZ RWA DocumentManager)</td><td>Company signs a SEP-10 challenge</td><td>Enforcement is legal and off-chain</td></tr>
+            <tr><td>Non-US residence check</td><td>Circom Groth16 on BN254, verified in Soroban</td><td>Poseidon nullifier + Merkle root of credentials</td><td>Must prove residence, not nationality</td></tr>
+            <tr><td>Gate to holding</td><td>Gate calls SAC <code>set_authorized(investor, true)</code></td><td>CAP-73 <code>trust</code> creates the trustline inline</td><td>0.5 XLM reserve per holder (sponsorable)</td></tr>
+            <tr><td>Primary raise</td><td>Soroban escrow: fixed USDC price, min/max, deadline, refund path</td><td>USDC SAC; escrow is share-token SAC admin until close</td><td>Escrow must itself be authorized on the share asset</td></tr>
+            <tr><td>Token issuance</td><td>Mint exactly the amount sold at close, then hand SAC admin to the gate</td><td>Gate can approve holders but has no mint function</td><td>Gives a fixed supply without locking the issuer key</td></tr>
+            <tr><td>Secondary trading (G-accounts)</td><td>SDEX offers (<code>ManageSellOffer</code> / <code>ManageBuyOffer</code>) + <code>PathPaymentStrictSend</code></td><td>Freighter via Wallets Kit</td><td>Recipients need approved trustlines</td></tr>
+            <tr><td>Secondary trading (passkey users)</td><td>Optional pool seeded with 5–10% of the raise + matching tokens</td><td>Aquarius or Soroswap; or native pool via a treasury G-account</td><td>Contract accounts can't place classic order-book offers</td></tr>
+            <tr><td>Lock period</td><td>Custom Soroban lock vault</td><td>OZ access control, pausable</td><td>OpenZeppelin has no staking/vesting module</td></tr>
+            <tr><td>Pro-rata dividends</td><td>Reward-per-share accumulator, keyed by epoch</td><td>USDC SAC; claims gas-sponsored via OZ Relayer</td><td>Never loop over holders on-chain</td></tr>
+            <tr><td>Alternative payouts</td><td>Push payments (≤100 per tx), claimable balances, OZ Merkle distributor</td><td>Path payment to USDC for any-asset payouts</td><td>Claimable balances lock 0.5 XLM per recipient</td></tr>
+            <tr><td>Recovery</td><td>Revoke to maintain-liabilities; <code>ClawbackOp</code></td><td>OZ governance timelock around these powers</td><td>Only applies to trustlines created after the flag</td></tr>
+            <tr><td>Gas for non-crypto users</td><td>Fee-bump via OZ Relayer / Channels</td><td>smart-account-kit spending limits</td><td>Launchtube is being retired</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="compliance">
+      <p class="kicker">Compliance</p>
+      <h2>Prove residence, and let the protocol enforce it</h2>
+      <div class="callout warn">
+        <strong>Spec change: residence, not nationality</strong>
+        <p>Under Regulation S, a US person is anyone <em>resident</em> in the US, plus US-organized entities (<a href="https://www.law.cornell.edu/cfr/text/17/230.902">17 CFR 230.902</a>). A US citizen living in Lisbon is generally not a US person. A French citizen living in New York is.</p>
+      </div>
+      <p>zkPassport and Self prove passport attributes such as nationality, and neither has a Stellar integration. So we build our own small circuit:</p>
+      <ul>
+        <li>A KYC provider's result becomes a credential signed by the platform (EdDSA over Poseidon).</li>
+        <li>The circuit proves <code>residence_country ≠ US</code>, that the credential hasn't expired, and that it came from a trusted issuer. For companies buying, it proves incorporation outside the US.</li>
+        <li>Public outputs are a Poseidon nullifier and the investor's Stellar address, so a proof can't be replayed or front-run.</li>
+        <li>The gate contract checks the BN254 pairing, then calls <code>set_authorized</code>. From then on the protocol enforces it everywhere.</li>
+        <li>Reg S also requires the buyer to be outside the US when ordering, so add a per-session location check or self-attestation in the UI.</li>
+      </ul>
+      <p>Cost isn't a concern. Nethermind measured an optimized Noir UltraHonk verification at about 80M of the 400M per-transaction instruction limit, costing 0.0124 XLM on testnet. Groth16 should be cheaper; the only figure found (~12M instructions) is unverified. SDF's <code>groth16_verifier</code> example is the starting point. Test snarkjs proof formatting on day one, because its BN254 path was only tested with Gnark fixtures.</p>
+
+      <h3>Gating and secondary trading</h3>
+      <p>Tokens with transfer hooks need every pool contract registered as an identity. Stellar's classic authorization flags avoid that: order-book trades, path payments and pool shares all fail without approved trustlines. The secondary market is open, but only to verified members.</p>
+      <div class="table-wrap wide">
+        <table>
+          <thead><tr><th>Option</th><th>How gating works</th><th>Trading</th><th>Regulatory fit</th><th>Verdict</th></tr></thead>
+          <tbody>
+            <tr class="pick"><td>A. Auth flags + ZK gate</td><td>Protocol enforces on every venue</td><td>One proof, then order book, path payments, seeded pool</td><td>Strong; revoke holders who move to the US</td><td><span class="pill ok">Recommended</span></td></tr>
+            <tr><td>B. KYC on primary only</td><td>Checks at the raise only (Centrifuge style)</td><td>Fully open secondary</td><td>Weak for Reg S resale limits</td><td><span class="pill no">Not for launch</span></td></tr>
+            <tr><td>C. OZ RWA (ERC-3643) token</td><td>Contract hooks + identity registry</td><td>Soroban venues only; loses native DEX</td><td>Rich per-transfer rules</td><td><span class="pill mid">If caps become mandatory</span></td></tr>
+            <tr><td>D. SEP-8 approval server</td><td>Issuer co-signs every transaction</td><td>Breaks pools</td><td>Strong</td><td><span class="pill no">Avoid</span></td></tr>
+            <tr><td>E. Time-phased hybrid</td><td>A during compliance period, then relaxed</td><td>Improves over time</td><td>Needs counsel</td><td><span class="pill mid">Roadmap</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Option A's costs: every investor needs a proof before buying, each holder needs a 0.5 XLM trustline reserve (the platform can cover it), and the issuer's clawback power is visible on-chain. Present clawback as investor protection, with a governance timelock around it. It is the same model BENJI and most of Stellar's $4B in real-world assets use.</p>
+    </section>
+
+    <section id="anchors">
+      <p class="kicker">Anchors &amp; ramps</p>
+      <h2>Circle Mint in, MoneyGram out, test anchor for the demo</h2>
+      <p>Companies and investors need different rails. Using one consumer anchor for both would sound naive to judges. Companies now move money both ways: they cash out the raise and pay in dividends.</p>
+      <div class="cards">
+        <div class="card">
+          <span class="role">Company: receive raise, pay dividends</span>
+          <h4>Circle Mint</h4>
+          <p>Business-verified account. US dollar wire to native USDC on Stellar, and back to fiat by wire. Can fund the Stellar Disbursement Platform.</p>
+          <ul><li>CCTP live on Stellar since 19 May 2026 (domain 27) for USDC held on other chains</li><li>Mainnet USDC issuer <code>GA5Z…KZVN</code></li></ul>
+        </div>
+        <div class="card">
+          <span class="role">Investor: fund and cash out</span>
+          <h4>MoneyGram Ramps</h4>
+          <p>SEP-24 integration. Cash-out in 170+ countries, cash-in in only about 25, so it's wrong for corporate flows and right for investors.</p>
+          <ul><li>Sandbox needs Partner Portal approval; keep it off the demo's critical path</li></ul>
+        </div>
+        <div class="card">
+          <span class="role">Regional bank rails</span>
+          <h4>Bitso · BlindPay · Anclap · ChipperCash</h4>
+          <p>Choose from <a href="https://anchors.stellar.org/">anchors.stellar.org</a> by target investor countries. BlindPay covers Argentina, Brazil, Colombia and Mexico through a REST API.</p>
+        </div>
+        <div class="card">
+          <span class="role">Hackathon demo</span>
+          <h4>testanchor.stellar.org</h4>
+          <p>Implements SEP-6, 10, 12, 24, 31 and 38 and lists Circle's real testnet USDC, so money moves in and out on testnet.</p>
+          <ul><li>Testnet USDC <code>GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5</code></li><li>Friendbot → USDC trustline → faucet.circle.com</li><li><code>@stellar/typescript-wallet-sdk</code> SEP-24 iframe flow</li></ul>
+        </div>
+      </div>
+      <p><strong>Avoid</strong> (based on third-party monitoring, not official sources):</p>
+      <ul class="avoid"><li>Mykobo, delisted</li><li>Bitnovo, HTTP 502</li><li>Clpx, withdrawals off</li><li>Cowrie, naira token only</li></ul>
+      <p>The <strong>Stellar Disbursement Platform</strong> with a Circle account is the production story for paying investors who have no wallet. It finds recipients by phone or email and pays whatever each CSV row says. It's too heavy for the hackathon. Before claiming dividends can't be frozen, check on stellar.expert whether Circle's own USDC issuer can revoke or claw back.</p>
+    </section>
+
+    <section id="architecture">
+      <p class="kicker">Architecture</p>
+      <h2>Four contracts, no bonding curve</h2>
+      <div class="contracts">
+        <div class="contract"><h4>Registry <span>Soroban</span></h4><p>Company profile, KYB attestation hash, agreement hash, payout %, schedule, raise terms, links.</p></div>
+        <div class="contract"><h4>Eligibility gate <span>Soroban · SAC admin after close</span></h4><p>BN254 Groth16 verifier, Poseidon credential root, nullifier set. Approves trustlines. Cannot mint.</p></div>
+        <div class="contract"><h4>Raise escrow <span>Soroban</span></h4><p>Fixed price, min/max, deadline. Holds USDC, mints exactly what sold at close, pays the company, or refunds everyone.</p></div>
+        <div class="contract"><h4>Lock vault <span>Soroban · custom</span></h4><p>Epoch-keyed positions, reward-per-share accumulator, full-epoch eligibility only.</p></div>
+        <div class="contract keeper"><h4>Liquidity seed <span>optional</span></h4><p>5–10% of the raise plus matching tokens into a pool, with the pool position locked. Gives passkey users instant trading.</p></div>
+        <div class="contract keeper"><h4>Front end <span>Next.js</span></h4><p>smart-account-kit passkeys, OZ Channels gas sponsorship, Freighter via Wallets Kit, an indexer such as Mercury, and the simulation page.</p></div>
+      </div>
+      <div class="callout warn">
+        <strong>The vault rule that makes the model work</strong>
+        <p>Only tokens locked for the whole epoch earn. Otherwise traders lock right before <code>distribute()</code> and sell right after. Key positions by holder and epoch, extend storage TTLs on every interaction, and never keep user data in temporary storage.</p>
+      </div>
+      <div class="callout warn">
+        <strong>Check this on testnet first: admin hand-off</strong>
+        <p>The plan: the escrow is SAC admin during the raise, mints once at close, then calls <code>set_admin</code> to hand control to the gate. The gate can approve holders but never mint, so supply is fixed by code without locking the issuer key. Confirm SAC admin calls work from a non-issuer contract admin before writing the architecture doc.</p>
+      </div>
+
+      <h3>Hackathon MVP vs. production</h3>
+      <div class="table-wrap wide">
+        <table>
+          <thead><tr><th>Area</th><th>Hackathon MVP (testnet)</th><th>Production</th></tr></thead>
+          <tbody>
+            <tr><td>Company verification</td><td>Live Companies House / GLEIF lookup + DNS TXT / stellar.toml check; KYB simulated</td><td>Sumsub/Persona KYB with beneficial-owner checks, vLEI, audited financials</td></tr>
+            <tr><td>Agreement</td><td>PDF hash + SEP-10-signed acceptance on-chain</td><td>Legal profit-participation contract (SPV), Reg S category analysis, EU crowdfunding licence</td></tr>
+            <tr><td>Eligibility</td><td>Mock KYC issuer, real Groth16 residence circuit, nullifier, gate → <code>set_authorized</code></td><td>Real KYC vendor, document proofs plus residence, sanctions screening, re-proof on expiry</td></tr>
+            <tr><td>Raise</td><td>Escrow with min/max/deadline and 5% fee on success; one successful raise and one refunded raise</td><td>Audit, investor limits, cooling-off period</td></tr>
+            <tr><td>Trading</td><td>SDEX offer + one path-payment trade; optional seeded pool</td><td>Aquarius/Soroswap via aggregator, market-maker programme</td></tr>
+            <tr><td>Lock + dividends</td><td>Epoch vault; company deposit and investor withdrawal via test anchor SEP-24</td><td>Circle Mint treasury, MoneyGram + regional anchors, SDP, transfer-agent reconciliation</td></tr>
+            <tr><td>Simulation</td><td>Separate page in the web app, interactive</td><td>Calibrated against real raise and dividend data</td></tr>
+            <tr><td>Evidence</td><td>4 contract IDs + tx hashes: proof, authorize, invest, close, refund, trade, distribute, claim</td><td>Monitoring (OZ Monitor), incident runbooks</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <details>
+        <summary>Version pins: where the sources disagree</summary>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Item</th><th>Use</th><th>Why</th></tr></thead>
+            <tbody>
+              <tr><td>Network protocol</td><td class="num">29</td><td>"30.0.0" from RPC is a software release, not protocol 30</td></tr>
+              <tr><td>soroban-sdk</td><td>Match your OZ release</td><td>Latest stable is 29.0.1, but OZ v0.8.0 is built on 27.0.2</td></tr>
+              <tr><td>OZ stellar-accounts</td><td class="num">0.7.3</td><td>v0.8.0 changed the signed digest; smart-account-kit isn't updated yet</td></tr>
+              <tr><td>OZ RWA modules</td><td>Treat as unaudited</td><td>v0.8.0 builds were labelled audit release candidates</td></tr>
+              <tr><td>stellar-cli</td><td class="num">28.1.0</td><td>Numbered independently of SDK and protocol</td></tr>
+              <tr><td>Wallets Kit</td><td><code>@creit-tech/stellar-wallets-kit</code> 2.6.0</td><td>Package name on JSR</td></tr>
+              <tr><td>JS SDK</td><td><code>@stellar/stellar-sdk</code> ≥15</td><td>Required by Aquarius</td></tr>
+              <tr><td>SEPs</td><td>Plan on SEP-10/12/24</td><td>SEP-45 is draft; SEP-8 last updated 2022</td></tr>
+              <tr><td>Pool venues</td><td>SDEX first, then Aquarius</td><td>Aquarius ~$39M TVL, Soroswap ~$1.2M; avoid Comet after the Aug 2026 exploit</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </section>
+
+    <section id="pricing">
+      <p class="kicker">Why fixed price</p>
+      <h2>Everyone pays the same price, so everyone earns the same yield</h2>
+      <p>pump.fun's price formula is P(x) = (30 + x)² / (30 · 1.073×10⁹), so the last buyer before graduation pays (115/30)² ≈ 14.7× what the first buyer paid. For a memecoin, that steepness is the product. For a dividend token, it means the first buyers get a yield the business can't support, paid for by everyone after them. A fixed-price raise removes that early-buyer advantage completely.</p>
+      <figure>
+        <div class="legend">
+          <span><i style="background: var(--chart-a)"></i>pump.fun curve</span>
+          <span><i style="background: var(--chart-b)"></i>Fixed-price raise</span>
+        </div>
+        <div class="chart-wrap"><svg id="curve" viewBox="0 0 640 300" role="img" aria-label="Price paid, as a multiple of the first buyer's price, against how much of the sale is filled. pump.fun rises to 14.7 times; the fixed-price raise stays at 1 times."></svg></div>
+        <figcaption>Price paid, as a multiple of the first buyer's price, against how much of the sale is filled (log scale).</figcaption>
+      </figure>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Sale model</th><th>First buyer's yield</th><th>Last buyer's yield</th><th>Who wins</th></tr></thead>
+          <tbody>
+            <tr><td>pump.fun-style curve</td><td class="num">≈ 265%</td><td class="num">18%</td><td>Snipers and bots</td></tr>
+            <tr class="pick"><td>Fixed-price raise</td><td class="num">18%</td><td class="num">18%</td><td>Everyone the same; the company gets the full raise</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Assumes an 18% target yield (a business valued at ~4× distributable profit). On the secondary market, price can move freely, and with it the yield a new buyer gets. That's normal price discovery among holders, and the company has already been funded.</p>
+    </section>
+
+    <section id="simulation">
+      <p class="kicker">The simulation · its own page in the app</p>
+      <h2>Same traders, two kinds of market</h2>
+      <p>Run the same population of traders against a pump.fun-style memecoin market and against fixed-price dividend raises. The only thing that changes is the asset. Then compare who makes money, and whether real businesses get funded.</p>
+      <h3>Agents</h3>
+      <ul>
+        <li><strong>Snipers</strong> buy in the first blocks and dump. With a fixed price they have no edge.</li>
+        <li><strong>Momentum traders</strong> follow price and volume, and turn over quickly.</li>
+        <li><strong>Yield investors</strong> invest when the target yield beats a hurdle (8% plus a risk premium), then lock and hold.</li>
+        <li><strong>Secondary buyers and sellers</strong> trade on the order book, at a discount or premium to the raise price depending on dividends paid.</li>
+        <li><strong>Companies</strong> are honest, pay late, misreport, or fail.</li>
+      </ul>
+
+      <h3>Memecoin arm</h3>
+      <div class="table-wrap wide">
+        <table>
+          <thead><tr><th>Parameter</th><th>Value / distribution</th><th>Basis</th></tr></thead>
+          <tbody>
+            <tr><td>Daily launches</td><td>Poisson, regimes 5k / 20k / 40k / 70k</td><td>22k/day (Sep 2025), 33k/day (Aug 2026), peak ~72k</td></tr>
+            <tr><td>Graduation</td><td>p ~ Beta(2, 180), mean ≈ 1.1%</td><td>Measured 0.63–1.89%</td></tr>
+            <tr><td>Curve</td><td>pump.fun formula, 1.25% fee (0.95 platform / 0.3 creator)</td><td>arXiv 2602.14860</td></tr>
+            <tr><td>Time to graduation</td><td>Median 4.4 min, ~457 trades</td><td>Same</td></tr>
+            <tr><td>Abandonment</td><td>79% dead after day one</td><td>Secondary summary</td></tr>
+            <tr><td>After graduation</td><td>Jump process; median −50% in 10 min; 38% touch −80%; rare Pareto up-jumps (α 1.5–2)</td><td>Developer blog; tail is an assumption</td></tr>
+            <tr><td>Sniper share of supply</td><td>Mean 10–20%, sweep 0–90%</td><td><span class="pill mid">Assumption</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Dividend arm</h3>
+      <div class="table-wrap wide">
+        <table>
+          <thead><tr><th>Parameter</th><th>Value / distribution</th><th>Basis</th></tr></thead>
+          <tbody>
+            <tr><td>Revenue</td><td>Lognormal, median $700k, σ 0.8</td><td>BizBuySell median $692k (Q2 2026)</td></tr>
+            <tr><td>Net margin</td><td>Mean 9%, sd 6%, range −5% to 30%</td><td>Damodaran ex-financials 8.56% (Jan 2026)</td></tr>
+            <tr><td>Profit growth</td><td>Mean 3–5%/yr, sd 10–15%; volatility 20–35%</td><td><span class="pill mid">Unsourced</span></td></tr>
+            <tr><td>Failure rate</td><td>6–8%/yr vetted, 10%/yr young</td><td>BLS: 51.5% survive 5 years</td></tr>
+            <tr><td>Fraud / misreporting</td><td>1–3%/yr</td><td><span class="pill mid">Stress variable</span></td></tr>
+            <tr><td>Recovery on failure</td><td>0–20%</td><td>Inference</td></tr>
+            <tr><td>Payout share X%</td><td>25 / 50 / 70 / 90%, base 70%</td><td>Platform parameter</td></tr>
+            <tr><td>Target yield (sets price)</td><td>12 / 15 / 18 / 22%, base 18%</td><td>Small businesses sell at 2.6–2.7× SDE</td></tr>
+            <tr><td>Raise fill</td><td>Share of raises reaching their minimum; refund otherwise</td><td>Driven by yield-investor demand</td></tr>
+            <tr><td>Liquidity seed</td><td>0 / 5 / 10% of raise</td><td>Platform parameter</td></tr>
+            <tr><td>Secondary discount</td><td>10–30% to fair value, stress 50–85%</td><td>Private-share secondaries; RealT</td></tr>
+            <tr><td>Lock epoch</td><td>3 / 6 / 12 months, full-epoch only</td><td>Platform parameter</td></tr>
+            <tr><td>Gate friction</td><td>5–50% of traders pass the proof</td><td><span class="pill mid">Assumption</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Comparators</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Model</th><th>Return profile</th></tr></thead>
+          <tbody>
+            <tr><td>Real-estate tokens (RealT)</td><td>Nominal yield 3–14%; secondary prices often 50–85% under issue</td></tr>
+            <tr><td>Main Street Capital (BDC)</td><td>~6–7.8% dividend yield, monthly</td></tr>
+            <tr><td>US private equity</td><td>8.7% in 2025 (Cambridge Associates); distributions ~6% vs 16% pre-2020</td></tr>
+            <tr><td>Reg CF crowdfunding</td><td>1.2% known exits, 2.5× average; 10% of exits give 85% of value</td></tr>
+            <tr><td>Security token offerings</td><td>Only 6.4% ever traded freely</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>What the page should show</h3>
+      <p>For each trader type and model: median and mean return, chance of loss, 1st/99th percentile, annual IRR. For each market: inequality of profits (Gini, Lorenz curve), how much money reaches real businesses vs. the platform and snipers, share of supply locked, and realized yield for lockers. Total trader P&amp;L in the memecoin arm must equal minus fees, which checks the simulation is consistent.</p>
+      <ol>
+        <li>P&amp;L distributions overlaid: memecoin, dividend token, real-estate token, BDC.</li>
+        <li>Where the money goes: to companies, to holders as dividends, to platform fees, to snipers.</li>
+        <li>Heatmap of investor IRR by target yield and payout %.</li>
+        <li>Price vs. fair value on the secondary market across dividend epochs.</li>
+        <li>Lorenz curves per model.</li>
+        <li>Companies still paying dividends vs. memecoins still trading, over time.</li>
+      </ol>
+      <p>Hypothesis: fixed pricing removes the sniper edge, locks cut turnover, and most money ends up funding businesses and paying holders. Fraud and failure rates are the biggest risks, so they should be sliders.</p>
+    </section>
+
+    <section id="evidence">
+      <p class="kicker">Data hygiene</p>
+      <h2>Figures to keep out of the pitch</h2>
+      <p>Several popular statistics don't hold up. Judges who know the data will spot them.</p>
+      <ul class="ev">
+        <li><span class="pill no">Withdrawn</span><span>"0.198% graduation rate", from preprint arXiv 2607.02823</span></li>
+        <li><span class="pill no">Withdrawn</span><span>All sniper-cohort numbers from arXiv 2607.02795 (~43% of its "buys" were sells)</span></li>
+        <li><span class="pill mid">Unverified</span><span>"97% of traders lose", "95% rugged within a day", "0.4% of wallets made over $10k"</span></li>
+        <li><span class="pill mid">Misread</span><span>"96% lose" actually means "lost money or made under $500"</span></li>
+        <li><span class="pill mid">Label</span><span>Solidus Labs' 98.6% "rug or pump-and-dump" is a vendor classification, not a measured loss rate</span></li>
+        <li><span class="pill mid">Unverified</span><span>~12M instructions per Groth16 verify; LetsBonk's 411 SOL threshold; Bain's 11% vs 14% distribution yield</span></li>
+        <li><span class="pill ok">Use</span><span>~60% of 4.26M active wallets lost money over 6 months; 311 made over $1M</span></li>
+      </ul>
+    </section>
+
+    <section id="production">
+      <p class="kicker">Beyond the hackathon</p>
+      <h2>Path to production</h2>
+      <p>The code can be ready for regulation; the regulated parts themselves come from vendors, auditors and lawyers. This is the order to do them in. Not legal advice.</p>
+      <h3>1. Legal structure</h3>
+      <ul>
+        <li><strong>What the token is:</strong> a security, a right to a share of profit. Each company needs a legal wrapper (an SPV or a profit-participation agreement) and a transfer agent or registrar keeping the official holder record.</li>
+        <li><strong>Offering rules:</strong> Regulation S to exclude US persons; in the EU, a crowdfunding service provider licence (raises capped around €5M a year, to verify) or a prospectus per offering.</li>
+        <li><strong>Models on Stellar:</strong> RedSwan (FINRA-regulated digital securities marketplace) and Spiko (AMF/ACPR-regulated tokenized funds) already run regulated securities on the network.</li>
+      </ul>
+      <h3>2. Vendors</h3>
+      <ul>
+        <li><strong>KYC and AML:</strong> Sumsub, Persona or Didit for residence and identity, plus sanctions and PEP screening. The vendor's result signs the credential that goes into the ZK tree.</li>
+        <li><strong>Money:</strong> Circle Mint for companies; FinClusive (SEP-6, 24, 31), MoneyGram or regional anchors for investors.</li>
+        <li><strong>Security:</strong> an audit of the contracts and the ZK circuit (Veridise covers both) and a multi-party trusted-setup ceremony.</li>
+      </ul>
+      <h3>3. Code that makes it auditable</h3>
+      <ul>
+        <li>Admin powers split into roles, with compliance actions behind a multisig and admin changes behind a timelock.</li>
+        <li>A compliance console for freezing, unfreezing and clawback with a stated reason, and an audit log from on-chain events.</li>
+        <li><code>stellar.toml</code> (SEP-1) describing the organization, its assets and their regulation.</li>
+        <li>Sanctions screening, signed credentials and a verifiable agreement document.</li>
+        <li>Standards to consider: SEP-8 regulated assets for per-transfer approval, and SEP-61 Trustline Onboarder (Authline implements it) for one-step trustline approval from wallets and brokers.</li>
+      </ul>
+    </section>
+
+    <section id="decisions">
+      <p class="kicker">Status</p>
+      <h2>Decisions</h2>
+      <ol class="decisions">
+        <li class="done"><b>How the company gets funded</b><p>Fixed-price raise into an all-or-nothing escrow. Then secondary trading on the order book, with an optional seeded pool. No bonding curve.</p></li>
+        <li class="done"><b>Investor eligibility</b><p>A real ZK residence proof: Circom Groth16, verified on BN254 in Soroban.</p></li>
+        <li class="done"><b>Simulation</b><p>Its own interactive page inside the web app.</p></li>
+        <li class="done"><b>Buyback clause</b><p>None. Investors exit on the secondary market; the obligation follows the business if it is sold.</p></li>
+        <li class="done"><b>Platform fee</b><p>5% of successful raises, taken by the escrow at close. Failed raises are refunded in full. Pool seeding stays optional and off by default.</p></li>
+      </ol>
+    </section>
+
+    <footer>
+      Synthesized from six research tracks on 25 October 2026: anchors, classic primitives and RWAs, Soroban contracts, ZK and identity, launchpad outcomes, and private-equity returns. Source notes and the full cited report are in <code>stellar-fintech/research_notes/</code> and <code>stellar-fintech/reports/</code>. The report predates the switch to a fixed-price raise. Not legal advice.
+    </footer>
+  </main>
+</div>
+
+<script>
+(function () {
+  var svg = document.getElementById("curve");
+  if (!svg) return;
+  var NS = "http://www.w3.org/2000/svg";
+  var W = 640, H = 300, L = 52, R = 70, T = 16, B = 40;
+  var pw = W - L - R, ph = H - T - B;
+  var ymax = Math.log(16);
+  function X(f) { return L + f * pw; }
+  function Y(m) { return T + ph - (Math.log(m) / ymax) * ph; }
+  function el(tag, attrs, text) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (text != null) e.textContent = text;
+    svg.appendChild(e);
+    return e;
+  }
+  [1, 2, 3, 5, 10, 15].forEach(function (m) {
+    el("line", { x1: L, x2: L + pw, y1: Y(m), y2: Y(m), "class": "grid" });
+    el("text", { x: L - 8, y: Y(m) + 4, "text-anchor": "end" }, m + "×");
+  });
+  [0, 0.25, 0.5, 0.75, 1].forEach(function (f) {
+    el("text", { x: X(f), y: T + ph + 18, "text-anchor": "middle" }, Math.round(f * 100) + "%");
+  });
+  el("text", { x: L + pw / 2, y: H - 4, "text-anchor": "middle" }, "share of sale filled");
+  var series = [
+    { k: 2.834, c: "var(--chart-a)", label: "14.7×" },
+    { k: 0, c: "var(--chart-b)", label: "1×" }
+  ];
+  series.forEach(function (s) {
+    var d = "";
+    for (var i = 0; i <= 80; i++) {
+      var f = i / 80, m = Math.pow(1 + f * s.k, 2);
+      d += (i ? "L" : "M") + X(f).toFixed(1) + " " + Y(m).toFixed(1);
+    }
+    el("path", { d: d, fill: "none", stroke: s.c, "stroke-width": 3, "stroke-linecap": "round" });
+    var end = Math.pow(1 + s.k, 2);
+    el("circle", { cx: X(1), cy: Y(end), r: 4, fill: s.c });
+    var t = el("text", { x: X(1) + 10, y: Y(end) + 4 }, s.label);
+    t.style.fill = s.c;
+    t.style.fontWeight = "600";
+  });
+})();
+</script>
