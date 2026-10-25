@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { LandingFilm } from "@/components/landing-film";
-import { GeoNotice } from "@/components/ui";
 
 export default function Home() {
   return (
@@ -19,7 +18,6 @@ export default function Home() {
             See the simulation →
           </Link>
         </div>
-        <GeoNotice />
       </section>
     </main>
   );

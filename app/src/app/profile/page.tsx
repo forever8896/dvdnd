@@ -62,11 +62,12 @@ export default function Profile() {
       </section>
 
       <section id="us-persons" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        <h2 className="h2">US persons notice</h2>
+        <h2 className="h2">Who can invest</h2>
         <p className="muted" style={{ maxWidth: 680 }}>
-          dvdnd tokens are offered only to people living outside the United States, under Regulation S. Residence, not
-          nationality, decides this: a US citizen living abroad may invest, a non-US citizen living in the US may not.
-          Tokens are profit-share instruments, not deposits; dividends depend on company profit.
+          Each raise says how it is offered. Reg S raises are for people living outside the United States, proven with a
+          zero-knowledge proof. Reg D 506(c) raises are for accredited investors, US residents included. Some raises run
+          both. For now, anyone whose ID document or nationality is American is treated as a US resident. Tokens are
+          profit-share instruments, not deposits; dividends depend on company profit.
         </p>
       </section>
 

@@ -208,18 +208,6 @@ export function Toast({
   );
 }
 
-export function GeoNotice() {
-  return (
-    <div className="geo-notice">
-      <span style={{ flex: 1 }}>
-        dvdnd is not available to US residents. Investing requires proof of residence outside the
-        United States.
-      </span>
-      <a href="/profile#us-persons">Why? ↗</a>
-    </div>
-  );
-}
-
 export function fmt(n: number, decimals = 0) {
   return n.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 }
