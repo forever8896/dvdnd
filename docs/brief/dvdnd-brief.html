@@ -257,13 +257,13 @@ html { scroll-behavior: smooth; }
             <tr class="status-group"><th colspan="3">Raise</th></tr>
             <tr><td>Fixed-price, all-or-nothing escrow with min, max and deadline</td><td><span class="pill ok">Built, real</span></td><td>Offering contract</td></tr>
             <tr><td>Company receives the full raise; flat listing fee at open; refunds on failure</td><td><span class="pill ok">Built, real</span></td><td>No share of the raise (§4(b)); verified on testnet</td></tr>
-            <tr><td>Each raise picks its exemption and rules</td><td><span class="pill ok">Built, real</span></td><td>Reg S or Reg D 506(c), minimum ticket, holder cap, lock-up date, compliance account</td></tr>
+            <tr><td>Each raise picks its exemption and rules</td><td><span class="pill ok">Built, real</span></td><td>Reg S, Reg D 506(c) or both side by side; minimum ticket, holder cap, lock-up date, compliance account</td></tr>
             <tr class="status-group"><th colspan="3">Investor eligibility</th></tr>
             <tr><td>ZK proof of non-US residence verified on-chain</td><td><span class="pill ok">Built, real</span></td><td>Groth16 on BN254, Poseidon Merkle tree kept on-chain</td></tr>
             <tr><td>One wallet per credential</td><td><span class="pill ok">Built, real</span></td><td>Pinned nullifier scope</td></tr>
             <tr><td>Residence checked by a real KYC vendor</td><td><span class="pill prog">In progress</span></td><td>idOS integrated: relay KYC (identity on an EVM wallet, since the relay is EVM-only; investing stays on Stellar), credential shared to dvdnd, issuer signature checked, verified residence builds the leaf. First real run pending (playground)</td></tr>
             <tr><td>Issuer builds the credential from the verified country</td><td><span class="pill ok">Built, real</span></td><td>Circuit v2: the investor only sends Poseidon(secret); the issuer adds the leaf from the KYC result</td></tr>
-            <tr><td>506(c) accreditation: signed statement plus $200k minimum, or a verifier's attestation</td><td><span class="pill mid">Testnet stand-in</span></td><td>Contract rules are real; the verifier is a testnet stand-in</td></tr>
+            <tr><td>506(c) accreditation: signed statement plus $200k minimum ($1M for entities), or a verifier's attestation</td><td><span class="pill mid">Testnet stand-in</span></td><td>Contract rules are real; the verifier is a testnet stand-in</td></tr>
             <tr><td>Accreditation verification service</td><td><span class="pill ext">Needs vendor or legal</span></td><td>VerifyInvestor, Parallel Markets or similar</td></tr>
             <tr><td>Sanctions screening of investor addresses</td><td><span class="pill todo">Not started</span></td><td>OFAC's published crypto addresses</td></tr>
             <tr><td>Credential tree survives RPC event retention</td><td><span class="pill mid">Testnet stand-in</span></td><td>Events plus a bundled seed; needs an on-chain view or indexer</td></tr>
@@ -483,8 +483,8 @@ html { scroll-behavior: smooth; }
         <table>
           <thead><tr><th>Route</th><th>Who can invest</th><th>Public marketing</th><th>Fit</th></tr></thead>
           <tbody>
-            <tr class="pick"><td>Reg D 506(c)</td><td>Verified accredited investors</td><td>Allowed</td><td>Built. Verification by an accreditation service, or the March 2025 route: $200k minimum plus a written statement</td></tr>
-            <tr class="pick"><td>Reg S</td><td>Non-US residents</td><td>Outside the US</td><td>Built. ZK residence proof; runs alongside 506(c)</td></tr>
+            <tr class="pick"><td>Reg D 506(c)</td><td>Verified accredited investors</td><td>Allowed</td><td>Built. Verification by an accreditation service, or the March 2025 route: $200k minimum ($1M for an entity) plus a written statement</td></tr>
+            <tr class="pick"><td>Reg S</td><td>Non-US residents</td><td>Outside the US</td><td>Built. ZK residence proof; a raise can run it alongside 506(c), so US investors join as accredited investors</td></tr>
             <tr><td>Reg CF</td><td>Anyone, with income-based caps; $5M per 12 months</td><td>Through a portal</td><td>Later, through a registered funding portal</td></tr>
             <tr><td>Reg D 506(b)</td><td>Accredited, plus up to 35 sophisticated</td><td>Not allowed</td><td>Doesn't fit a public listing site</td></tr>
             <tr><td>Reg A+ Tier 2</td><td>Anyone; $75M per 12 months</td><td>Allowed</td><td>Too heavy for small businesses</td></tr>

@@ -2,7 +2,7 @@
 
 **Own a share of real, profitable businesses. Get paid in dollars.**
 
-dvdnd is tokenized private equity on Stellar. Profitable small and mid-sized businesses raise USDC at a fixed price by selling a share of their future profits. Investors who lock their tokens for a full period receive that period's dividends in USDC, pro-rata. Each raise runs under a securities exemption: **Reg S** (investors prove with a zero-knowledge proof that they live outside the US) or **Reg D 506(c)** (verified accredited investors). The Stellar protocol itself then limits holding the token to eligible investors.
+dvdnd is tokenized private equity on Stellar. Profitable small and mid-sized businesses raise USDC at a fixed price by selling a share of their future profits. Investors who lock their tokens for a full period receive that period's dividends in USDC, pro-rata. Each raise runs under a securities exemption: **Reg S** (investors prove with a zero-knowledge proof that they live outside the US), **Reg D 506(c)** (verified accredited investors, US residents included), or both side by side. The Stellar protocol itself then limits holding the token to eligible investors.
 
 **Live demo (Stellar testnet): https://dvdnd.vercel.app**
 
@@ -20,10 +20,11 @@ Real businesses, meanwhile, struggle to raise growth capital without giving up c
 ## How dvdnd works
 
 1. **A company signs up.** It proves it owns the business (domain check, plus GLEIF when it has an LEI) and signs an agreement committing X% of yearly net profit to token holders. The agreement's hash is recorded on-chain.
-2. **The company opens a fixed-price raise** and pays a flat listing fee. It sets a price (for example 1.00 USDC per token, set from a target yield), a minimum, a maximum and a deadline, plus the raise's rules: exemption (Reg S or 506(c)), minimum investment, holder cap, lock-up date, and who holds the compliance role (the company or its transfer agent).
+2. **The company opens a fixed-price raise** and pays a flat listing fee. It sets a price (for example 1.00 USDC per token, set from a target yield), a minimum, a maximum and a deadline, plus the raise's rules: exemption (Reg S, 506(c) or both), minimum investment, holder cap, lock-up date, and who holds the compliance role (the company or its transfer agent).
 3. **Eligible investors put USDC into escrow.**
    - **Reg S:** identity checked once through idOS, then a zero-knowledge proof of non-US residence verified on-chain.
-   - **506(c):** a signed accreditation statement on-chain, plus either a verifier's attestation or at least 200,000 USDC invested (the SEC staff's March 2025 route).
+   - **506(c):** a signed accreditation statement on-chain (as a person or an entity), plus either a verifier's attestation or at least 200,000 USDC invested, 1,000,000 for an entity (the SEC staff's March 2025 route).
+   - **Both:** proven non-US residents invest under Reg S, everyone else (including US residents) as accredited investors.
    - If the minimum is reached, the company receives everything raised and investors claim their tokens. If it isn't, everyone is refunded.
 4. **Lock-up, then trading between eligible holders.** Until the lock-up date, claimed tokens sit in the dividend vault, earning, and the holder's wallet is frozen. Afterwards, holders release them and trade only with other eligible holders, on Stellar's order book and through path payments.
 5. **Dividends.**
@@ -71,7 +72,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for how the pieces fit together.
 |---|---|
 | registry | [`CCL5K3BT7EKT47SLRIHL23AMKELXPY34WATWMRLKGW2ZWYOALE66Y2TZ`](https://stellar.expert/explorer/testnet/contract/CCL5K3BT7EKT47SLRIHL23AMKELXPY34WATWMRLKGW2ZWYOALE66Y2TZ) |
 | gate | [`CBPU52XUHU4UQ3MUBOXITFNHQMOON3SDEWN2IVKPGRCZSQTRTCLGDB7N`](https://stellar.expert/explorer/testnet/contract/CBPU52XUHU4UQ3MUBOXITFNHQMOON3SDEWN2IVKPGRCZSQTRTCLGDB7N) |
-| offering | [`CCBMO6FN53CBZILJ6PBU4DODLRYK27RQH5ESWVDPMNPVH5VILUZV4E5C`](https://stellar.expert/explorer/testnet/contract/CCBMO6FN53CBZILJ6PBU4DODLRYK27RQH5ESWVDPMNPVH5VILUZV4E5C) |
+| offering | [`CCJCRABWLOEOXVDRHSJXLS5HDOCUCZWY2X2N27NUP24H62N6DKYISX5P`](https://stellar.expert/explorer/testnet/contract/CCJCRABWLOEOXVDRHSJXLS5HDOCUCZWY2X2N27NUP24H62N6DKYISX5P) |
 | vault | [`CDU5CGRWVSMFKQWRNJLP5XAKHQAF624QTLUNCONHJ4GQHOZOVAQROHKM`](https://stellar.expert/explorer/testnet/contract/CDU5CGRWVSMFKQWRNJLP5XAKHQAF624QTLUNCONHJ4GQHOZOVAQROHKM) |
 | USDC (Circle testnet) | [`CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA`](https://stellar.expert/explorer/testnet/contract/CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA) |
 
