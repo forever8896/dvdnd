@@ -259,7 +259,7 @@ html { scroll-behavior: smooth; }
             <tr class="status-group"><th colspan="3">Investor eligibility</th></tr>
             <tr><td>ZK proof of non-US residence verified on-chain</td><td><span class="pill ok">Built, real</span></td><td>Groth16 on BN254, Poseidon Merkle tree kept on-chain</td></tr>
             <tr><td>One wallet per credential</td><td><span class="pill ok">Built, real</span></td><td>Pinned nullifier scope</td></tr>
-            <tr><td>Residence checked by a real KYC vendor</td><td><span class="pill ext">Needs vendor or legal</span></td><td>Mock issuer today; Sumsub, Persona or Didit</td></tr>
+            <tr><td>Residence checked by a real KYC vendor</td><td><span class="pill prog">In progress</span></td><td>idOS integrated: relay KYC, credential shared to dvdnd, issuer signature checked, verified residence builds the leaf. Waiting on the relay origin allow-list for a first real run (playground)</td></tr>
             <tr><td>Issuer-signed credentials</td><td><span class="pill todo">Not started</span></td><td>Closes the trust gap on the declared country</td></tr>
             <tr><td>Sanctions screening of investor addresses</td><td><span class="pill todo">Not started</span></td><td>OFAC's published crypto addresses</td></tr>
             <tr><td>Credential tree survives RPC event retention</td><td><span class="pill mid">Testnet stand-in</span></td><td>Events plus a bundled seed; needs an on-chain view or indexer</td></tr>
@@ -286,7 +286,7 @@ html { scroll-behavior: smooth; }
             <tr><td>Compliance console with audit log</td><td><span class="pill prog">In progress</span></td><td>Contract actions and events exist; the screen with multisig signing is next</td></tr>
             <tr><td>stellar.toml (SEP-1) for dvdnd and its assets</td><td><span class="pill ok">Built, real</span></td><td>Generated from the chain at <a href="https://dvdnd.vercel.app/.well-known/stellar.toml">/.well-known/stellar.toml</a>; issuers point to it</td></tr>
             <tr><td>Contract and ZK circuit audit</td><td><span class="pill ext">Needs vendor or legal</span></td><td>Veridise, Certora, Runtime Verification, OtterSec, Halborn</td></tr>
-            <tr><td>Multi-party trusted setup ceremony</td><td><span class="pill ext">Needs vendor or legal</span></td><td>Today: single-contributor development setup</td></tr>
+            <tr><td>Multi-party trusted setup ceremony</td><td><span class="pill prog">In progress</span></td><td>Phase 1: PSE Perpetual Powers of Tau (80 contributors). Phase 2: scripted ceremony with a Stellar-ledger beacon, one contributor so far; key live on the testnet gate</td></tr>
             <tr class="status-group"><th colspan="3">Legal</th></tr>
             <tr><td>Legal wrapper per company (SPV or profit-participation agreement)</td><td><span class="pill ext">Needs vendor or legal</span></td><td>Counsel</td></tr>
             <tr><td>Offering rules: Reg S, EU crowdfunding licence or prospectus</td><td><span class="pill ext">Needs vendor or legal</span></td><td>Counsel</td></tr>
@@ -528,7 +528,7 @@ html { scroll-behavior: smooth; }
           <tbody>
             <tr><td>Company verification</td><td>Live Companies House / GLEIF lookup + DNS TXT / stellar.toml check; KYB simulated</td><td>Sumsub/Persona KYB with beneficial-owner checks, vLEI, audited financials</td></tr>
             <tr><td>Agreement</td><td>PDF hash + SEP-10-signed acceptance on-chain</td><td>Legal profit-participation contract (SPV), Reg S category analysis, EU crowdfunding licence</td></tr>
-            <tr><td>Eligibility</td><td>Mock KYC issuer, real Groth16 residence circuit, nullifier, gate → <code>set_authorized</code></td><td>Real KYC vendor, document proofs plus residence, sanctions screening, re-proof on expiry</td></tr>
+            <tr><td>Eligibility</td><td>idOS KYC (testnet demo check as fallback), issuer builds the leaf from the verified country, real Groth16 residence circuit, nullifier, gate → <code>set_authorized</code></td><td>Real KYC vendor, document proofs plus residence, sanctions screening, re-proof on expiry</td></tr>
             <tr><td>Raise</td><td>Escrow with min/max/deadline and 5% fee on success; one successful raise and one refunded raise</td><td>Audit, investor limits, cooling-off period</td></tr>
             <tr><td>Trading</td><td>SDEX offer + one path-payment trade; optional seeded pool</td><td>Aquarius/Soroswap via aggregator, market-maker programme</td></tr>
             <tr><td>Lock + dividends</td><td>Epoch vault; company deposit and investor withdrawal via test anchor SEP-24</td><td>Circle Mint treasury, MoneyGram + regional anchors, SDP, transfer-agent reconciliation</td></tr>
