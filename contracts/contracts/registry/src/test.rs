@@ -7,7 +7,8 @@ fn setup() -> (Env, RegistryClient<'static>, Address) {
     let env = Env::default();
     env.mock_all_auths();
     let admin = Address::generate(&env);
-    let id = env.register(Registry, (admin.clone(),));
+    let verifier = Address::generate(&env);
+    let id = env.register(Registry, (admin.clone(), verifier));
     (env.clone(), RegistryClient::new(&env, &id), admin)
 }
 
@@ -52,4 +53,27 @@ fn rejects_invalid_payout() {
     reg.verify(&id, &BytesN::from_array(&env, &[1; 32]));
     let res = reg.try_sign_agreement(&id, &BytesN::from_array(&env, &[2; 32]), &10_001, &1);
     assert_eq!(res, Err(Ok(soroban_sdk::Error::from_contract_error(Error::InvalidPayout as u32))));
+}
+
+#[test]
+fn roles_are_separate_and_reassignable() {
+    let (env, reg, admin) = setup();
+    let verifier = reg.verifier();
+    assert_eq!(reg.admin(), admin);
+    assert_ne!(verifier, admin);
+
+    let owner = Address::generate(&env);
+    let id = reg.register(&owner, &String::from_str(&env, "X"), &620, &String::from_str(&env, ""));
+    reg.verify(&id, &BytesN::from_array(&env, &[1; 32]));
+    // verify() asked the verifier, not the admin, to authorize.
+    assert_eq!(env.auths()[0].0, verifier);
+
+    let new_verifier = Address::generate(&env);
+    reg.set_verifier(&new_verifier);
+    assert_eq!(env.auths()[0].0, admin);
+    assert_eq!(reg.verifier(), new_verifier);
+
+    reg.suspend(&id);
+    assert_eq!(env.auths()[0].0, admin);
+    assert_eq!(reg.company(&id).status, Status::Suspended);
 }

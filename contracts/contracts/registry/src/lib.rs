@@ -1,10 +1,13 @@
 #![no_std]
 //! Company registry: who the company is, whether the platform has verified it,
 //! and the profit-share agreement it signed.
+//!
+//! Roles: the *verifier* (an automated service key) records ownership checks;
+//! the *admin* (a multisig council) suspends companies and reassigns roles.
 
 use soroban_sdk::{
-    contract, contracterror, contractevent, contractimpl, contracttype, panic_with_error, Address,
-    BytesN, Env, String,
+    contract, contracterror, contractevent, contractimpl, contracttype, panic_with_error, symbol_short,
+    Address, BytesN, Env, String, Symbol,
 };
 
 const DAY_IN_LEDGERS: u32 = 17_280;
@@ -59,6 +62,7 @@ pub struct Company {
 #[contracttype]
 enum DataKey {
     Admin,
+    Verifier,
     NextId,
     Company(u32),
 }
@@ -68,6 +72,19 @@ pub struct CompanyRegistered {
     #[topic]
     pub id: u32,
     pub owner: Address,
+}
+
+#[contractevent]
+pub struct RoleChanged {
+    #[topic]
+    pub role: Symbol,
+    pub account: Address,
+}
+
+#[contractevent]
+pub struct CompanySuspended {
+    #[topic]
+    pub id: u32,
 }
 
 #[contractevent]
@@ -91,8 +108,9 @@ pub struct Registry;
 
 #[contractimpl]
 impl Registry {
-    pub fn __constructor(env: Env, admin: Address) {
+    pub fn __constructor(env: Env, admin: Address, verifier: Address) {
         env.storage().instance().set(&DataKey::Admin, &admin);
+        env.storage().instance().set(&DataKey::Verifier, &verifier);
         env.storage().instance().set(&DataKey::NextId, &1u32);
     }
 
@@ -124,9 +142,9 @@ impl Registry {
         id
     }
 
-    /// Platform admin records that ownership was verified (registry match, domain, KYB).
+    /// The verifier records that ownership was verified (registry match, domain, KYB).
     pub fn verify(env: Env, id: u32, kyb_hash: BytesN<32>) {
-        admin(&env).require_auth();
+        verifier(&env).require_auth();
         let mut company = load(&env, id);
         company.status = Status::Verified;
         company.kyb_hash = Some(kyb_hash.clone());
@@ -166,6 +184,27 @@ impl Registry {
         let mut company = load(&env, id);
         company.status = Status::Suspended;
         save(&env, &company);
+        CompanySuspended { id }.publish(&env);
+    }
+
+    pub fn set_admin(env: Env, new_admin: Address) {
+        admin(&env).require_auth();
+        env.storage().instance().set(&DataKey::Admin, &new_admin);
+        RoleChanged { role: symbol_short!("admin"), account: new_admin }.publish(&env);
+    }
+
+    pub fn set_verifier(env: Env, new_verifier: Address) {
+        admin(&env).require_auth();
+        env.storage().instance().set(&DataKey::Verifier, &new_verifier);
+        RoleChanged { role: symbol_short!("verifier"), account: new_verifier }.publish(&env);
+    }
+
+    pub fn admin(env: Env) -> Address {
+        admin(&env)
+    }
+
+    pub fn verifier(env: Env) -> Address {
+        verifier(&env)
     }
 
     pub fn company(env: Env, id: u32) -> Company {
@@ -190,6 +229,10 @@ impl Registry {
 
 fn admin(env: &Env) -> Address {
     env.storage().instance().get(&DataKey::Admin).unwrap()
+}
+
+fn verifier(env: &Env) -> Address {
+    env.storage().instance().get(&DataKey::Verifier).unwrap()
 }
 
 fn load(env: &Env, id: u32) -> Company {
