@@ -238,9 +238,9 @@ html { scroll-behavior: smooth; }
       <p class="kicker">Live checklist</p>
       <h2>What's built against the vision</h2>
       <p>Every piece of the plan below, with where it stands in the live app at <a href="https://dvdnd.vercel.app">dvdnd.vercel.app</a> and on Stellar testnet. "Built, real" means it runs for real on testnet; stand-ins are marked; the last group needs vendors, auditors or lawyers rather than code.</p>
-      <p class="updated">Updated 25 Oct 2026 · 16 of 40 built for real</p>
-      <div class="meter" role="img" aria-label="16 built, 3 stand-ins, 5 in progress, 9 not started, 7 need vendors or legal"><i style="width:40.00%;background:var(--accent)" title="Built, real"></i><i style="width:7.50%;background:var(--warn)" title="Testnet stand-in"></i><i style="width:12.50%;background:#4a6fa5" title="In progress"></i><i style="width:22.50%;background:var(--line)" title="Not started"></i><i style="width:17.50%;background:transparent" title="Needs vendor or legal"></i></div>
-      <div class="meter-legend"><span><span class="pill ok">Built, real</span> <b>16</b></span><span><span class="pill mid">Testnet stand-in</span> <b>3</b></span><span><span class="pill prog">In progress</span> <b>5</b></span><span><span class="pill todo">Not started</span> <b>9</b></span><span><span class="pill ext">Needs vendor or legal</span> <b>7</b></span></div>
+      <p class="updated">Updated 25 Oct 2026 · <span class="built-count">17 of 40 built for real</span></p>
+      <div class="meter" role="img" aria-label="17 built, 3 stand-ins, 4 in progress, 9 not started, 7 need vendors or legal"><i style="width:42.50%;background:var(--accent)" title="Built, real"></i><i style="width:7.50%;background:var(--warn)" title="Testnet stand-in"></i><i style="width:10.00%;background:#4a6fa5" title="In progress"></i><i style="width:22.50%;background:var(--line)" title="Not started"></i><i style="width:17.50%;background:transparent" title="Needs vendor or legal"></i></div>
+      <div class="meter-legend"><span><span class="pill ok">Built, real</span> <b>17</b></span><span><span class="pill mid">Testnet stand-in</span> <b>3</b></span><span><span class="pill prog">In progress</span> <b>4</b></span><span><span class="pill todo">Not started</span> <b>9</b></span><span><span class="pill ext">Needs vendor or legal</span> <b>7</b></span></div>
       <div class="table-wrap wide">
         <table class="status-table">
           <thead><tr><th>Piece</th><th>Status</th><th>Notes</th></tr></thead>
@@ -284,7 +284,7 @@ html { scroll-behavior: smooth; }
             <tr><td>Admin powers behind a multisig</td><td><span class="pill prog">In progress</span></td><td>In progress</td></tr>
             <tr><td>Timelock on admin changes</td><td><span class="pill todo">Not started</span></td><td></td></tr>
             <tr><td>Compliance console with audit log</td><td><span class="pill prog">In progress</span></td><td>In progress</td></tr>
-            <tr><td>stellar.toml (SEP-1) for dvdnd and its assets</td><td><span class="pill prog">In progress</span></td><td>In progress</td></tr>
+            <tr><td>stellar.toml (SEP-1) for dvdnd and its assets</td><td><span class="pill ok">Built, real</span></td><td>Generated from the chain at <a href="https://dvdnd.vercel.app/.well-known/stellar.toml">/.well-known/stellar.toml</a>; issuers point to it</td></tr>
             <tr><td>Contract and ZK circuit audit</td><td><span class="pill ext">Needs vendor or legal</span></td><td>Veridise, Certora, Runtime Verification, OtterSec, Halborn</td></tr>
             <tr><td>Multi-party trusted setup ceremony</td><td><span class="pill ext">Needs vendor or legal</span></td><td>Today: single-contributor development setup</td></tr>
             <tr class="status-group"><th colspan="3">Legal</th></tr>
@@ -762,5 +762,25 @@ html { scroll-behavior: smooth; }
     t.style.fill = s.c;
     t.style.fontWeight = "600";
   });
+})();
+</script>
+
+<script>
+// Build status: meter, legend and totals are counted from the checklist rows,
+// so updating a row's status pill is all an update needs.
+(function () {
+  var order = [["ok", "var(--accent)"], ["mid", "var(--warn)"], ["prog", "#4a6fa5"], ["todo", "var(--line)"], ["ext", "transparent"]];
+  var pills = document.querySelectorAll(".status-table td .pill");
+  var total = pills.length, counts = {}, labels = {};
+  pills.forEach(function (p) {
+    var k = order.map(function (o) { return o[0]; }).find(function (c) { return p.classList.contains(c); });
+    counts[k] = (counts[k] || 0) + 1; labels[k] = p.textContent;
+  });
+  var meter = document.querySelector("#status .meter"), legend = document.querySelector("#status .meter-legend"), upd = document.querySelector("#status .built-count");
+  if (!meter || !legend || !total) return;
+  meter.innerHTML = order.map(function (o) { return '<i style="width:' + ((counts[o[0]] || 0) / total * 100).toFixed(2) + '%;background:' + o[1] + '"></i>'; }).join("");
+  legend.innerHTML = order.filter(function (o) { return counts[o[0]]; }).map(function (o) { return '<span><span class="pill ' + o[0] + '">' + labels[o[0]] + '</span> <b>' + counts[o[0]] + '</b></span>'; }).join("");
+  meter.setAttribute("aria-label", order.map(function (o) { return (counts[o[0]] || 0) + " " + (labels[o[0]] || o[0]); }).join(", "));
+  if (upd) upd.textContent = (counts.ok || 0) + " of " + total + " built for real";
 })();
 </script>
