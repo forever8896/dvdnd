@@ -45,3 +45,18 @@ Ana locks 600 tokens and Ben 200, then the company pays an 80 USDC dividend: Ana
 - Company pays 80 USDC dividend: https://stellar.expert/explorer/testnet/tx/9a2840c92a70eb422b92c5067f4a151b584929c2ea6517a40eaca60098b1d25b
 - investor-cara claims dividend: https://stellar.expert/explorer/testnet/tx/f4f7d7eb88cec77795b25db970be39e36cd8fcdb47c2c6f803b9397b4ccf1fc3
 - investor-dan claims dividend: https://stellar.expert/explorer/testnet/tx/ed4a58490ee21c1705f7b064c2cadd35a5b4494e6f0880a4a77b627f5245a209
+
+## ANDES lifecycle (2026-10-25)
+
+## ANDES lifecycle (2026-10-25)
+- investor-eve invests 600 USDC: https://stellar.expert/explorer/testnet/tx/c6e5a0e5b1aa552f7a0f4a37227267d4edfdaabaae2e527a2100f2c231f465b4
+- investor-finn invests 400 USDC: https://stellar.expert/explorer/testnet/tx/f15492480feac7410feeed038fcfb3c7a4ee55acde03726eeb7dfe29165a2896
+- Raise finalized (company paid, 5% fee): https://stellar.expert/explorer/testnet/tx/5ae8041d0733ceb980156b38197a0f993385bd422052d32d8e5ca8d25b7eb850
+- investor-eve claims share tokens: https://stellar.expert/explorer/testnet/tx/3ef8298f34f1bb2fe3b7347819a3699efa150497e2007e0df7e6801219dc52d6
+- investor-finn claims share tokens: https://stellar.expert/explorer/testnet/tx/d8fb337baee06bd338755532e73fc651bacb99017bd6cbcf4e9a907808b04c6e
+- investor-eve locks all tokens: https://stellar.expert/explorer/testnet/tx/67d1310a2dd3a12fd9a2c39ecbd369941fa9dd36db8844ab2d1cbe0c4e219943
+- investor-finn locks half: https://stellar.expert/explorer/testnet/tx/64095f5e717af874cc9a125f8bc701fe913c004e2946460b729c00f73bda08b2
+- First dividend period starts: https://stellar.expert/explorer/testnet/tx/67de8b64f6ba5c0f0bde75dd8f91bdf3e4f8ea0a1ef641f538787f5fd1b427d0
+- Company pays 80 USDC dividend: https://stellar.expert/explorer/testnet/tx/a37f923524f8f1e614a00d843f5e4d45edc408f003f9f02cd5ff451640bdb7f0
+- investor-eve claims dividend: https://stellar.expert/explorer/testnet/tx/1be8fee535cef0b1d064177c3360b6d77ec1848d65c4af38389d3885c13b047b
+- investor-finn claims dividend: https://stellar.expert/explorer/testnet/tx/01d7b686d1bf1319305af86914c7abc2439775d3125595f62781f58f49b68ec7
