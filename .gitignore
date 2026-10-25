@@ -7,3 +7,5 @@ circuits/build/*.ptau
 deployments/credentials/
 contracts/contracts/*/test_snapshots/
 .vercel
+design/film/segs/
+design/film/qa/
