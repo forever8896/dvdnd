@@ -12,7 +12,7 @@ import {
   type Listing,
   type Profile,
 } from "./chain";
-import { CONTRACTS, NETWORK } from "./config";
+import { CONTRACTS, NETWORK, SITE_DOMAIN } from "./config";
 import {
   balances,
   classic,
@@ -90,7 +90,11 @@ export async function issueShareToken(code: string, progress: IssueProgress) {
 
   progress("Setting compliance flags");
   const flags = await classic(issuerSigner, [
-    Operation.setOptions({ setFlags: (AuthRequiredFlag | AuthRevocableFlag | AuthClawbackEnabledFlag) as 1 }),
+    Operation.setOptions({
+      setFlags: (AuthRequiredFlag | AuthRevocableFlag | AuthClawbackEnabledFlag) as 1,
+      // Wallets find the token's details in dvdnd's stellar.toml through this.
+      homeDomain: SITE_DOMAIN,
+    }),
   ]);
   progress("Compliance flags set", flags);
 

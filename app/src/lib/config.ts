@@ -9,6 +9,9 @@ export const NETWORK = {
   explorer: "https://stellar.expert/explorer/testnet",
 };
 
+/** Domain serving /.well-known/stellar.toml; set as each share-token issuer's home_domain. */
+export const SITE_DOMAIN = process.env.NEXT_PUBLIC_SITE_DOMAIN ?? "dvdnd.vercel.app";
+
 export const CONTRACTS = {
   registry: process.env.NEXT_PUBLIC_REGISTRY ?? "CDWUC63EYRCEVQISAN7MZNAAOMT76VW6PTSVIUXTX3PDPXWJBNWJFJXY",
   gate: process.env.NEXT_PUBLIC_GATE ?? "CBPU52XUHU4UQ3MUBOXITFNHQMOON3SDEWN2IVKPGRCZSQTRTCLGDB7N",

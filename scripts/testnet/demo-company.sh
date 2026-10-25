@@ -15,7 +15,7 @@ YEAR=31536000
 
 # 1. Share asset: holders must be authorized, can be frozen, can be clawed back.
 stellar tx new set-options --network "$NETWORK" --source-account "$ISSUER" \
-  --set-required --set-revocable --set-clawback-enabled >/dev/null
+  --set-required --set-revocable --set-clawback-enabled --home-domain "${SITE_DOMAIN:-dvdnd.vercel.app}" >/dev/null
 SHARE_SAC=$(asset_contract "$CODE:$(addr "$ISSUER")" "$ISSUER")
 echo "Share token $CODE SAC: $SHARE_SAC"
 
