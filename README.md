@@ -22,7 +22,7 @@ Real businesses, meanwhile, struggle to raise growth capital without giving up c
 1. **A company signs up.** It proves it owns the business (domain check, plus GLEIF when it has an LEI) and signs an agreement committing X% of yearly net profit to token holders. The agreement's hash is recorded on-chain.
 2. **The company opens a fixed-price raise** and pays a flat listing fee. It sets a price (for example 1.00 USDC per token, set from a target yield), a minimum, a maximum and a deadline, plus the raise's rules: exemption (Reg S, 506(c) or both), minimum investment, holder cap, lock-up date, and who holds the compliance role (the company or its transfer agent).
 3. **Eligible investors put USDC into escrow.**
-   - **Reg S:** identity checked once through idOS, then a zero-knowledge proof of non-US residence verified on-chain.
+   - **Reg S:** identity checked once through Didit (ID document and live selfie), then a zero-knowledge proof of non-US residence verified on-chain.
    - **506(c):** a signed accreditation statement on-chain (as a person or an entity), plus either a verifier's attestation or at least 200,000 USDC invested, 1,000,000 for an entity (the SEC staff's March 2025 route).
    - **Both:** proven non-US residents invest under Reg S, everyone else (including US residents) as accredited investors.
    - If the minimum is reached, the company receives everything raised and investors claim their tokens. If it isn't, everyone is refunded.
@@ -125,11 +125,11 @@ Open https://dvdnd.vercel.app, or run it locally:
 
 ```sh
 cd app
-cp .env.example .env.local   # then set DVDND_ADMIN_SECRET=$(stellar keys show admin) and the idOS keys
+cp .env.example .env.local   # then set DVDND_ADMIN_SECRET=$(stellar keys show admin) and the Didit keys
 pnpm install && pnpm dev                                           # http://localhost:3000
 ```
 
-1. **Investor (Reg S):** Sign in → I'm an investor → verify residence (idOS identity check with an EVM wallet such as MetaMask, or the testnet demo check; then a real Groth16 proof generated in the browser and verified on-chain) → Discover → open a raise → Invest (Add money swaps test XLM for Circle testnet USDC).
+1. **Investor (Reg S):** Sign in → I'm an investor → verify residence (Didit identity check with only the Stellar wallet; then a real Groth16 proof generated in the browser and verified on-chain) → Discover → open a raise → Invest (Add money swaps test XLM for Circle testnet USDC).
    **Investor (506(c)):** open the Harbor & Hearth raise → sign the accreditation statement → get verified by the testnet verifier → Invest.
 2. **Company:** Sign in → I'm raising for my company → register → verify ownership → sign the agreement → Set up raise (issues the share token with compliance flags and opens the raise).
 3. **Close and pay:** once a raise is full or past its deadline, anyone can close it → investors claim tokens in Portfolio and lock them → the company starts the first period and pays a dividend → investors claim USDC.

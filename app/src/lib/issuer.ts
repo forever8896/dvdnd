@@ -3,9 +3,8 @@
 // the browser sent, then adds it to the gate's on-chain Merkle tree with the
 // platform key. It never sees the secret, so it can't prove for the investor.
 //
-// For a real identity check it first records the identity on the platform
-// account (a data entry keyed by a hash of, e.g., the idOS user id or the ID
-// document), so one verified person gets one dvdnd credential.
+// It first records the identity on the platform account (a data entry keyed
+// by a hash of the ID document), so one verified person gets one credential.
 
 import "server-only";
 import { createHash } from "node:crypto";
@@ -57,7 +56,7 @@ export function countryCode(value: unknown): number {
 }
 
 /** An identity a credential is claimed for: the provider and its stable id for the person. */
-export type Claim = { source: "idos" | "didit"; id: string };
+export type Claim = { source: "didit"; id: string };
 
 const claimKey = (c: Claim) => `${c.source}:${createHash("sha256").update(c.id).digest("base64")}`;
 

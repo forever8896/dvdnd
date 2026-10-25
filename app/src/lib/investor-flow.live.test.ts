@@ -1,15 +1,17 @@
 // Investor flow against testnet and the running dev server: eligibility,
 // add money and invest.
-// Opt-in: LIVE=1 APP_URL=http://localhost:3100 pnpm vitest run investor-flow.live
+// Opt-in: LIVE=1 DVDND_ADMIN_SECRET=… pnpm vitest run investor-flow.live
+// Issues the credential the way the server does after an approved identity
+// check (the issuer is called directly, standing in for a Didit decision).
 import { describe, expect, it } from "vitest";
+import { issueCredential } from "./issuer";
 import { contribution, eligibleUntil, gate, offering, toUnits } from "./chain";
 import { balances, buyUsdc, friendbot, Keypair, keypairSigner } from "./stellar";
 import { credentialLeaf, fetchLeaves, proveResidence, randomSecret, secretCommitment } from "./zk";
 
-const APP_URL = process.env.APP_URL ?? "http://localhost:3100";
 const ARTIFACTS = { wasm: "public/zk/residence.wasm", zkey: "public/zk/residence_final.zkey" };
 
-describe.skipIf(!process.env.LIVE)("investor flow on testnet", () => {
+describe.skipIf(!process.env.LIVE || !process.env.DVDND_ADMIN_SECRET)("investor flow on testnet", () => {
   it("issues a credential, proves residence and registers on-chain", async () => {
     const kp = Keypair.random();
     await friendbot(kp.publicKey());
@@ -17,13 +19,7 @@ describe.skipIf(!process.env.LIVE)("investor flow on testnet", () => {
 
     // The issuer only gets Poseidon(secret) and builds the leaf from the country it accepted.
     const secret = randomSecret();
-    const res = await fetch(`${APP_URL}/api/kyc`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ commitment: (await secretCommitment(secret)).toString(), country: 620, fullName: "Test Investor" }),
-    });
-    const body = await res.json();
-    expect(res.status, JSON.stringify(body)).toBe(200);
+    const body = await issueCredential(620, await secretCommitment(secret));
     expect(body.country).toBe(620);
     const leaf = await credentialLeaf(620, body.expiry, secret);
     expect(body.leaf).toBe(leaf.toString());
@@ -46,11 +42,6 @@ describe.skipIf(!process.env.LIVE)("investor flow on testnet", () => {
   }, 180_000);
 
   it("refuses US residents at the issuer", async () => {
-    const res = await fetch(`${APP_URL}/api/kyc`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ commitment: "123", country: 840, fullName: "US Person" }),
-    });
-    expect(res.status).toBe(403);
+    await expect(issueCredential(840, 123n)).rejects.toMatchObject({ status: 403, us: true });
   });
 });

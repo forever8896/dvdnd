@@ -261,7 +261,7 @@ html { scroll-behavior: smooth; }
             <tr class="status-group"><th colspan="3">Investor eligibility</th></tr>
             <tr><td>ZK proof of non-US residence verified on-chain</td><td><span class="pill ok">Built, real</span></td><td>Groth16 on BN254, Poseidon Merkle tree kept on-chain</td></tr>
             <tr><td>One wallet per credential</td><td><span class="pill ok">Built, real</span></td><td>Pinned nullifier scope</td></tr>
-            <tr><td>Residence checked by a real KYC vendor</td><td><span class="pill ok">Built, real</span></td><td>Didit (ID document, liveness, face match) behind our issuer, Stellar wallet only; first real check passed on 25 Oct. Proof of address and AML need Didit's paid compliance workflow. idOS remains an alternative</td></tr>
+            <tr><td>Residence checked by a real KYC vendor</td><td><span class="pill ok">Built, real</span></td><td>Didit (ID document, liveness, face match) behind our issuer, Stellar wallet only; first real check passed on 25 Oct. Proof of address and AML ($0.40 a check) need Didit credits</td></tr>
             <tr><td>Issuer builds the credential from the verified country</td><td><span class="pill ok">Built, real</span></td><td>Circuit v2: the investor only sends Poseidon(secret); the issuer adds the leaf from the KYC result</td></tr>
             <tr><td>506(c) accreditation: signed statement plus $200k minimum ($1M for entities), or a verifier's attestation</td><td><span class="pill mid">Testnet stand-in</span></td><td>Contract rules are real; the verifier is a testnet stand-in</td></tr>
             <tr><td>Accreditation verification service</td><td><span class="pill ext">Needs vendor or legal</span></td><td>VerifyInvestor, Parallel Markets or similar</td></tr>
@@ -578,7 +578,7 @@ html { scroll-behavior: smooth; }
           <tbody>
             <tr><td>Company verification</td><td>Live Companies House / GLEIF lookup + DNS TXT / stellar.toml check; KYB simulated</td><td>Sumsub/Persona KYB with beneficial-owner checks, vLEI, audited financials</td></tr>
             <tr><td>Agreement</td><td>PDF hash + SEP-10-signed acceptance on-chain</td><td>Legal profit-participation contract (SPV), Reg S category analysis, EU crowdfunding licence</td></tr>
-            <tr><td>Eligibility</td><td>idOS KYC (testnet demo check as fallback), issuer builds the leaf from the verified country, real Groth16 residence circuit, nullifier, gate → <code>set_authorized</code></td><td>Real KYC vendor, document proofs plus residence, sanctions screening, re-proof on expiry</td></tr>
+            <tr><td>Eligibility</td><td>Didit KYC, issuer builds the leaf from the verified country, real Groth16 residence circuit, nullifier, gate → <code>set_authorized</code></td><td>Real KYC vendor, document proofs plus residence, sanctions screening, re-proof on expiry</td></tr>
             <tr><td>Raise</td><td>Escrow with min/max/deadline and a flat listing fee; per-raise exemption, lock-up and holder cap</td><td>Audit, Form D filings, accreditation service, cooling-off period</td></tr>
             <tr><td>Trading</td><td>SDEX offer + one path-payment trade; optional seeded pool</td><td>Aquarius/Soroswap via aggregator, market-maker programme</td></tr>
             <tr><td>Lock + dividends</td><td>Epoch vault; company deposit and investor withdrawal via test anchor SEP-24</td><td>Circle Mint treasury, MoneyGram + regional anchors, SDP, transfer-agent reconciliation</td></tr>

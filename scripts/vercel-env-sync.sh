@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Copies the named variables from app/.env.local to the Vercel project's
 # production and preview environments without printing their values.
-# Usage: scripts/vercel-env-sync.sh IDOS_RELAY_PRIVATE_KEY IDOS_CONSUMER_AUTH_KEY ...
+# Usage: scripts/vercel-env-sync.sh DIDIT_API_KEY DIDIT_WORKFLOW_ID ...
 set -euo pipefail
 cd "$(dirname "$0")/.."
 ENV_FILE=app/.env.local
