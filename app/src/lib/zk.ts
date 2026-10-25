@@ -122,6 +122,8 @@ export type Credential = {
   secret: string;
   leaf: string;
   index?: number;
+  /** The identity-check session it came from, deleted at the provider once the proof is on-chain. */
+  kycSession?: string;
 };
 
 export type SorobanProof = {

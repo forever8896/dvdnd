@@ -17,7 +17,9 @@ export async function POST(req: Request) {
     if (!body.sessionId || !UUID.test(body.sessionId)) throw new IssueError("Invalid Didit session.", 400);
     if (!body.address || !StrKey.isValidEd25519PublicKey(body.address)) throw new IssueError("Invalid Stellar address.", 400);
     const commitment = parseCommitment(body.commitment);
-    const residence = residenceFromDecision(await getDecision(body.sessionId), body.address);
+    const decision = await getDecision(body.sessionId);
+    if (!decision) throw new IssueError("This verification no longer exists. Start a new one.", 410);
+    const residence = residenceFromDecision(decision, body.address);
     const issued = await issueCredential(residence.country, commitment, { source: "didit", id: residence.documentId });
     return NextResponse.json({ ...issued, basis: residence.basis });
   } catch (e) {

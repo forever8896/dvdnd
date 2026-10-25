@@ -36,6 +36,7 @@ export default function Verify() {
   const [verifiedTx, setVerifiedTx] = useState<string>();
   const [proofMs, setProofMs] = useState<number | null>(null);
   const [usResident, setUsResident] = useState(false);
+  const [erased, setErased] = useState(false);
   // A built proof waiting for the wallet's signature (external wallets sign on a click).
   const [proof, setProof] = useState<SorobanProof | null>(null);
   // A credential this browser already holds but hasn't registered (e.g. the signature never happened).
@@ -60,15 +61,27 @@ export default function Verify() {
     setStep("form");
   }, []);
 
-  /** Has the gate contract check the proof and register this wallet. */
+  /**
+   * Has the gate contract check the proof and register this wallet, then asks
+   * the server to delete the identity-check session at Didit (it checks the
+   * registration on-chain first).
+   */
   const register = useCallback(
-    async (investor: Signer, p: SorobanProof) => {
+    async (investor: Signer, p: SorobanProof, kycSession?: string) => {
       setStep("verifying");
       const v = await gate.verifyAndRegister(investor, p);
       setVerifiedTx(v.hash);
       setProof(null);
       await refresh();
       setStep("done");
+      if (kycSession) {
+        const res = await fetch("/api/didit/erase", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sessionId: kycSession, address: investor.publicKey }),
+        }).catch(() => null);
+        if (res?.ok) setErased(true);
+      }
     },
     [refresh],
   );
@@ -90,7 +103,7 @@ export default function Verify() {
         setStep("sign");
         return;
       }
-      await register(investor, p);
+      await register(investor, p, cred.kycSession);
     },
     [register],
   );
@@ -121,7 +134,7 @@ export default function Verify() {
         if ((await leafFromCommitment(out.country, out.expiry, await secretCommitment(s))).toString() !== out.leaf) {
           throw new Error("The issued credential doesn't match this browser's secret.");
         }
-        const cred: Credential = { country: out.country, expiry: out.expiry, secret: s.toString(), leaf: out.leaf, index: out.index };
+        const cred: Credential = { country: out.country, expiry: out.expiry, secret: s.toString(), leaf: out.leaf, index: out.index, kycSession: sessionId };
         try {
           localStorage.setItem(credKey(investor.publicKey), JSON.stringify(cred));
         } catch {
@@ -186,7 +199,7 @@ export default function Verify() {
         await proveAndRegister(investor, stored);
         return;
       }
-      await register(investor, proof);
+      await register(investor, proof, stored?.kycSession);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
       setStep("sign");
@@ -324,6 +337,7 @@ export default function Verify() {
               Proof verified on-chain · <TxLink hash={verifiedTx} />
             </div>
           )}
+          {erased && <div className="small">Your identity check data was deleted at Didit. dvdnd keeps only your country.</div>}
           <Link href="/discover" className="btn btn-primary btn-wide" style={{ alignSelf: "flex-start" }}>
             Discover raises
           </Link>

@@ -60,8 +60,28 @@ export type Decision = {
   aml_screenings?: { status?: string }[] | null;
 };
 
-export async function getDecision(sessionId: string) {
-  return didit<Decision>(`/session/${encodeURIComponent(sessionId)}/decision/`);
+/** The session's decision, or null once the session has been deleted. */
+export async function getDecision(sessionId: string): Promise<Decision | null> {
+  try {
+    return await didit<Decision>(`/session/${encodeURIComponent(sessionId)}/decision/`);
+  } catch (e) {
+    if (e instanceof IssueError && /\b404\b|not found/i.test(e.message)) return null;
+    throw e;
+  }
+}
+
+/**
+ * Permanently deletes a session and everything Didit holds for it, including
+ * any retained face template (privacy erasure). Already deleted counts as done.
+ */
+export async function eraseSession(sessionId: string) {
+  const res = await fetch(`${API}/session/${encodeURIComponent(sessionId)}/delete/`, {
+    method: "DELETE",
+    headers: { "x-api-key": config().apiKey, "Content-Type": "application/json" },
+    body: JSON.stringify({ deletion_instruction: "privacy_erasure" }),
+    cache: "no-store",
+  });
+  if (!res.ok && res.status !== 404) throw new IssueError(`Didit couldn't delete the session (${res.status}).`, 502);
 }
 
 const approved = (s?: string | null) => (s ?? "").toLowerCase() === "approved";
