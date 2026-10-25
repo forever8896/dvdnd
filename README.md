@@ -4,6 +4,8 @@
 
 dvdnd is tokenized private equity on Stellar. Profitable small and mid-sized businesses raise USDC at a fixed price by selling a share of their future profits. Investors who lock their tokens for a full period receive that period's dividends in USDC, pro-rata. Investors prove they are not US residents with a zero-knowledge proof, and the Stellar protocol itself then limits holding the token to verified investors.
 
+**Live demo (Stellar testnet): https://dvdnd.vercel.app**
+
 Built for HackMeridian · Genesis track · Stellar Unlocked.
 
 ## The problem
@@ -104,6 +106,8 @@ scripts/testnet/demo-lifecycle.sh ANDES company-andes investor-ana 600 investor-
 ```
 
 ### Click through it in the app
+
+Open https://dvdnd.vercel.app, or run it locally:
 
 ```sh
 cd app
