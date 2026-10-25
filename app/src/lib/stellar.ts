@@ -72,9 +72,14 @@ export async function invoke(
   method: string,
   args: xdr.ScVal[] = [],
 ): Promise<TxResult> {
+  return sorobanOp(signer, new Contract(contractId).call(method, ...args));
+}
+
+/** Simulates, prepares, signs and submits one Soroban operation (invoke or deploy). */
+export async function sorobanOp(signer: Signer, op: xdr.Operation): Promise<TxResult> {
   const account = await server.getAccount(signer.publicKey);
   const tx = new TransactionBuilder(account, { fee: BASE_FEE, networkPassphrase: NETWORK.passphrase })
-    .addOperation(new Contract(contractId).call(method, ...args))
+    .addOperation(op)
     .setTimeout(60)
     .build();
   let prepared: Transaction;

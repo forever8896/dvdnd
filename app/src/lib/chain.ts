@@ -150,12 +150,14 @@ export async function listListings(): Promise<Listing[]> {
   const n = await raiseCount();
   const ids = Array.from({ length: n }, (_, i) => i + 1);
   const raises = await Promise.all(ids.map(getRaise));
-  return Promise.all(
+  const listings = await Promise.all(
     raises.map(async (raise) => {
       const company = await getCompany(raise.company_id);
       return { raise, company, profile: parseProfile(company) };
     }),
   );
+  // Suspended companies (e.g. test runs, or removed by the platform) are hidden.
+  return listings.filter((l) => l.company.status !== CompanyStatus.Suspended);
 }
 
 export async function getListing(raiseId: number): Promise<Listing> {
