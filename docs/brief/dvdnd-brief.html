@@ -259,7 +259,7 @@ html { scroll-behavior: smooth; }
             <tr class="status-group"><th colspan="3">Investor eligibility</th></tr>
             <tr><td>ZK proof of non-US residence verified on-chain</td><td><span class="pill ok">Built, real</span></td><td>Groth16 on BN254, Poseidon Merkle tree kept on-chain</td></tr>
             <tr><td>One wallet per credential</td><td><span class="pill ok">Built, real</span></td><td>Pinned nullifier scope</td></tr>
-            <tr><td>Residence checked by a real KYC vendor</td><td><span class="pill prog">In progress</span></td><td>idOS integrated: relay KYC, credential shared to dvdnd, issuer signature checked, verified residence builds the leaf. Waiting on the relay origin allow-list for a first real run (playground)</td></tr>
+            <tr><td>Residence checked by a real KYC vendor</td><td><span class="pill prog">In progress</span></td><td>idOS integrated: relay KYC (identity on an EVM wallet, since the relay is EVM-only; investing stays on Stellar), credential shared to dvdnd, issuer signature checked, verified residence builds the leaf. First real run pending (playground)</td></tr>
             <tr><td>Issuer-signed credentials</td><td><span class="pill todo">Not started</span></td><td>Closes the trust gap on the declared country</td></tr>
             <tr><td>Sanctions screening of investor addresses</td><td><span class="pill todo">Not started</span></td><td>OFAC's published crypto addresses</td></tr>
             <tr><td>Credential tree survives RPC event retention</td><td><span class="pill mid">Testnet stand-in</span></td><td>Events plus a bundled seed; needs an on-chain view or indexer</td></tr>
