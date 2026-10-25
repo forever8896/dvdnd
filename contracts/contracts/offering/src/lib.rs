@@ -18,8 +18,8 @@ use soroban_sdk::{
 };
 
 const DAY_IN_LEDGERS: u32 = 17_280;
-const TTL_THRESHOLD: u32 = 30 * DAY_IN_LEDGERS;
-const TTL_EXTEND_TO: u32 = 60 * DAY_IN_LEDGERS;
+const TTL_THRESHOLD: u32 = 7 * DAY_IN_LEDGERS;
+const TTL_EXTEND_TO: u32 = 14 * DAY_IN_LEDGERS;
 /// Share tokens and USDC both use 7 decimals; price is USDC units per whole token.
 const TOKEN_UNIT: i128 = 10_000_000;
 const BPS: i128 = 10_000;
