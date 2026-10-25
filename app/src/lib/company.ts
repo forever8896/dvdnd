@@ -53,19 +53,7 @@ export async function sha256(text: string): Promise<Uint8Array> {
   return new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text)));
 }
 
-/** The plain-language agreement the company signs; its SHA-256 goes on-chain. */
-export function agreementText(c: { name: string; payoutPct: number; periodLabel: string }) {
-  return [
-    `dvdnd profit-share agreement`,
-    `Company: ${c.name}`,
-    `1. The company commits ${c.payoutPct}% of its audited yearly net profit to holders of its dvdnd token.`,
-    `2. Dividends are paid in USDC on Stellar, ${c.periodLabel.toLowerCase()}, to tokens locked for the full period, pro-rata.`,
-    `3. The commitment lasts for as long as the business operates.`,
-    `4. If the business is sold, the obligation transfers to the buyer.`,
-    `5. Late payments are flagged publicly on the company's listing.`,
-    `6. The company holds no tokens and receives the full raise only if the minimum is reached. It pays dvdnd a flat listing fee per raise, never a share of what is raised.`,
-  ].join("\n");
-}
+export { agreementText } from "./agreement";
 
 export async function signAgreement(s: Signer, companyId: number, hash: Uint8Array, payoutBps: number, periodSecs: number) {
   return invoke(s, CONTRACTS.registry, "sign_agreement", [

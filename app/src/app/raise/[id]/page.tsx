@@ -27,6 +27,8 @@ import {
   targetYield,
   type Listing,
 } from "@/lib/chain";
+import { signedAgreement } from "@/lib/agreement";
+import { sha256 } from "@/lib/company";
 import { normalizeDomain } from "@/lib/dns";
 import { useAsync } from "@/lib/hooks";
 import { isEligible, useWallet } from "@/lib/wallet";
@@ -216,16 +218,43 @@ function Agreement({ l }: { l: Listing }) {
           ))}
         </div>
       </div>
-      <div style={{ background: "var(--surface)", padding: 16, display: "flex", flexDirection: "column", gap: 8 }}>
-        <div className="label">Signed agreement</div>
-        <div className="mono small" style={{ overflowWrap: "anywhere", color: "var(--text)" }}>
-          sha256
-          <br />
-          {hex(l.company.agreement_hash)}
-        </div>
-        <div className="small">The hash of the signed PDF is recorded on Stellar. Anyone can check the document hasn&apos;t changed.</div>
+      <SignedAgreement l={l} />
+    </div>
+  );
+}
+
+/** The exact text the company signed, rebuilt from its on-chain record and checked against the on-chain hash. */
+function SignedAgreement({ l }: { l: Listing }) {
+  const text = signedAgreement(l.company);
+  const onChain = hex(l.company.agreement_hash);
+  const { data: matches } = useAsync(async () => hex(await sha256(text)) === onChain, [text, onChain]);
+  return (
+    <div style={{ background: "var(--surface)", padding: 16, display: "flex", flexDirection: "column", gap: 10, minWidth: 0 }}>
+      <div className="label">Signed agreement</div>
+      {matches === undefined ? null : matches ? (
+        <span className="pill pill-green" style={{ alignSelf: "flex-start" }}>
+          <ShieldCheck size={11} />
+          Matches the hash on Stellar
+        </span>
+      ) : (
+        <span className="pill pill-red" style={{ alignSelf: "flex-start" }}>Doesn&apos;t match the hash on Stellar</span>
+      )}
+      <pre className="small" style={{ whiteSpace: "pre-wrap", margin: 0, font: "12px/1.5 var(--font-sans)", background: "var(--bg)", padding: 10 }}>
+        {text}
+      </pre>
+      <div className="mono small" style={{ overflowWrap: "anywhere", color: "var(--text)" }}>
+        sha256 {onChain}
+      </div>
+      <div className="small">
+        Your browser hashed this text and compared it with the hash the company signed on Stellar, so the terms can&apos;t
+        have changed since.
+      </div>
+      <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+        <a className="small" href={`data:text/plain;charset=utf-8,${encodeURIComponent(text)}`} download={`${l.company.name} - dvdnd agreement.txt`}>
+          Download text
+        </a>
         <a href={`${NETWORK.explorer}/contract/${CONTRACTS.registry}`} target="_blank" rel="noreferrer" className="small">
-          View registry on Stellar ↗
+          Registry on Stellar ↗
         </a>
       </div>
     </div>

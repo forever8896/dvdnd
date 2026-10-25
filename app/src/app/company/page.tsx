@@ -18,16 +18,12 @@ import {
   RaiseState,
   type Company,
 } from "@/lib/chain";
+import { PERIODS } from "@/lib/agreement";
 import { agreementText, findMyCompany, myListings, register, sha256, signAgreement } from "@/lib/company";
 import { IS_TESTNET } from "@/lib/config";
 import { useAsync } from "@/lib/hooks";
 import { useWallet } from "@/lib/wallet";
 
-const PERIODS = [
-  { label: "Annually", secs: 31_536_000 },
-  { label: "Semi-annually", secs: 15_768_000 },
-  { label: "Quarterly", secs: 7_884_000 },
-];
 
 export default function CompanyHome() {
   const { ready, signer } = useWallet();
