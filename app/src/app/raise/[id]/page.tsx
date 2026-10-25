@@ -118,6 +118,12 @@ function Header({ l }: { l: Listing }) {
               Ownership verified
             </span>
           )}
+          {l.company.kyb_hash && l.profile.lei && (
+            <a className="pill pill-green" href={`https://search.gleif.org/#/record/${l.profile.lei}`} target="_blank" rel="noreferrer" style={{ textDecoration: "none" }}>
+              <ShieldCheck size={11} />
+              LEI verified · GLEIF ↗
+            </a>
+          )}
           {l.company.kyb_hash && normalizeDomain(l.profile.website) && (
             <span className="pill pill-green">
               <ShieldCheck size={11} />

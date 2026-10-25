@@ -46,6 +46,8 @@ export type Profile = {
   city: string;
   description: string;
   website?: string;
+  /** Legal Entity Identifier, checked against GLEIF during verification. */
+  lei?: string;
   /** Last full year net profit in USD. */
   netProfit: number;
   code?: string;

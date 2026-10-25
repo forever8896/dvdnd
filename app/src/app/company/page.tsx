@@ -96,7 +96,7 @@ function TextField({ id, label, value, onChange, hint, mono }: { id: string; lab
 
 function DetailsStep({ onDone }: { onDone: () => Promise<void> }) {
   const { signer } = useWallet();
-  const [f, setF] = useState({ name: "", country: "233", sector: "", city: "", website: "", description: "", netProfit: "2000" });
+  const [f, setF] = useState({ name: "", country: "233", sector: "", city: "", website: "", lei: "", description: "", netProfit: "2000" });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const set = (k: keyof typeof f) => (v: string) => setF((x) => ({ ...x, [k]: v }));
@@ -111,6 +111,7 @@ function DetailsStep({ onDone }: { onDone: () => Promise<void> }) {
         city: f.city.trim(),
         description: f.description.trim(),
         website: f.website.trim() ? (f.website.startsWith("http") ? f.website.trim() : `https://${f.website.trim()}`) : undefined,
+        lei: f.lei.trim().toUpperCase() || undefined,
         netProfit: Number(f.netProfit) || 0,
       });
       await onDone();
@@ -140,6 +141,7 @@ function DetailsStep({ onDone }: { onDone: () => Promise<void> }) {
       <TextField id="sector" label="Sector" value={f.sector} onChange={set("sector")} />
       <TextField id="city" label="City" value={f.city} onChange={set("city")} />
       <TextField id="website" label="Website" value={f.website} onChange={set("website")} hint="You'll prove you control this domain with a DNS record." />
+      <TextField id="lei" label="LEI (optional)" value={f.lei} onChange={set("lei")} mono hint="Legal Entity Identifier. With one, we verify the company against the GLEIF registry." />
       <TextField id="netProfit" label="Last year's net profit (USD)" value={f.netProfit} onChange={set("netProfit")} mono hint="Testnet demo: use a figure at the scale of your test raise." />
       <label className="field" style={{ gridColumn: "1 / -1" }}>
         <span>About the business</span>
@@ -157,6 +159,14 @@ function DetailsStep({ onDone }: { onDone: () => Promise<void> }) {
     </form>
   );
 }
+
+type LeiStatus = {
+  lei: string | null;
+  ok?: boolean;
+  problems?: string[];
+  error?: string;
+  record?: { legalName: string; country: string; registeredAs: string | null; entityStatus: string; registrationStatus: string } | null;
+};
 
 type DnsStatus = {
   domain: string;
@@ -177,6 +187,9 @@ function VerifyStep({ company, onDone }: { company: Company; onDone: () => Promi
   const { data: initial } = useAsync(() => fetchDns(company.id), [company.id]);
   const status = dns ?? initial;
   const verified = status?.check?.verified === true;
+  const { data: leiStatus } = useAsync(async () => (await fetch(`/api/kyb/lei?companyId=${company.id}`, { cache: "no-store" })).json() as Promise<LeiStatus>, [company.id]);
+  const hasLei = !!leiStatus?.lei;
+  const leiOk = leiStatus?.ok === true;
 
   async function fetchDns(id: number): Promise<DnsStatus> {
     const res = await fetch(`/api/kyb/dns?companyId=${id}`, { cache: "no-store" });
@@ -276,16 +289,48 @@ function VerifyStep({ company, onDone }: { company: Company; onDone: () => Promi
       </section>
       <section style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <div className="label">2 · Company registry</div>
-        <p className="muted" style={{ fontSize: 13 }}>
-          We match you against the {countryName(company.country)} company registry. Testnet demo: this part is
-          simulated and your answers are recorded as evidence.
-        </p>
-        <TextField id="registryNumber" label="Registry number" value={registryNumber} onChange={setRegistryNumber} hint="As shown in the company registry" />
+        {!leiStatus ? (
+          <div className="skeleton" style={{ height: 80 }} />
+        ) : hasLei ? (
+          <div style={{ background: "var(--surface)", padding: 14, display: "flex", flexDirection: "column", gap: 6, fontSize: 13 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+              <span className="label">GLEIF record</span>
+              <a className="mono small" href={`https://search.gleif.org/#/record/${leiStatus.lei}`} target="_blank" rel="noreferrer">
+                {leiStatus.lei} ↗
+              </a>
+            </div>
+            {leiStatus.record ? (
+              <>
+                <div style={{ fontWeight: 600 }}>{leiStatus.record.legalName}</div>
+                <div className="small">
+                  {leiStatus.record.country} · registry no. {leiStatus.record.registeredAs ?? "—"} · {leiStatus.record.entityStatus.toLowerCase()} · LEI{" "}
+                  {leiStatus.record.registrationStatus.toLowerCase()}
+                </div>
+              </>
+            ) : null}
+            {leiOk ? (
+              <span className="pill pill-green" style={{ alignSelf: "flex-start" }}>
+                <ShieldCheck size={11} />
+                Matches your registration
+              </span>
+            ) : (
+              <span className="red small">{leiStatus.error ?? leiStatus.problems?.join(" ")}</span>
+            )}
+          </div>
+        ) : (
+          <>
+            <p className="muted" style={{ fontSize: 13 }}>
+              No LEI on file, so the registry details are self-declared and recorded as evidence. Register with an LEI to
+              have them checked against GLEIF.
+            </p>
+            <TextField id="registryNumber" label="Registry number" value={registryNumber} onChange={setRegistryNumber} hint="As shown in the company registry" />
+          </>
+        )}
         <TextField id="director" label="Your name, as listed director" value={director} onChange={setDirector} />
-        <button className="btn btn-primary btn-wide" style={{ alignSelf: "flex-start" }} disabled={busy || !verified || !registryNumber.trim() || !director.trim()}>
+        <button className="btn btn-primary btn-wide" style={{ alignSelf: "flex-start" }} disabled={busy || !verified || !director.trim() || (hasLei ? !leiOk : !registryNumber.trim())}>
           {busy ? "Verifying…" : "Verify ownership"}
         </button>
-        {!verified && <span className="small">Available once the DNS record is found.</span>}
+        {!verified && <span className="small">Available once the DNS record is found{hasLei && !leiOk ? " and the LEI matches" : ""}.</span>}
         {error && <Toast kind="error" title="Verification failed">{error}</Toast>}
       </section>
     </form>
