@@ -89,8 +89,8 @@ export function Clip({ name, caption, ratio = "1280 / 800" }: { name: string; ca
       <div className="clip-frame" style={{ aspectRatio: ratio }}>
         <video
           ref={ref}
-          src={near && !still ? `/docs/${name}.mp4` : undefined}
-          poster={`/docs/${name}.jpg`}
+          src={near && !still ? `/clips/${name}.mp4` : undefined}
+          poster={`/clips/${name}.jpg`}
           muted
           loop
           playsInline
@@ -111,7 +111,7 @@ export function Shot({ name, caption, ratio = "1280 / 800" }: { name: string; ca
     <figure className="clip">
       <div className="clip-frame" style={{ aspectRatio: ratio }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={`/docs/${name}.jpg`} alt={typeof caption === "string" ? caption : ""} loading="lazy" />
+        <img src={`/clips/${name}.jpg`} alt={typeof caption === "string" ? caption : ""} loading="lazy" />
       </div>
       <figcaption className="small">{caption}</figcaption>
     </figure>
