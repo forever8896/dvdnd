@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     if (!body.userId || !UUID.test(body.userId)) throw new IssueError("Invalid idOS user.", 400);
     const commitment = parseCommitment(body.commitment);
     const residence = await verifiedResidence(body.userId);
-    const issued = await issueCredential(residence.country, commitment, body.userId);
+    const issued = await issueCredential(residence.country, commitment, { source: "idos", id: body.userId });
     return NextResponse.json({ ...issued, basis: residence.basis });
   } catch (e) {
     if (e instanceof IssueError) return NextResponse.json({ error: e.message, ineligible: e.ineligible, us: e.us }, { status: e.status });

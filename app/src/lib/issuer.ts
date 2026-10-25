@@ -3,9 +3,9 @@
 // the browser sent, then adds it to the gate's on-chain Merkle tree with the
 // platform key. It never sees the secret, so it can't prove for the investor.
 //
-// For idOS credentials it first records the idOS identity on the platform
-// account (a data entry keyed by a hash of the idOS user id), so one verified
-// person gets one dvdnd credential.
+// For a real identity check it first records the identity on the platform
+// account (a data entry keyed by a hash of, e.g., the idOS user id or the ID
+// document), so one verified person gets one dvdnd credential.
 
 import "server-only";
 import { createHash } from "node:crypto";
@@ -56,10 +56,13 @@ export function countryCode(value: unknown): number {
   return n;
 }
 
-const claimKey = (idosUserId: string) => `idos:${createHash("sha256").update(idosUserId).digest("base64")}`;
+/** An identity a credential is claimed for: the provider and its stable id for the person. */
+export type Claim = { source: "idos" | "didit"; id: string };
 
-/** Adds the investor's credential leaf on-chain. `idosUserId` makes it one per idOS identity. */
-export async function issueCredential(country: number, commitment: bigint, idosUserId?: string): Promise<Issued> {
+const claimKey = (c: Claim) => `${c.source}:${createHash("sha256").update(c.id).digest("base64")}`;
+
+/** Adds the investor's credential leaf on-chain. A `claim` makes it one per verified identity. */
+export async function issueCredential(country: number, commitment: bigint, claim?: Claim): Promise<Issued> {
   if (country === 840) {
     throw new IssueError("US residents can't hold a Reg S credential; invest as an accredited investor instead.", 403, true, true);
   }
@@ -67,10 +70,10 @@ export async function issueCredential(country: number, commitment: bigint, idosU
     throw new IssueError("dvdnd isn't available to residents of this country.", 403, true);
   }
   const issuer = platform();
-  const key = idosUserId ? claimKey(idosUserId) : null;
+  const key = claim ? claimKey(claim) : null;
   if (key) {
     const account = await horizon.loadAccount(issuer.publicKey);
-    if (account.data_attr[key]) throw new IssueError("This idOS identity already has a dvdnd credential.", 409);
+    if (account.data_attr[key]) throw new IssueError("This identity already has a dvdnd credential.", 409);
     await classic(issuer, [Operation.manageData({ name: key, value: String(Math.floor(Date.now() / 1000)) })]);
   }
   const expiry = Math.floor(Date.now() / 1000) + CREDENTIAL_LIFETIME;

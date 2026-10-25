@@ -6,13 +6,21 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ShieldCheck } from "@/components/icons";
 import { EligibilityPill, Toast, TxLink } from "@/components/ui";
 import { COUNTRY_OPTIONS, countryName, gate } from "@/lib/chain";
-import { IDOS_ENABLED, IS_TESTNET } from "@/lib/config";
+import { DIDIT_ENABLED, IDOS_ENABLED, IS_TESTNET } from "@/lib/config";
 import { connectEthereum, ENCLAVE_CONTAINER, hasEthereumWallet, hasProfile, logIn, shareKycCredential, type EvmWallet } from "@/lib/idos-client";
 import type { Signer } from "@/lib/stellar";
 import { isEligible, useWallet } from "@/lib/wallet";
 import { fetchLeaves, leafFromCommitment, proveResidence, randomSecret, secretCommitment, type Credential } from "@/lib/zk";
 
-type Method = "idos" | "demo";
+type Method = "didit" | "idos" | "demo";
+
+/** Identity checks offered here, best first. */
+const METHODS: { key: Method; label: string; on: boolean }[] = [
+  { key: "didit", label: "Didit", on: DIDIT_ENABLED },
+  { key: "idos", label: "idOS", on: IDOS_ENABLED },
+  { key: "demo", label: "Testnet demo check", on: IS_TESTNET },
+];
+const AVAILABLE = METHODS.filter((m) => m.on);
 type Step = "form" | "kyc" | "sharing" | "issuing" | "proving" | "verifying" | "done" | "ineligible";
 
 const STEPS: { key: Step; label: string }[] = [
@@ -31,7 +39,8 @@ export default function Verify() {
   const router = useRouter();
   const { ready, signer, eligibleUntil, refresh } = useWallet();
   const investor = signer.investor;
-  const [method, setMethod] = useState<Method>(IDOS_ENABLED ? "idos" : "demo");
+  const [method, setMethod] = useState<Method>(AVAILABLE[0]?.key ?? "demo");
+  const diditReturn = useRef(false);
   const [step, setStep] = useState<Step>("form");
   const [fullName, setFullName] = useState("");
   const [country, setCountry] = useState(620);
@@ -140,6 +149,42 @@ export default function Verify() {
     return () => clearInterval(t);
   }, [step, kycLink, continueWithIdos]);
 
+  /** Back from Didit's hosted check: read the decision on the server, then issue and prove. */
+  const continueWithDidit = useCallback(
+    async (sessionId: string) => {
+      if (!investor) return;
+      setError(null);
+      try {
+        await issueAndProve(investor, (commitment) =>
+          fetch("/api/didit/credential", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sessionId, address: investor.publicKey, commitment: commitment.toString() }),
+          }),
+        );
+      } catch (e) {
+        fail(e);
+      }
+    },
+    [investor, issueAndProve, fail],
+  );
+
+  // Didit sends the investor back here with ?provider=didit&verificationSessionId=…
+  useEffect(() => {
+    if (!investor || diditReturn.current) return;
+    const q = new URLSearchParams(window.location.search);
+    const sessionId = q.get("verificationSessionId");
+    if (q.get("provider") !== "didit" || !sessionId) return;
+    diditReturn.current = true;
+    setMethod("didit");
+    router.replace("/verify");
+    if (/declined/i.test(q.get("status") ?? "")) {
+      fail(new Error("Didit didn't approve the verification. You can try again."));
+      return;
+    }
+    void continueWithDidit(sessionId);
+  }, [investor, router, continueWithDidit, fail]);
+
   if (!investor) return null;
   const alreadyEligible = isEligible(eligibleUntil) && step === "form";
 
@@ -154,6 +199,24 @@ export default function Verify() {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
       setConnecting(false);
+    }
+  }
+
+  async function startDidit() {
+    if (!investor) return;
+    setError(null);
+    setStep("kyc");
+    try {
+      const res = await fetch("/api/didit/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ address: investor.publicKey }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error ?? "Couldn't start the Didit check.");
+      window.location.href = body.url;
+    } catch (e) {
+      fail(e);
     }
   }
 
@@ -255,18 +318,32 @@ export default function Verify() {
 
       {step === "form" && !alreadyEligible && (
         <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 560 }}>
-          {IDOS_ENABLED && IS_TESTNET && (
+          {AVAILABLE.length > 1 && (
             <div className="seg" role="group" aria-label="Identity check" style={{ alignSelf: "flex-start" }}>
-              <button aria-pressed={method === "idos"} onClick={() => setMethod("idos")}>
-                idOS identity check
-              </button>
-              <button aria-pressed={method === "demo"} onClick={() => setMethod("demo")}>
-                Testnet demo check
-              </button>
+              {AVAILABLE.map((m) => (
+                <button key={m.key} aria-pressed={method === m.key} onClick={() => setMethod(m.key)}>
+                  {m.label}
+                </button>
+              ))}
             </div>
           )}
 
-          {method === "idos" ? (
+          {method === "didit" ? (
+            <>
+              <p style={{ margin: 0 }}>
+                <a href="https://didit.me" target="_blank" rel="noreferrer">Didit</a> checks your ID document, a liveness
+                selfie and a proof of address (a recent utility bill or bank statement), and screens against sanctions
+                lists. It takes a few minutes on your phone or computer. dvdnd only reads your verified country of
+                residence from the result.
+              </p>
+              <p className="small" style={{ margin: 0 }}>
+                Only your Stellar wallet ({investor.label}) is involved; nothing to sign until the proof is registered.
+              </p>
+              <button className="btn btn-primary btn-wide" style={{ alignSelf: "flex-start" }} onClick={startDidit}>
+                Verify with Didit
+              </button>
+            </>
+          ) : method === "idos" ? (
             <>
               <p style={{ margin: 0 }}>
                 <a href="https://www.idos.network" target="_blank" rel="noreferrer">idOS</a> checks your ID document, a
@@ -374,7 +451,7 @@ export default function Verify() {
               </div>
             </>
           ) : (
-            <Toast kind="pending" title="Looking for your idOS profile" />
+            <Toast kind="pending" title={method === "didit" ? "Opening Didit" : "Looking for your idOS profile"} />
           )}
         </div>
       )}
@@ -391,10 +468,10 @@ export default function Verify() {
           )}
           {issued && (
             <Toast kind="ok" title={`Credential issued for ${countryName(issued.country)}`}>
-              {issued.basis && <>Verified by idOS from your {issued.basis} · </>}Added to the on-chain Merkle tree · <TxLink hash={issued.hash} />
+              {issued.basis && <>Verified by {method === "didit" ? "Didit" : "idOS"} from your {issued.basis} · </>}Added to the on-chain Merkle tree · <TxLink hash={issued.hash} />
             </Toast>
           )}
-          {step === "issuing" && <Toast kind="pending" title={method === "idos" ? "Reading your verified residence and issuing your credential" : "Checking residence and issuing your credential"} />}
+          {step === "issuing" && <Toast kind="pending" title={method === "demo" ? "Checking residence and issuing your credential" : "Reading your verified residence and issuing your credential"} />}
           {step === "proving" && (
             <Toast kind="pending" title="Generating your private proof">
               Your browser proves your country isn&apos;t the US, without revealing which country it is. About 5–15 seconds.

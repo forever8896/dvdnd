@@ -99,3 +99,6 @@ export const IDOS = {
 export const IDOS_ENABLED = Boolean(
   IDOS.nodeUrl && IDOS.relayUrl && IDOS.acceptedIssuerPublicKey && IDOS.consumerAuthPublicKey && IDOS.consumerEncryptionPublicKey,
 );
+
+/** Didit runs the identity check (ID, liveness, proof of address, AML) behind our own issuer. */
+export const DIDIT_ENABLED = process.env.NEXT_PUBLIC_DIDIT_ENABLED === "1";
