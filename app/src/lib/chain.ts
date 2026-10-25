@@ -1,6 +1,7 @@
 // Typed reads and writes for the dvdnd contracts.
 
 import { Address, nativeToScVal, xdr } from "@stellar/stellar-sdk";
+import { Buffer } from "buffer";
 import { CONTRACTS, UNIT } from "./config";
 import { invoke, read, type Signer } from "./stellar";
 
@@ -176,6 +177,26 @@ export const offering = {
 };
 
 // ── gate ──────────────────────────────────────────────────────────────
+export const gate = {
+  verifyAndRegister: (
+    s: Signer,
+    p: { proof: { a: Uint8Array; b: Uint8Array; c: Uint8Array }; root: bigint; now: number; nullifier: bigint; scope: bigint },
+  ) =>
+    invoke(s, CONTRACTS.gate, "verify_and_register", [
+      sc.address(s.publicKey),
+      // Struct fields are encoded as a map with keys in sorted order.
+      xdr.ScVal.scvMap(
+        (["a", "b", "c"] as const).map(
+          (k) => new xdr.ScMapEntry({ key: xdr.ScVal.scvSymbol(k), val: sc.bytes(p.proof[k]) }),
+        ),
+      ),
+      sc.u256(p.root),
+      sc.u64(p.now),
+      sc.u256(p.nullifier),
+      sc.u256(p.scope),
+    ]),
+};
+
 export async function eligibleUntil(investor: string): Promise<number> {
   return Number(await read(CONTRACTS.gate, "eligible_until", [sc.address(investor)]));
 }
