@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/modernist-53e8dd47-557b-44e1-b9e8-4d235568fd23/styles.css">
+<script src="_ds/modernist-53e8dd47-557b-44e1-b9e8-4d235568fd23/_ds_bundle.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root,[data-theme=light]{--bg:#f3f2f2;--surface:#eae9e9;--surface2:#dedcdc;--text:#201e1d;--muted:#605d5d;--faint:#9b9797;--line:rgba(32,30,29,.4);--hair:rgba(32,30,29,.14);--accent:oklch(0.46 0.1 250);--accent-ink:#f3f2f2;--accent-soft:oklch(0.93 0.025 250);--accent-text:oklch(0.4 0.1 250);--green:oklch(0.5 0.13 150);--green-soft:oklch(0.93 0.05 150);--amber:oklch(0.6 0.13 70);--amber-soft:oklch(0.94 0.06 80);--red:#ec3013;--red-soft:#ffe0d9;--canvas:#d9d7d6}
+[data-theme=dark]{--bg:#161514;--surface:#211f1e;--surface2:#2c2a29;--text:#f3f2f2;--muted:#b3afae;--faint:#7d7979;--line:rgba(243,242,242,.35);--hair:rgba(243,242,242,.12);--accent:oklch(0.74 0.1 250);--accent-ink:#161514;--accent-soft:oklch(0.3 0.04 250);--accent-text:oklch(0.8 0.09 250);--green:oklch(0.76 0.13 150);--green-soft:oklch(0.3 0.05 150);--amber:oklch(0.8 0.13 75);--amber-soft:oklch(0.32 0.05 75);--red:#ff6a52;--red-soft:#4d170e;--canvas:#0b0b0a}
+body{margin:0;background:var(--canvas);color:var(--text);font-family:Archivo,system-ui,sans-serif;font-size:14px;line-height:1.5;font-variant-numeric:tabular-nums}
+a{color:var(--accent-text)}a:hover{color:var(--accent)}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</helmet>
+<div style="padding:40px 44px;display:flex;flex-direction:column;gap:48px;font-family:Archivo,system-ui,sans-serif;align-items:flex-start">
+
+<div style="max-width:720px;display:flex;flex-direction:column;gap:8px">
+  <div style="font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">dvdnd · 03 Investor app · desktop 1440</div>
+  <h1 style="margin:0;font:800 34px/1.1 Archivo;letter-spacing:-.02em">Investor screens</h1>
+  <p style="margin:0;color:var(--muted)">Top nav (Modernist header). Eligibility and balance always visible top right. Use the Theme tweak to switch light / dark; the Trade mode tweak toggles the advanced order book.</p>
+</div>
+
+<!-- 05 DISCOVER -->
+<div data-screen-label="05 Discover" style="width:1440px;background:var(--bg);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.2)">
+  <div style="display:flex;align-items:center;gap:32px;padding:0 32px;height:56px;border-bottom:2px solid var(--line)">
+    <div style="font:800 17px Archivo">dvdnd</div>
+    <div style="display:flex;gap:24px;font:14px Archivo;height:56px;align-items:stretch"><span style="color:var(--accent-text);font-weight:600;border-bottom:2px solid var(--accent);display:flex;align-items:center;margin-bottom:-2px">Discover</span><span style="display:flex;align-items:center">Portfolio</span><span style="display:flex;align-items:center">Wallet</span><span style="display:flex;align-items:center">Simulation</span></div>
+    <div style="margin-left:auto;display:flex;gap:16px;align-items:center">
+      <span style="font:600 11px/1 Archivo;letter-spacing:.04em;padding:5px 9px;background:var(--green-soft);color:var(--green);display:inline-flex;gap:6px;align-items:center"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg>Verified</span>
+      <span style="font:500 13px 'JetBrains Mono',monospace">1,240.00 <span style="color:var(--muted)">USDC</span></span>
+      <span style="width:32px;height:32px;background:var(--text);color:var(--bg);display:inline-flex;align-items:center;justify-content:center;font:800 12px Archivo">AM</span>
+    </div>
+  </div>
+  <div style="padding:32px 32px 48px;display:flex;flex-direction:column;gap:24px">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px">
+      <div><h1 style="margin:0;font:800 32px/1.1 Archivo;letter-spacing:-.02em">Discover</h1><p style="margin:6px 0 0;color:var(--muted)">Profitable businesses raising against a share of future profit. 1.00 USDC per token, all-or-nothing.</p></div>
+      <div style="display:inline-flex;border:1px solid var(--line)"><span style="padding:8px 16px;font:600 13px Archivo;background:var(--text);color:var(--bg)">Raises · 4</span><span style="padding:8px 16px;font:13px Archivo;border-left:1px solid var(--line)">Trading · 1</span></div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-top:2px solid var(--line);border-bottom:1px solid var(--hair);padding:12px 0">
+      <span style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-right:8px">Filter</span>
+      <span style="font:13px Archivo;padding:6px 10px;border:1px solid var(--line);display:inline-flex;gap:6px;align-items:center;white-space:nowrap">Status · <b style="font-weight:600">Open, Funded</b> ▾</span>
+      <span style="font:13px Archivo;padding:6px 10px;border:1px solid var(--hair);display:inline-flex;gap:6px;align-items:center;white-space:nowrap">Sector · All ▾</span>
+      <span style="font:13px Archivo;padding:6px 10px;border:1px solid var(--hair);display:inline-flex;gap:6px;align-items:center;white-space:nowrap">Country · All ▾</span>
+      <span style="font:13px Archivo;padding:6px 10px;border:1px solid var(--line);display:inline-flex;gap:6px;align-items:center;white-space:nowrap">Yield · <b style="font-weight:600;font-family:'JetBrains Mono',monospace">15–22%</b> ▾</span>
+      <span style="margin-left:auto;font:13px Archivo;color:var(--muted)">Sort · <b style="color:var(--text);font-weight:600">Closing soonest</b> ▾</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:2px;background:var(--hair)">
+      <sc-for list="{{ raises }}" as="c" hint-placeholder-count="4">
+        <div style="background:var(--bg);padding:24px;display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;gap:14px;align-items:flex-start">
+            <div style="width:48px;height:48px;background:var(--text);color:var(--bg);display:flex;align-items:center;justify-content:center;font:800 15px Archivo;flex:none">{{ c.initials }}</div>
+            <div style="flex:1;min-width:0"><div style="font:800 18px/1.2 Archivo">{{ c.name }}</div><div style="font:12px Archivo;color:var(--muted);margin-top:3px;display:flex;gap:8px;align-items:center"><span style="font:500 10px 'JetBrains Mono',monospace;border:1px solid var(--line);padding:1px 4px">{{ c.cc }}</span>{{ c.country }} · {{ c.sector }} · {{ c.sub }}</div></div>
+            <span style="font:600 11px/1 Archivo;letter-spacing:.04em;padding:5px 9px;background:{{ c.pillBg }};color:{{ c.pillFg }};display:inline-flex;gap:6px;align-items:center;white-space:nowrap"><i style="width:6px;height:6px;background:currentColor;display:inline-block"></i>{{ c.status }}</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+            <div><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Target yield</div><div style="font:500 22px/1.2 'JetBrains Mono',monospace;margin-top:4px">{{ c.yield }}</div></div>
+            <div><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Profit committed</div><div style="font:500 22px/1.2 'JetBrains Mono',monospace;margin-top:4px">{{ c.committed }}</div></div>
+            <div><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Days left</div><div style="font:500 22px/1.2 'JetBrains Mono',monospace;margin-top:4px">{{ c.days }}</div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="position:relative;height:8px;background:var(--surface2)"><div style="position:absolute;inset:0 auto 0 0;width:{{ c.pct }};background:{{ c.barColor }}"></div><div style="position:absolute;top:-4px;bottom:-4px;left:{{ c.minPct }};width:2px;background:var(--text)"></div></div>
+            <div style="display:flex;justify-content:space-between;font:12px 'JetBrains Mono',monospace;color:var(--muted)"><span><b style="color:var(--text);font-weight:500">{{ c.raised }}</b> raised · {{ c.investors }} investors</span><span>min {{ c.min }}</span><span>max {{ c.max }}</span></div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;border-top:2px solid var(--line);padding-top:16px">
+      <div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Trading tab · secondary market</div>
+      <div style="display:grid;grid-template-columns:48px 1.6fr 1fr 1fr 1fr 1fr 1fr auto;gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid var(--hair)">
+        <div style="width:48px;height:48px;background:var(--text);color:var(--bg);display:flex;align-items:center;justify-content:center;font:800 15px Archivo">AC</div>
+        <div><div style="font:800 16px Archivo">Andes Craft Brewing</div><div style="font:12px Archivo;color:var(--muted)">Chile · Beverages</div></div>
+        <div><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Last price</div><div style="font:500 18px 'JetBrains Mono',monospace">1.08 <span style="font-size:11px;color:var(--muted)">USDC</span></div></div>
+        <div><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Implied yield</div><div style="font:500 18px 'JetBrains Mono',monospace;color:var(--green)">16.6%</div></div>
+        <div><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Dividends paid</div><div style="font:500 18px 'JetBrains Mono',monospace">2 <span style="font-size:11px;color:var(--muted)">0.088 · 0.091</span></div></div>
+        <div><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">24h volume</div><div style="font:500 18px 'JetBrains Mono',monospace">14,210</div></div>
+        <div><span style="font:600 11px/1 Archivo;letter-spacing:.04em;padding:5px 9px;background:var(--surface2);color:var(--text);display:inline-flex;gap:6px;align-items:center"><i style="width:6px;height:6px;background:currentColor;display:inline-block"></i>Trading</span></div>
+        <button style="font:800 13px Archivo;background:transparent;color:var(--text);border:1px solid var(--line);padding:9px 14px;cursor:pointer">Trade</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 06 COMPANY DETAIL -->
+<div data-screen-label="06 Company detail" style="width:1440px;background:var(--bg);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.2)">
+  <div style="display:flex;align-items:center;gap:32px;padding:0 32px;height:56px;border-bottom:2px solid var(--line)">
+    <div style="font:800 17px Archivo">dvdnd</div>
+    <div style="display:flex;gap:24px;font:14px Archivo;height:56px;align-items:stretch"><span style="color:var(--accent-text);font-weight:600;border-bottom:2px solid var(--accent);display:flex;align-items:center;margin-bottom:-2px">Discover</span><span style="display:flex;align-items:center">Portfolio</span><span style="display:flex;align-items:center">Wallet</span><span style="display:flex;align-items:center">Simulation</span></div>
+    <div style="margin-left:auto;display:flex;gap:16px;align-items:center"><span style="font:600 11px/1 Archivo;letter-spacing:.04em;padding:5px 9px;background:var(--green-soft);color:var(--green)">Verified</span><span style="font:500 13px 'JetBrains Mono',monospace">1,240.00 <span style="color:var(--muted)">USDC</span></span><span style="width:32px;height:32px;background:var(--text);color:var(--bg);display:inline-flex;align-items:center;justify-content:center;font:800 12px Archivo">AM</span></div>
+  </div>
+  <div style="padding:24px 32px 56px;display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:40px;align-items:start">
+    <div style="display:flex;flex-direction:column;gap:28px;min-width:0">
+      <div style="font:12px Archivo;color:var(--muted)">Discover / Harbor &amp; Hearth Bakeries</div>
+      <div style="display:flex;gap:20px;align-items:flex-start">
+        <div style="width:72px;height:72px;background:var(--text);color:var(--bg);display:flex;align-items:center;justify-content:center;font:800 22px Archivo;flex:none">HH</div>
+        <div style="flex:1">
+          <div style="display:flex;gap:12px;align-items:center"><h1 style="margin:0;font:800 32px/1.1 Archivo;letter-spacing:-.02em">Harbor &amp; Hearth Bakeries</h1><span style="font:600 11px/1 Archivo;letter-spacing:.04em;padding:5px 9px;background:var(--accent-soft);color:var(--accent-text);display:inline-flex;gap:6px;align-items:center"><i style="width:6px;height:6px;background:currentColor;display:inline-block"></i>Open</span></div>
+          <div style="font:13px Archivo;color:var(--muted);margin-top:6px;display:flex;gap:14px;flex-wrap:wrap"><span style="white-space:nowrap"><span style="font:500 10px 'JetBrains Mono',monospace;border:1px solid var(--line);padding:1px 4px;margin-right:6px">PT</span>Porto, Portugal</span><span>Food · 4 shops · founded 2011</span><a href="#">harborhearth.pt ↗</a><a href="#">Instagram ↗</a><a href="#">LinkedIn ↗</a></div>
+          <div style="display:flex;gap:16px;margin-top:14px;font:12px Archivo;flex-wrap:wrap;align-items:center">
+            <span style="display:inline-flex;gap:6px;align-items:center;color:var(--green)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"></path></svg>Registry verified · PT 509 112 334</span>
+            <span style="display:inline-flex;gap:6px;align-items:center;color:var(--green)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"></path></svg>Domain verified</span>
+            <span style="display:inline-flex;gap:6px;align-items:center;color:var(--green)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"></path></svg>Agreement signed</span>
+            <span style="font:11px 'JetBrains Mono',monospace;background:var(--surface);padding:3px 6px;color:var(--muted)">sha256 7f3a9c…e21e</span>
+          </div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:2px;background:var(--hair);border-top:2px solid var(--line)">
+        <div style="background:var(--bg);padding:14px 14px 14px 0"><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Net profit / yr</div><div style="font:500 22px/1.2 'JetBrains Mono',monospace;margin-top:6px">$210k</div></div>
+        <div style="background:var(--bg);padding:14px"><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Committed</div><div style="font:500 22px/1.2 'JetBrains Mono',monospace;margin-top:6px">50%</div></div>
+        <div style="background:var(--bg);padding:14px"><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Dividends / yr</div><div style="font:500 22px/1.2 'JetBrains Mono',monospace;margin-top:6px">$105k</div></div>
+        <div style="background:var(--bg);padding:14px"><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Target yield</div><div style="font:500 22px/1.2 'JetBrains Mono',monospace;margin-top:6px;color:var(--green)">18.0%</div></div>
+        <div style="background:var(--bg);padding:14px"><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Price / token</div><div style="font:500 22px/1.2 'JetBrains Mono',monospace;margin-top:6px">1.00</div></div>
+        <div style="background:var(--bg);padding:14px"><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Schedule</div><div style="font:600 15px/1.2 Archivo;margin-top:9px">Quarterly</div></div>
+      </div>
+      <div style="display:flex;gap:0;border-bottom:2px solid var(--line)">
+        <sc-for list="{{ detailTabs }}" as="t" hint-placeholder-count="5"><button onClick="{{ t.onClick }}" style="font:600 14px Archivo;background:transparent;border:0;border-bottom:2px solid {{ t.border }};color:{{ t.color }};padding:10px 16px 10px 0;margin:0 20px -2px 0;cursor:pointer">{{ t.label }}</button></sc-for>
+      </div>
+      <sc-if value="{{ tabOverview }}" hint-placeholder-val="{{ true }}">
+      <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:32px">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <h2 style="margin:0;font:800 22px/1.15 Archivo;letter-spacing:-.015em">Four neighbourhood bakeries, profitable since 2014</h2>
+          <p style="margin:0">Harbor &amp; Hearth runs four sourdough bakeries across Porto and Matosinhos. Each shop was profitable within 14 months of opening. The raise funds a central production kitchen that cuts ingredient and labour cost per loaf by roughly a fifth, and a fifth shop in Gaia planned for 2027.</p>
+          <p style="margin:0">The company commits 50% of audited yearly net profit to token holders for as long as the business operates. Dividends are paid quarterly in USDC.</p>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:8px">
+            <div style="aspect-ratio:4/3;background:repeating-linear-gradient(135deg,var(--surface) 0 8px,var(--surface2) 8px 9px);display:flex;align-items:flex-end;padding:8px;font:11px 'JetBrains Mono',monospace;color:var(--muted)">photo · shop front (b/w)</div>
+            <div style="aspect-ratio:4/3;background:repeating-linear-gradient(135deg,var(--surface) 0 8px,var(--surface2) 8px 9px);display:flex;align-items:flex-end;padding:8px;font:11px 'JetBrains Mono',monospace;color:var(--muted)">photo · kitchen</div>
+            <div style="aspect-ratio:4/3;background:repeating-linear-gradient(135deg,var(--surface) 0 8px,var(--surface2) 8px 9px);display:flex;align-items:flex-end;padding:8px;font:11px 'JetBrains Mono',monospace;color:var(--muted)">photo · team</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--hair);padding-bottom:8px">Team</div>
+          <div style="display:flex;gap:12px;align-items:center"><span style="width:36px;height:36px;background:var(--surface2);display:inline-block"></span><div><div style="font:600 14px Archivo">Inês Carvalho</div><div style="font:12px Archivo;color:var(--muted)">Founder &amp; director · signed the agreement</div></div></div>
+          <div style="display:flex;gap:12px;align-items:center"><span style="width:36px;height:36px;background:var(--surface2);display:inline-block"></span><div><div style="font:600 14px Archivo">Tomás Ribeiro</div><div style="font:12px Archivo;color:var(--muted)">Head baker, co-owner</div></div></div>
+          <div style="display:flex;gap:12px;align-items:center"><span style="width:36px;height:36px;background:var(--surface2);display:inline-block"></span><div><div style="font:600 14px Archivo">Marta Sousa</div><div style="font:12px Archivo;color:var(--muted)">Finance · prepares quarterly reports</div></div></div>
+          <div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--hair);padding-bottom:8px;margin-top:10px">Use of funds</div>
+          <div style="display:flex;flex-direction:column;gap:8px;font:13px Archivo">
+            <div style="display:flex;justify-content:space-between"><span>Central kitchen fit-out</span><span style="font-family:'JetBrains Mono',monospace">320,000</span></div>
+            <div style="height:6px;background:var(--surface2)"><div style="width:55%;height:100%;background:var(--text)"></div></div>
+            <div style="display:flex;justify-content:space-between"><span>Fifth shop (Gaia)</span><span style="font-family:'JetBrains Mono',monospace">180,000</span></div>
+            <div style="height:6px;background:var(--surface2)"><div style="width:31%;height:100%;background:var(--text)"></div></div>
+            <div style="display:flex;justify-content:space-between"><span>Working capital</span><span style="font-family:'JetBrains Mono',monospace">83,000</span></div>
+            <div style="height:6px;background:var(--surface2)"><div style="width:14%;height:100%;background:var(--text)"></div></div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+      <sc-if value="{{ tabFinancials }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:32px">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline"><h2 style="margin:0;font:800 22px/1.15 Archivo;letter-spacing:-.015em">Revenue and net profit</h2><span style="font:12px 'JetBrains Mono',monospace;color:var(--muted)">USD, audited</span></div>
+          <svg viewBox="0 0 640 220" width="100%" style="display:block;overflow:visible">
+            <g stroke="var(--hair)"><line x1="40" y1="20" x2="640" y2="20"></line><line x1="40" y1="70" x2="640" y2="70"></line><line x1="40" y1="120" x2="640" y2="120"></line><line x1="40" y1="170" x2="640" y2="170"></line><line x1="40" y1="200" x2="640" y2="200" stroke="var(--line)" stroke-width="2"></line></g>
+            <g font-family="JetBrains Mono" font-size="10" fill="var(--faint)"><text x="0" y="24">1.8M</text><text x="0" y="74">1.2M</text><text x="0" y="124">600k</text><text x="0" y="204">0</text></g>
+            <g><rect x="100" y="98" width="56" height="102" fill="var(--surface2)"></rect><rect x="160" y="178" width="56" height="22" fill="var(--text)"></rect><text x="100" y="216" font-family="JetBrains Mono" font-size="11" fill="var(--muted)">2023</text><text x="128" y="92" font-family="JetBrains Mono" font-size="10" fill="var(--muted)" text-anchor="middle">1.02M</text><text x="188" y="172" font-family="JetBrains Mono" font-size="10" fill="var(--muted)" text-anchor="middle">132k</text></g>
+            <g><rect x="290" y="78" width="56" height="122" fill="var(--surface2)"></rect><rect x="350" y="170" width="56" height="30" fill="var(--text)"></rect><text x="290" y="216" font-family="JetBrains Mono" font-size="11" fill="var(--muted)">2024</text><text x="318" y="72" font-family="JetBrains Mono" font-size="10" fill="var(--muted)" text-anchor="middle">1.26M</text><text x="378" y="164" font-family="JetBrains Mono" font-size="10" fill="var(--muted)" text-anchor="middle">176k</text></g>
+            <g><rect x="480" y="56" width="56" height="144" fill="var(--surface2)"></rect><rect x="540" y="165" width="56" height="35" fill="var(--accent)"></rect><text x="480" y="216" font-family="JetBrains Mono" font-size="11" fill="var(--text)" font-weight="500">2025</text><text x="508" y="50" font-family="JetBrains Mono" font-size="10" fill="var(--muted)" text-anchor="middle">1.54M</text><text x="568" y="159" font-family="JetBrains Mono" font-size="11" fill="var(--text)" font-weight="500" text-anchor="middle">210k</text></g>
+          </svg>
+          <div style="display:flex;gap:16px;font:12px Archivo;color:var(--muted)"><span style="display:inline-flex;gap:6px;align-items:center"><i style="width:10px;height:10px;background:var(--surface2);display:inline-block"></i>Revenue</span><span style="display:inline-flex;gap:6px;align-items:center"><i style="width:10px;height:10px;background:var(--text);display:inline-block"></i>Net profit</span><span style="margin-left:auto">Net margin 2025 · <b style="font-family:'JetBrains Mono',monospace;color:var(--text);font-weight:500">13.6%</b></span></div>
+        </div>
+        <div style="display:flex;flex-direction:column">
+          <div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-bottom:2px solid var(--line);padding-bottom:8px">Uploaded reports</div>
+          <sc-for list="{{ reports }}" as="r" hint-placeholder-count="4">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--hair);font:13px Archivo"><div><div style="font-weight:600">{{ r.name }}</div><div style="font:12px Archivo;color:var(--muted)">{{ r.meta }}</div></div><a href="#" style="font:12px 'JetBrains Mono',monospace;white-space:nowrap">PDF ↗</a></div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+      <sc-if value="{{ tabAgreement }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:32px">
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <h2 style="margin:0;font:800 22px/1.15 Archivo;letter-spacing:-.015em">Profit-share agreement, in plain words</h2>
+          <div style="display:grid;grid-template-columns:140px 1fr;gap:10px 16px;font:14px Archivo;border-top:2px solid var(--line);padding-top:14px">
+            <span style="color:var(--muted)">Commitment</span><span>50% of audited yearly net profit, paid to token holders.</span>
+            <span style="color:var(--muted)">Schedule</span><span>Quarterly. Paid within 30 days of quarter end.</span>
+            <span style="color:var(--muted)">Who gets paid</span><span>Only tokens locked for the full quarter, pro-rata.</span>
+            <span style="color:var(--muted)">Duration</span><span>For as long as the business operates.</span>
+            <span style="color:var(--muted)">If sold</span><span>The obligation transfers to the buyer.</span>
+            <span style="color:var(--muted)">Late payment</span><span>Flagged publicly after 30 days; the listing shows the delay.</span>
+            <span style="color:var(--muted)">Governing law</span><span>Portugal. Disputes go to Porto arbitration.</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;background:var(--surface);padding:20px">
+          <div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Signed agreement</div>
+          <div style="font:13px Archivo">Signed by Inês Carvalho, director · 2 Oct 2026</div>
+          <div style="font:12px 'JetBrains Mono',monospace;word-break:break-all;background:var(--bg);padding:10px;line-height:1.6">sha256<br>7f3a9c1b44e0d2a9c7f1e3b8a6d5c4f2e1d0b9a8c7f6e5d4c3b2a1f0e9d8c7b6e21e</div>
+          <div style="font:12px Archivo;color:var(--muted)">The hash of the signed PDF is recorded on Stellar. Anyone can check the document hasn't changed.</div>
+          <div style="display:flex;gap:8px"><button style="font:800 13px Archivo;background:transparent;color:var(--text);border:1px solid var(--line);padding:9px 14px;cursor:pointer">Download PDF</button><a href="#" style="font:13px Archivo;padding:9px 4px">View on Stellar ↗</a></div>
+        </div>
+      </div>
+      </sc-if>
+      <sc-if value="{{ tabDividends }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;gap:2px;background:var(--hair)">
+          <div style="flex:1;background:var(--bg);padding:14px 14px 14px 0"><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Next expected</div><div style="font:500 20px 'JetBrains Mono',monospace;margin-top:6px">30 Apr 2027</div><div style="font:12px Archivo;color:var(--muted)">Q1 2027 · first period after close</div></div>
+          <div style="flex:1;background:var(--bg);padding:14px"><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Expected per token / qtr</div><div style="font:500 20px 'JetBrains Mono',monospace;margin-top:6px">0.045 <span style="font-size:11px;color:var(--muted)">USDC</span></div><div style="font:12px Archivo;color:var(--muted)">at 18% target yield</div></div>
+          <div style="flex:1;background:var(--bg);padding:14px"><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Paid to date</div><div style="font:500 20px 'JetBrains Mono',monospace;margin-top:6px;color:var(--muted)">—</div><div style="font:12px Archivo;color:var(--muted)">Raise still open</div></div>
+        </div>
+        <div style="border:1px dashed var(--line);padding:24px;font:13px Archivo;color:var(--muted)">No dividends yet. History appears here after the first quarter closes. See <a href="#">Andes Craft Brewing</a> for a paying company.</div>
+      </div>
+      </sc-if>
+      <sc-if value="{{ tabHolders }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--hair)">
+        <div style="background:var(--bg);padding:14px 14px 14px 0"><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Investors in escrow</div><div style="font:500 24px 'JetBrains Mono',monospace;margin-top:6px">318</div></div>
+        <div style="background:var(--bg);padding:14px"><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Median ticket</div><div style="font:500 24px 'JetBrains Mono',monospace;margin-top:6px">650 <span style="font-size:12px;color:var(--muted)">USDC</span></div></div>
+        <div style="background:var(--bg);padding:14px"><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Largest share</div><div style="font:500 24px 'JetBrains Mono',monospace;margin-top:6px">4.1%</div></div>
+        <div style="background:var(--bg);padding:14px"><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Countries</div><div style="font:500 24px 'JetBrains Mono',monospace;margin-top:6px">27</div></div>
+      </div>
+      </sc-if>
+    </div>
+    <div style="position:sticky;top:24px;display:flex;flex-direction:column;gap:18px;background:var(--surface);padding:24px;border-top:2px solid var(--line)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font:500 30px/1 'JetBrains Mono',monospace;letter-spacing:-.02em">412,000</div><div style="font:12px Archivo;color:var(--muted)">of 583,000 USDC</div></div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="position:relative;height:10px;background:var(--surface2)"><div style="position:absolute;inset:0 auto 0 0;width:70.7%;background:var(--accent)"></div><div style="position:absolute;top:-4px;bottom:-4px;left:60%;width:2px;background:var(--text)"></div></div>
+        <div style="display:flex;justify-content:space-between;font:11px 'JetBrains Mono',monospace;color:var(--muted)"><span style="color:var(--green)">min 350,000 reached</span><span>max 583,000</span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;font:12px Archivo;color:var(--muted)">
+        <div><div style="font:500 18px 'JetBrains Mono',monospace;color:var(--text)">318</div>investors</div>
+        <div><div style="font:500 18px 'JetBrains Mono',monospace;color:var(--text)">9</div>days left</div>
+        <div><div style="font:500 18px 'JetBrains Mono',monospace;color:var(--text)">3 Nov</div>deadline</div>
+      </div>
+      <button style="font:800 15px Archivo;background:var(--accent);color:var(--accent-ink);border:0;padding:14px 16px;text-align:left;cursor:pointer;display:flex;justify-content:space-between"><span>Invest</span><span style="font-weight:400;opacity:.8">1.00 USDC / token</span></button>
+      <div style="font:12px/1.5 Archivo;color:var(--muted);border-top:1px solid var(--hair);padding-top:12px">All-or-nothing. Your USDC stays in escrow until the deadline. If the minimum isn't reached, it's refunded to you automatically. <a href="#">Details ↗</a></div>
+      <div style="display:flex;align-items:center;gap:8px;font:12px Archivo"><span style="width:16px;height:16px;background:var(--text);color:var(--bg);display:inline-flex;align-items:center;justify-content:center;font:800 9px Archivo">S</span><span>Escrow contract on Stellar</span><a href="#" style="font:12px 'JetBrains Mono',monospace;margin-left:auto">c0e1…9f4a ↗</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- 07 INVEST FLOW -->
+<div data-screen-label="07 Invest flow" style="display:flex;flex-direction:column;gap:12px">
+  <div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">07 Invest flow · modal states</div>
+  <div style="display:flex;gap:24px;align-items:flex-start">
+    <div style="width:440px;background:var(--surface);color:var(--text);padding:24px;box-shadow:0 12px 32px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:18px;border-top:2px solid var(--line)">
+      <div style="display:flex;justify-content:space-between;align-items:center"><div style="font:800 20px Archivo">Invest in Harbor &amp; Hearth</div><span style="font:12px Archivo;color:var(--muted)">Step 1 of 3</span></div>
+      <label style="display:flex;flex-direction:column;gap:5px"><span style="font:12px Archivo;color:var(--muted)">Amount</span><span style="display:flex;background:var(--bg);border:1px solid var(--accent)"><input value="3,000.00" style="flex:1;min-width:0;font:500 24px 'JetBrains Mono',monospace;background:transparent;border:0;padding:10px 12px;color:var(--text)"><span style="font:600 12px Archivo;color:var(--muted);padding:0 12px;display:flex;align-items:center;border-left:1px solid var(--hair)">USDC</span></span><span style="font:11px Archivo;color:var(--muted);display:flex;justify-content:space-between"><span>Available 1,240.00 · <a href="#">Add money</a></span><span>Max 50,000</span></span></label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--hair)">
+        <div style="background:var(--surface);padding:12px 12px 12px 0"><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Tokens received</div><div style="font:500 20px 'JetBrains Mono',monospace;margin-top:4px">3,000</div></div>
+        <div style="background:var(--surface);padding:12px"><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Share of profit pool</div><div style="font:500 20px 'JetBrains Mono',monospace;margin-top:4px">0.51%</div></div>
+        <div style="background:var(--surface);padding:12px 12px 12px 0"><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Expected dividend / yr</div><div style="font:500 20px 'JetBrains Mono',monospace;margin-top:4px;color:var(--green)">540.00 <span style="font-size:11px;color:var(--muted)">USDC</span></div></div>
+        <div style="background:var(--surface);padding:12px"><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">At target yield</div><div style="font:500 20px 'JetBrains Mono',monospace;margin-top:4px">18.0%</div></div>
+      </div>
+      <div style="font:12px/1.5 Archivo;color:var(--muted);background:var(--bg);padding:12px">Funds held in escrow. Refunded in full if the minimum isn't reached by 3 Nov 2026. Expected dividends are based on last year's profit and aren't guaranteed.</div>
+      <label style="display:flex;gap:10px;align-items:flex-start;font:12px Archivo"><input type="checkbox" checked style="margin:3px 0 0;accent-color:var(--accent)"><span>I'm currently outside the United States and I've read the <a href="#">agreement summary</a>.</span></label>
+      <div style="display:flex;gap:8px"><button style="font:800 14px Archivo;background:var(--accent);color:var(--accent-ink);border:0;padding:12px 16px;flex:1;text-align:left;cursor:pointer">Continue</button><button style="font:800 14px Archivo;background:transparent;color:var(--text);border:1px solid var(--line);padding:12px 16px;cursor:pointer">Cancel</button></div>
+    </div>
+    <div style="width:440px;background:var(--surface);color:var(--text);padding:24px;box-shadow:0 12px 32px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:18px;border-top:2px solid var(--line)">
+      <div style="display:flex;justify-content:space-between;align-items:center"><div style="font:800 20px Archivo">Confirm with passkey</div><span style="font:12px Archivo;color:var(--muted)">Step 2 of 3</span></div>
+      <div style="display:flex;flex-direction:column;gap:8px;font:14px Archivo;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair);padding:14px 0">
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">To escrow for</span><span>Harbor &amp; Hearth Bakeries</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Amount</span><span style="font-family:'JetBrains Mono',monospace;font-weight:500">3,000.00 USDC</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Tokens on success</span><span style="font-family:'JetBrains Mono',monospace">3,000</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Network fee</span><span style="font-family:'JetBrains Mono',monospace;color:var(--green)">0.00 · sponsored</span></div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px 0">
+        <div style="width:64px;height:64px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg></div>
+        <div style="font:13px Archivo;color:var(--muted);text-align:center">Use Face ID, Touch ID or your device PIN.<br>Nothing is sent until you confirm.</div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center;background:var(--bg);padding:12px 14px;border-left:3px solid var(--amber)"><i style="width:14px;height:14px;border:2px solid var(--amber);border-right-color:transparent;border-radius:50%;flex:none;animation:spin 1s linear infinite"></i><div style="font:13px Archivo">Waiting for Stellar confirmation · <span style="color:var(--muted)">about 5 seconds</span></div></div>
+    </div>
+    <div style="width:440px;background:var(--surface);color:var(--text);padding:24px;box-shadow:0 12px 32px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:18px;border-top:2px solid var(--green)">
+      <div style="display:flex;justify-content:space-between;align-items:center"><div style="font:800 20px Archivo;display:flex;gap:10px;align-items:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="3"><path d="M20 6 9 17l-5-5"></path></svg>You're in escrow</div><span style="font:12px Archivo;color:var(--muted)">Step 3 of 3</span></div>
+      <div style="font:14px Archivo;color:var(--muted)">If Harbor &amp; Hearth reaches its minimum by 3 Nov 2026, you'll receive 3,000 tokens. If not, your 3,000.00 USDC comes back automatically.</div>
+      <div style="background:var(--bg);padding:16px;display:flex;flex-direction:column;gap:10px;font:13px Archivo">
+        <div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Escrow receipt</div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Amount</span><span style="font-family:'JetBrains Mono',monospace;font-weight:500">3,000.00 USDC</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Date</span><span style="font-family:'JetBrains Mono',monospace">25 Oct 2026, 14:32 UTC</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Transaction</span><a href="#" style="font-family:'JetBrains Mono',monospace">a9d4…77b0 ↗</a></div>
+        <div style="display:flex;align-items:center;gap:8px;font:12px Archivo;border-top:1px solid var(--hair);padding-top:10px"><span style="width:16px;height:16px;background:var(--text);color:var(--bg);display:inline-flex;align-items:center;justify-content:center;font:800 9px Archivo">S</span>Verified on Stellar</div>
+      </div>
+      <div style="display:flex;gap:8px"><button style="font:800 14px Archivo;background:var(--accent);color:var(--accent-ink);border:0;padding:12px 16px;flex:1;text-align:left;cursor:pointer">View portfolio</button><button style="font:800 14px Archivo;background:transparent;color:var(--text);border:1px solid var(--line);padding:12px 16px;cursor:pointer">Done</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- 08 TRADE -->
+<div data-screen-label="08 Trade" style="width:1440px;background:var(--bg);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.2)">
+  <div style="display:flex;align-items:center;gap:32px;padding:0 32px;height:56px;border-bottom:2px solid var(--line)">
+    <div style="font:800 17px Archivo">dvdnd</div>
+    <div style="display:flex;gap:24px;font:14px Archivo;height:56px;align-items:stretch"><span style="color:var(--accent-text);font-weight:600;border-bottom:2px solid var(--accent);display:flex;align-items:center;margin-bottom:-2px">Discover</span><span style="display:flex;align-items:center">Portfolio</span><span style="display:flex;align-items:center">Wallet</span><span style="display:flex;align-items:center">Simulation</span></div>
+    <div style="margin-left:auto;display:flex;gap:16px;align-items:center"><span style="font:600 11px/1 Archivo;letter-spacing:.04em;padding:5px 9px;background:var(--green-soft);color:var(--green)">Verified</span><span style="font:500 13px 'JetBrains Mono',monospace">1,240.00 <span style="color:var(--muted)">USDC</span></span><span style="width:32px;height:32px;background:var(--text);color:var(--bg);display:inline-flex;align-items:center;justify-content:center;font:800 12px Archivo">AM</span></div>
+  </div>
+  <div style="padding:24px 32px 48px;display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:40px;align-items:start">
+    <div style="display:flex;flex-direction:column;gap:24px;min-width:0">
+      <div style="font:12px Archivo;color:var(--muted)">Discover / Trading / Andes Craft Brewing</div>
+      <div style="display:flex;gap:16px;align-items:center">
+        <div style="width:56px;height:56px;background:var(--text);color:var(--bg);display:flex;align-items:center;justify-content:center;font:800 18px Archivo">AC</div>
+        <div style="flex:1"><div style="display:flex;gap:12px;align-items:center"><h1 style="margin:0;font:800 28px/1.1 Archivo;letter-spacing:-.02em">Andes Craft Brewing</h1><span style="font:600 11px/1 Archivo;letter-spacing:.04em;padding:5px 9px;background:var(--surface2);color:var(--text)">Trading</span></div><div style="font:13px Archivo;color:var(--muted);margin-top:4px">Chile · Beverages · 50% of profit committed · semi-annual dividends · <a href="#">Company page</a></div></div>
+        <div style="display:inline-flex;border:1px solid var(--line)"><button onClick="{{ setSimple }}" style="padding:8px 14px;font:600 13px Archivo;border:0;cursor:pointer;background:{{ simpleBg }};color:{{ simpleFg }}">Simple</button><button onClick="{{ setAdvanced }}" style="padding:8px 14px;font:600 13px Archivo;border:0;border-left:1px solid var(--line);cursor:pointer;background:{{ advBg }};color:{{ advFg }}">Advanced</button></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:2px;background:var(--hair);border-top:2px solid var(--line)">
+        <div style="background:var(--bg);padding:14px 14px 14px 0"><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Last price</div><div style="font:500 24px/1.2 'JetBrains Mono',monospace;margin-top:6px">1.08</div></div>
+        <div style="background:var(--bg);padding:14px"><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Implied yield</div><div style="font:500 24px/1.2 'JetBrains Mono',monospace;margin-top:6px;color:var(--green)">16.6%</div></div>
+        <div style="background:var(--bg);padding:14px"><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Fair value</div><div style="font:500 24px/1.2 'JetBrains Mono',monospace;margin-top:6px">1.00</div></div>
+        <div style="background:var(--bg);padding:14px"><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Last dividend</div><div style="font:500 24px/1.2 'JetBrains Mono',monospace;margin-top:6px">0.091</div></div>
+        <div style="background:var(--bg);padding:14px"><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Next period ends</div><div style="font:500 24px/1.2 'JetBrains Mono',monospace;margin-top:6px">31 Dec</div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><h2 style="margin:0;font:800 18px/1.15 Archivo">Price · 90 days</h2><span style="font:12px 'JetBrains Mono',monospace;color:var(--muted)">USDC per token</span></div>
+        <svg viewBox="0 0 900 200" width="100%" style="display:block;overflow:visible">
+          <g stroke="var(--hair)"><line x1="40" y1="10" x2="900" y2="10"></line><line x1="40" y1="60" x2="900" y2="60"></line><line x1="40" y1="110" x2="900" y2="110"></line><line x1="40" y1="160" x2="900" y2="160"></line></g>
+          <g font-family="JetBrains Mono" font-size="10" fill="var(--faint)"><text x="0" y="14">1.12</text><text x="0" y="64">1.06</text><text x="0" y="114">1.00</text><text x="0" y="164">0.94</text></g>
+          <line x1="40" y1="110" x2="900" y2="110" stroke="var(--faint)" stroke-dasharray="3 4"></line>
+          <text x="896" y="124" font-family="JetBrains Mono" font-size="10" fill="var(--faint)" text-anchor="end">fair value 1.00</text>
+          <polyline fill="none" stroke="var(--accent)" stroke-width="2" points="40,118 100,112 160,116 220,104 280,98 340,106 400,92 460,88 520,96 580,82 640,78 700,70 760,66 820,52 880,44"></polyline>
+          <circle cx="880" cy="44" r="4" fill="var(--accent)"></circle>
+          <text x="870" y="38" font-family="JetBrains Mono" font-size="11" font-weight="500" fill="var(--text)" text-anchor="end">1.08</text>
+          <g font-family="JetBrains Mono" font-size="10" fill="var(--faint)"><text x="40" y="190">Jul 27</text><text x="460" y="190" text-anchor="middle">Sep 10</text><text x="880" y="190" text-anchor="end">Oct 25</text></g>
+        </svg>
+      </div>
+      <sc-if value="{{ advanced }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;border-top:2px solid var(--line);padding-top:20px">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Order book · depth</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;font:12px 'JetBrains Mono',monospace">
+            <div style="display:flex;flex-direction:column;gap:2px">
+              <div style="display:flex;justify-content:space-between;color:var(--muted);padding:4px 8px;border-bottom:1px solid var(--hair)"><span>Bid</span><span>Size</span></div>
+              <sc-for list="{{ bids }}" as="b" hint-placeholder-count="6"><div style="position:relative;display:flex;justify-content:space-between;padding:4px 8px"><i style="position:absolute;inset:0 0 0 auto;width:{{ b.w }};background:var(--green-soft)"></i><span style="position:relative;color:var(--green)">{{ b.p }}</span><span style="position:relative">{{ b.s }}</span></div></sc-for>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:2px">
+              <div style="display:flex;justify-content:space-between;color:var(--muted);padding:4px 8px;border-bottom:1px solid var(--hair)"><span>Ask</span><span>Size</span></div>
+              <sc-for list="{{ asks }}" as="a" hint-placeholder-count="6"><div style="position:relative;display:flex;justify-content:space-between;padding:4px 8px"><i style="position:absolute;inset:0 auto 0 0;width:{{ a.w }};background:var(--surface2)"></i><span style="position:relative">{{ a.p }}</span><span style="position:relative">{{ a.s }}</span></div></sc-for>
+            </div>
+          </div>
+          <div style="font:12px Archivo;color:var(--muted)">Spread 0.01 · 0.9%</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Recent trades</div>
+          <div style="display:flex;flex-direction:column;font:12px 'JetBrains Mono',monospace">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;color:var(--muted);padding:4px 0;border-bottom:1px solid var(--hair);font-family:Archivo"><span>Time</span><span>Side</span><span style="text-align:right">Price</span><span style="text-align:right">Size</span></div>
+            <sc-for list="{{ trades }}" as="tr" hint-placeholder-count="6"><div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;padding:5px 0;border-bottom:1px solid var(--hair)"><span style="color:var(--muted)">{{ tr.t }}</span><span style="color:{{ tr.c }}">{{ tr.side }}</span><span style="text-align:right">{{ tr.p }}</span><span style="text-align:right">{{ tr.s }}</span></div></sc-for>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+    </div>
+    <div style="position:sticky;top:24px;display:flex;flex-direction:column;gap:16px;background:var(--surface);padding:24px;border-top:2px solid var(--line)">
+      <div style="display:flex;border:1px solid var(--line)"><span style="flex:1;padding:9px 14px;font:800 14px Archivo;background:var(--text);color:var(--bg)">Buy</span><span style="flex:1;padding:9px 14px;font:800 14px Archivo;border-left:1px solid var(--line)">Sell</span></div>
+      <label style="display:flex;flex-direction:column;gap:5px"><span style="font:12px Archivo;color:var(--muted)">Pay with</span><span style="display:flex;background:var(--bg);border:1px solid var(--line);padding:9px 12px;justify-content:space-between;font:14px Archivo"><span style="font-weight:600">USDC · 1,240.00 available</span><span style="color:var(--muted)">▾</span></span><span style="font:11px Archivo;color:var(--muted)">XLM is converted automatically at the current rate.</span></label>
+      <label style="display:flex;flex-direction:column;gap:5px"><span style="font:12px Archivo;color:var(--muted)">Spend</span><span style="display:flex;background:var(--bg);border:1px solid var(--accent)"><input value="500.00" style="flex:1;min-width:0;font:500 22px 'JetBrains Mono',monospace;background:transparent;border:0;padding:9px 12px;color:var(--text)"><span style="font:600 12px Archivo;color:var(--muted);padding:0 12px;display:flex;align-items:center;border-left:1px solid var(--hair)">USDC</span></span></label>
+      <div style="display:flex;flex-direction:column;gap:8px;font:13px Archivo;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair);padding:12px 0">
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">You receive</span><span style="font-family:'JetBrains Mono',monospace;font-weight:500">≈ 461 tokens</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Average price</span><span style="font-family:'JetBrains Mono',monospace">1.084</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Implied yield at this price</span><span style="font-family:'JetBrains Mono',monospace;color:var(--green)">16.5%</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Fee</span><span style="font-family:'JetBrains Mono',monospace">0.25% · 1.25</span></div>
+      </div>
+      <button style="font:800 15px Archivo;background:var(--accent);color:var(--accent-ink);border:0;padding:14px 16px;text-align:left;cursor:pointer">Buy 461 tokens</button>
+      <div style="font:12px/1.5 Archivo;color:var(--muted)">Tokens bought now can be locked for the period ending 31 Dec 2026, but only full-period locks earn that dividend. <a href="#">Details ↗</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- 09 PORTFOLIO -->
+<div data-screen-label="09 Portfolio" style="width:1440px;background:var(--bg);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.2)">
+  <div style="display:flex;align-items:center;gap:32px;padding:0 32px;height:56px;border-bottom:2px solid var(--line)">
+    <div style="font:800 17px Archivo">dvdnd</div>
+    <div style="display:flex;gap:24px;font:14px Archivo;height:56px;align-items:stretch"><span style="display:flex;align-items:center">Discover</span><span style="color:var(--accent-text);font-weight:600;border-bottom:2px solid var(--accent);display:flex;align-items:center;margin-bottom:-2px">Portfolio</span><span style="display:flex;align-items:center">Wallet</span><span style="display:flex;align-items:center">Simulation</span></div>
+    <div style="margin-left:auto;display:flex;gap:16px;align-items:center"><span style="font:600 11px/1 Archivo;letter-spacing:.04em;padding:5px 9px;background:var(--green-soft);color:var(--green)">Verified</span><span style="font:500 13px 'JetBrains Mono',monospace">1,240.00 <span style="color:var(--muted)">USDC</span></span><span style="width:32px;height:32px;background:var(--text);color:var(--bg);display:inline-flex;align-items:center;justify-content:center;font:800 12px Archivo">AM</span></div>
+  </div>
+  <div style="padding:32px 32px 48px;display:flex;flex-direction:column;gap:28px">
+    <h1 style="margin:0;font:800 32px/1.1 Archivo;letter-spacing:-.02em">Portfolio</h1>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:2px;background:var(--hair);border-top:2px solid var(--line)">
+      <div style="background:var(--bg);padding:20px 20px 20px 0"><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Total value</div><div style="font:500 40px/1.1 'JetBrains Mono',monospace;letter-spacing:-.03em;margin-top:10px">8,752<span style="font-size:22px;color:var(--muted)">.00</span></div><div style="font:12px Archivo;color:var(--muted);margin-top:4px">5,400 in tokens · 3,000 in escrow · 352 claimable</div></div>
+      <div style="background:var(--bg);padding:20px"><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Dividends earned</div><div style="font:500 40px/1.1 'JetBrains Mono',monospace;letter-spacing:-.03em;margin-top:10px;color:var(--green)">716<span style="font-size:22px">.00</span></div><div style="font:12px Archivo;color:var(--muted);margin-top:4px">2 periods · Andes Craft Brewing</div></div>
+      <div style="background:var(--green-soft);padding:20px;display:flex;align-items:center;gap:20px"><div style="flex:1"><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--green)">Claimable now</div><div style="font:500 40px/1.1 'JetBrains Mono',monospace;letter-spacing:-.03em;margin-top:10px;color:var(--green)">352<span style="font-size:22px">.00</span></div><div style="font:12px Archivo;color:var(--muted);margin-top:4px">4,000 locked × 0.088 USDC · H1 2026</div></div><button style="font:800 15px Archivo;background:var(--green);color:var(--bg);border:0;padding:14px 18px;text-align:left;cursor:pointer;min-width:160px">Claim dividend</button></div>
+    </div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:40px;align-items:start">
+      <div style="display:flex;flex-direction:column;gap:28px">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <h2 style="margin:0;font:800 18px/1.15 Archivo">Holdings</h2>
+          <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <thead><tr><th style="text-align:left;font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px 8px 8px 0;border-bottom:2px solid var(--line)">Company</th><th style="text-align:right;font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px;border-bottom:2px solid var(--line)">Tokens</th><th style="text-align:left;font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px;border-bottom:2px solid var(--line)">Lock status</th><th style="text-align:right;font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px;border-bottom:2px solid var(--line)">Value</th><th style="text-align:right;font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px;border-bottom:2px solid var(--line)">Yield on cost</th><th style="border-bottom:2px solid var(--line)"></th></tr></thead>
+            <tbody>
+              <tr><td style="padding:12px 8px 12px 0;border-bottom:1px solid var(--hair)"><div style="display:flex;gap:10px;align-items:center"><span style="width:32px;height:32px;background:var(--text);color:var(--bg);display:inline-flex;align-items:center;justify-content:center;font:800 11px Archivo">AC</span><div><div style="font-weight:600">Andes Craft Brewing</div><div style="font:12px Archivo;color:var(--muted)">Chile · Trading at 1.08</div></div></div></td><td style="padding:12px 8px;border-bottom:1px solid var(--hair);text-align:right;font-family:'JetBrains Mono',monospace">5,000</td><td style="padding:12px 8px;border-bottom:1px solid var(--hair)"><div style="display:flex;gap:6px;flex-wrap:wrap"><span style="font:600 11px/1 Archivo;padding:5px 8px;background:var(--amber-soft);color:var(--amber);display:inline-flex;gap:6px;align-items:center"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>4,000 locked · 67d</span><span style="font:600 11px/1 Archivo;padding:5px 8px;border:1px solid var(--line);color:var(--muted);white-space:nowrap">1,000 unlocked</span></div></td><td style="padding:12px 8px;border-bottom:1px solid var(--hair);text-align:right;font-family:'JetBrains Mono',monospace">5,400.00</td><td style="padding:12px 8px;border-bottom:1px solid var(--hair);text-align:right;font-family:'JetBrains Mono',monospace;color:var(--green)">17.9%</td><td style="padding:12px 0 12px 8px;border-bottom:1px solid var(--hair);text-align:right"><button style="font:800 12px Archivo;background:transparent;color:var(--text);border:1px solid var(--line);padding:7px 10px;cursor:pointer">Lock 1,000</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <h2 style="margin:0;font:800 18px/1.15 Archivo">In escrow</h2>
+          <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <thead><tr><th style="text-align:left;font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px 8px 8px 0;border-bottom:2px solid var(--line)">Raise</th><th style="text-align:right;font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px;border-bottom:2px solid var(--line)">Amount</th><th style="text-align:left;font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px;border-bottom:2px solid var(--line)">Progress</th><th style="text-align:left;font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px;border-bottom:2px solid var(--line)">Status</th><th style="text-align:right;font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px 0 8px 8px;border-bottom:2px solid var(--line)">Deadline</th></tr></thead>
+            <tbody>
+              <tr><td style="padding:12px 8px 12px 0;border-bottom:1px solid var(--hair)"><div style="font-weight:600">Harbor &amp; Hearth Bakeries</div><div style="font:12px Archivo;color:var(--muted)">3,000 tokens on success</div></td><td style="padding:12px 8px;border-bottom:1px solid var(--hair);text-align:right;font-family:'JetBrains Mono',monospace">3,000.00</td><td style="padding:12px 8px;border-bottom:1px solid var(--hair);width:220px"><div style="position:relative;height:6px;background:var(--surface2)"><div style="position:absolute;inset:0 auto 0 0;width:70.7%;background:var(--accent)"></div><div style="position:absolute;top:-3px;bottom:-3px;left:60%;width:2px;background:var(--text)"></div></div><div style="font:11px 'JetBrains Mono',monospace;color:var(--muted);margin-top:4px">412k of 583k · min reached</div></td><td style="padding:12px 8px;border-bottom:1px solid var(--hair)"><span style="font:600 11px/1 Archivo;padding:5px 8px;background:var(--accent-soft);color:var(--accent-text)">Open</span></td><td style="padding:12px 0 12px 8px;border-bottom:1px solid var(--hair);text-align:right;font-family:'JetBrains Mono',monospace">3 Nov · 9d</td></tr>
+              <tr><td style="padding:12px 8px 12px 0;border-bottom:1px solid var(--hair)"><div style="font-weight:600;color:var(--muted)">Solenne Skin Clinic</div><div style="font:12px Archivo;color:var(--muted)">Missed 150k minimum</div></td><td style="padding:12px 8px;border-bottom:1px solid var(--hair);text-align:right;font-family:'JetBrains Mono',monospace;color:var(--muted)">500.00</td><td style="padding:12px 8px;border-bottom:1px solid var(--hair)"><div style="position:relative;height:6px;background:var(--surface2)"><div style="position:absolute;inset:0 auto 0 0;width:34%;background:var(--faint)"></div><div style="position:absolute;top:-3px;bottom:-3px;left:57%;width:2px;background:var(--red)"></div></div><div style="font:11px 'JetBrains Mono',monospace;color:var(--muted);margin-top:4px">89.5k of 264k</div></td><td style="padding:12px 8px;border-bottom:1px solid var(--hair)"><span style="font:600 11px/1 Archivo;padding:5px 8px;background:var(--red-soft);color:var(--red)">Refunding</span></td><td style="padding:12px 0 12px 8px;border-bottom:1px solid var(--hair);text-align:right;font:12px Archivo;color:var(--muted)">Refund in ~1h · <a href="#">tx ↗</a></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <h2 style="margin:0;font:800 18px/1.15 Archivo">Upcoming</h2>
+        <div style="display:flex;flex-direction:column;border-top:2px solid var(--line)">
+          <div style="display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--hair)"><div style="font:500 13px 'JetBrains Mono',monospace;width:64px;color:var(--muted)">3 Nov</div><div style="flex:1;font:13px Archivo"><div style="font-weight:600">Harbor &amp; Hearth closes</div><div style="color:var(--muted)">Tokens issued or refund</div></div></div>
+          <div style="display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--hair)"><div style="font:500 13px 'JetBrains Mono',monospace;width:64px;color:var(--muted)">31 Dec</div><div style="flex:1;font:13px Archivo"><div style="font-weight:600">Andes H2 period ends</div><div style="color:var(--muted)">4,000 tokens unlock · expected ≈ 364.00 USDC</div></div></div>
+          <div style="display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--hair)"><div style="font:500 13px 'JetBrains Mono',monospace;width:64px;color:var(--muted)">30 Jan</div><div style="flex:1;font:13px Archivo"><div style="font-weight:600">Andes H2 dividend due</div><div style="color:var(--muted)">Within 30 days of period end</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 10 LOCK + 11 CLAIM -->
+<div data-screen-label="10–11 Lock and Claim flows" style="display:flex;flex-direction:column;gap:12px">
+  <div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">10 Lock flow · 11 Claim flow</div>
+  <div style="display:flex;gap:24px;align-items:flex-start">
+    <div style="width:440px;background:var(--surface);color:var(--text);padding:24px;box-shadow:0 12px 32px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:18px;border-top:2px solid var(--line)">
+      <div style="font:800 20px Archivo">Lock Andes tokens</div>
+      <label style="display:flex;flex-direction:column;gap:5px"><span style="font:12px Archivo;color:var(--muted)">Amount to lock</span><span style="display:flex;background:var(--bg);border:1px solid var(--accent)"><input value="1,000" style="flex:1;min-width:0;font:500 24px 'JetBrains Mono',monospace;background:transparent;border:0;padding:10px 12px;color:var(--text)"><span style="font:600 12px Archivo;color:var(--muted);padding:0 12px;display:flex;align-items:center;border-left:1px solid var(--hair)">tokens</span></span><span style="font:11px Archivo;color:var(--muted);display:flex;justify-content:space-between"><span>1,000 unlocked available</span><a href="#">Max</a></span></label>
+      <div style="display:flex;flex-direction:column;gap:8px;font:13px Archivo;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair);padding:12px 0">
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Period</span><span>H2 2026 · semi-annual</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Unlock date</span><span style="font-family:'JetBrains Mono',monospace">31 Dec 2026</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Expected dividend</span><span style="font-family:'JetBrains Mono',monospace;color:var(--amber)">Not this period</span></div>
+      </div>
+      <div style="display:flex;gap:10px;background:var(--amber-soft);padding:12px;font:12px/1.5 Archivo;color:var(--text)"><span style="width:3px;background:var(--amber);flex:none"></span><span>Only tokens locked for the whole period earn this period's dividend. H2 started 1 Jul, so these 1,000 tokens start earning from the next period (H1 2027). Your 4,000 already-locked tokens are unaffected.</span></div>
+      <div style="display:flex;gap:8px"><button style="font:800 14px Archivo;background:var(--accent);color:var(--accent-ink);border:0;padding:12px 16px;flex:1;text-align:left;cursor:pointer">Lock 1,000 tokens</button><button style="font:800 14px Archivo;background:transparent;color:var(--text);border:1px solid var(--line);padding:12px 16px;cursor:pointer">Cancel</button></div>
+    </div>
+    <div style="width:440px;background:var(--surface);color:var(--text);padding:24px;box-shadow:0 12px 32px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:18px;border-top:2px solid var(--line)">
+      <div style="font:800 20px Archivo">Locked positions</div>
+      <div style="display:flex;flex-direction:column;gap:12px;background:var(--bg);padding:16px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font:600 14px Archivo">Andes Craft Brewing</div><span style="font:600 11px/1 Archivo;padding:5px 8px;background:var(--amber-soft);color:var(--amber)">Locked</span></div>
+        <div style="font:500 28px/1 'JetBrains Mono',monospace">4,000 <span style="font-size:13px;color:var(--muted)">tokens</span></div>
+        <div style="display:flex;flex-direction:column;gap:6px"><div style="height:6px;background:var(--surface2)"><div style="width:63%;height:100%;background:var(--amber)"></div></div><div style="display:flex;justify-content:space-between;font:11px 'JetBrains Mono',monospace;color:var(--muted)"><span>1 Jul</span><span style="color:var(--text)">67 days left</span><span>31 Dec</span></div></div>
+        <div style="display:flex;justify-content:space-between;font:13px Archivo"><span style="color:var(--muted)">Expected at period end</span><span style="font-family:'JetBrains Mono',monospace;color:var(--green)">≈ 364.00 USDC</span></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;background:var(--bg);padding:16px;opacity:.7">
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font:600 14px Archivo">Andes Craft Brewing</div><span style="font:600 11px/1 Archivo;padding:5px 8px;background:var(--amber-soft);color:var(--amber)">Pending</span></div>
+        <div style="font:500 28px/1 'JetBrains Mono',monospace">1,000 <span style="font-size:13px;color:var(--muted)">tokens</span></div>
+        <div style="font:12px Archivo;color:var(--muted)">Starts earning H1 2027 · 1 Jan – 30 Jun</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px">
+      <div style="width:440px;background:var(--surface);color:var(--text);padding:24px;box-shadow:0 12px 32px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:18px;border-top:2px solid var(--green)">
+        <div style="font:800 20px Archivo">Claim dividend</div>
+        <div style="font:500 40px/1 'JetBrains Mono',monospace;letter-spacing:-.03em;color:var(--green)">352.00 <span style="font-size:16px;color:var(--muted)">USDC</span></div>
+        <div style="display:flex;flex-direction:column;gap:8px;font:13px Archivo;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair);padding:12px 0">
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">From</span><span>Andes Craft Brewing · H1 2026</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Per locked token</span><span style="font-family:'JetBrains Mono',monospace">0.088 USDC</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Your locked tokens</span><span style="font-family:'JetBrains Mono',monospace">4,000</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Company deposit</span><a href="#" style="font-family:'JetBrains Mono',monospace">63,580 USDC · tx ↗</a></div>
+        </div>
+        <button style="font:800 15px Archivo;background:var(--green);color:var(--bg);border:0;padding:14px 16px;text-align:left;cursor:pointer">Claim 352.00 USDC</button>
+      </div>
+      <div style="width:440px;background:var(--surface);color:var(--text);padding:24px;box-shadow:0 12px 32px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:18px;border-top:2px solid var(--green)">
+        <div style="font:800 20px Archivo;display:flex;gap:10px;align-items:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="3"><path d="M20 6 9 17l-5-5"></path></svg>352.00 USDC is in your wallet</div>
+        <div style="font:13px Archivo;color:var(--muted)">Confirmed on Stellar · <a href="#" style="font-family:'JetBrains Mono',monospace">e71c…b2d9 ↗</a> · balance now 1,592.00 USDC</div>
+        <div style="background:var(--bg);padding:16px;display:flex;flex-direction:column;gap:8px"><div style="font:600 14px Archivo">Cash out to your bank?</div><div style="font:12px Archivo;color:var(--muted)">Send to your SEPA account ending 4471. Usually arrives the same day.</div><div style="display:flex;gap:8px;margin-top:4px"><button style="font:800 13px Archivo;background:var(--accent);color:var(--accent-ink);border:0;padding:10px 14px;text-align:left;cursor:pointer">Cash out 352.00</button><button style="font:800 13px Archivo;background:transparent;color:var(--text);border:1px solid var(--line);padding:10px 14px;cursor:pointer">Keep as USDC</button></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 12 WALLET -->
+<div data-screen-label="12 Wallet" style="width:1440px;background:var(--bg);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.2)">
+  <div style="display:flex;align-items:center;gap:32px;padding:0 32px;height:56px;border-bottom:2px solid var(--line)">
+    <div style="font:800 17px Archivo">dvdnd</div>
+    <div style="display:flex;gap:24px;font:14px Archivo;height:56px;align-items:stretch"><span style="display:flex;align-items:center">Discover</span><span style="display:flex;align-items:center">Portfolio</span><span style="color:var(--accent-text);font-weight:600;border-bottom:2px solid var(--accent);display:flex;align-items:center;margin-bottom:-2px">Wallet</span><span style="display:flex;align-items:center">Simulation</span></div>
+    <div style="margin-left:auto;display:flex;gap:16px;align-items:center"><span style="font:600 11px/1 Archivo;letter-spacing:.04em;padding:5px 9px;background:var(--green-soft);color:var(--green)">Verified</span><span style="font:500 13px 'JetBrains Mono',monospace">1,240.00 <span style="color:var(--muted)">USDC</span></span><span style="width:32px;height:32px;background:var(--text);color:var(--bg);display:inline-flex;align-items:center;justify-content:center;font:800 12px Archivo">AM</span></div>
+  </div>
+  <div style="padding:32px 32px 48px;display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:40px;align-items:start">
+    <div style="display:flex;flex-direction:column;gap:28px;min-width:0">
+      <h1 style="margin:0;font:800 32px/1.1 Archivo;letter-spacing:-.02em">Wallet</h1>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--hair);border-top:2px solid var(--line)">
+        <div style="background:var(--bg);padding:20px 20px 20px 0"><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">USDC</div><div style="font:500 36px/1.1 'JetBrains Mono',monospace;letter-spacing:-.03em;margin-top:10px">1,240<span style="font-size:20px;color:var(--muted)">.00</span></div><div style="font:12px Archivo;color:var(--muted);margin-top:4px">Dollar stablecoin · what you invest and get paid in</div></div>
+        <div style="background:var(--bg);padding:20px"><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">XLM</div><div style="font:500 36px/1.1 'JetBrains Mono',monospace;letter-spacing:-.03em;margin-top:10px">180<span style="font-size:20px;color:var(--muted)">.50</span></div><div style="font:12px Archivo;color:var(--muted);margin-top:4px">≈ 21.66 USD · converted automatically when you trade</div></div>
+      </div>
+      <div style="display:flex;gap:8px"><button style="font:800 14px Archivo;background:var(--accent);color:var(--accent-ink);border:0;padding:12px 16px;min-width:160px;text-align:left;cursor:pointer">Add money</button><button style="font:800 14px Archivo;background:transparent;color:var(--text);border:1px solid var(--line);padding:12px 16px;min-width:160px;text-align:left;cursor:pointer">Cash out to bank</button></div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><h2 style="margin:0;font:800 18px/1.15 Archivo">History</h2><div style="display:flex;gap:6px;font:12px Archivo"><span style="padding:4px 8px;background:var(--text);color:var(--bg)">All</span><span style="padding:4px 8px;border:1px solid var(--hair)">Invest</span><span style="padding:4px 8px;border:1px solid var(--hair)">Dividend</span><span style="padding:4px 8px;border:1px solid var(--hair)">Trade</span><span style="padding:4px 8px;border:1px solid var(--hair)">Deposit</span></div></div>
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead><tr><th style="text-align:left;font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px 8px 8px 0;border-bottom:2px solid var(--line)">Date</th><th style="text-align:left;font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px;border-bottom:2px solid var(--line)">Type</th><th style="text-align:left;font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px;border-bottom:2px solid var(--line)">Detail</th><th style="text-align:right;font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px;border-bottom:2px solid var(--line)">Amount</th><th style="text-align:right;font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px 0 8px 8px;border-bottom:2px solid var(--line)">Explorer</th></tr></thead>
+          <tbody>
+            <sc-for list="{{ history }}" as="h" hint-placeholder-count="7">
+              <tr><td style="padding:11px 8px 11px 0;border-bottom:1px solid var(--hair);font-family:'JetBrains Mono',monospace;color:var(--muted);white-space:nowrap">{{ h.date }}</td><td style="padding:11px 8px;border-bottom:1px solid var(--hair)"><span style="font:600 11px/1 Archivo;padding:5px 8px;background:{{ h.bg }};color:{{ h.fg }}">{{ h.type }}</span></td><td style="padding:11px 8px;border-bottom:1px solid var(--hair)">{{ h.detail }}</td><td style="padding:11px 8px;border-bottom:1px solid var(--hair);text-align:right;font-family:'JetBrains Mono',monospace;font-weight:500;color:{{ h.amtColor }}">{{ h.amount }}</td><td style="padding:11px 0 11px 8px;border-bottom:1px solid var(--hair);text-align:right"><a href="#" style="font:12px 'JetBrains Mono',monospace">{{ h.tx }} ↗</a></td></tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:0;border-top:2px solid var(--line);background:var(--surface)">
+      <div style="padding:16px 20px;border-bottom:1px solid var(--hair);display:flex;justify-content:space-between;align-items:center"><div style="font:800 16px Archivo">Add money</div><span style="font:11px Archivo;color:var(--muted)">Partner panel</span></div>
+      <div style="padding:20px;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;border:1px solid var(--line)"><span style="flex:1;padding:8px 12px;font:600 13px Archivo;background:var(--text);color:var(--bg)">Bank transfer</span><span style="flex:1;padding:8px 12px;font:13px Archivo;border-left:1px solid var(--line)">Card</span><span style="flex:1;padding:8px 12px;font:13px Archivo;border-left:1px solid var(--line)">Cash (MoneyGram)</span></div>
+        <div style="border:1px dashed var(--line);padding:20px;display:flex;flex-direction:column;gap:10px;font:13px Archivo;background:var(--bg)">
+          <div style="display:flex;justify-content:space-between;align-items:center"><span style="font:800 13px Archivo;letter-spacing:.04em">PARTNER · SEPA on-ramp</span><span style="font:10px 'JetBrains Mono',monospace;color:var(--muted)">embedded</span></div>
+          <label style="display:flex;flex-direction:column;gap:5px"><span style="font:12px Archivo;color:var(--muted)">You send</span><span style="display:flex;background:var(--surface);border:1px solid var(--line)"><input value="500.00" style="flex:1;min-width:0;font:500 18px 'JetBrains Mono',monospace;background:transparent;border:0;padding:8px 10px;color:var(--text)"><span style="font:600 12px Archivo;color:var(--muted);padding:0 12px;display:flex;align-items:center;border-left:1px solid var(--hair)">EUR</span></span></label>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">You receive</span><span style="font-family:'JetBrains Mono',monospace;font-weight:500">≈ 541.20 USDC</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Rate · fee</span><span style="font-family:'JetBrains Mono',monospace">1.0863 · 0.4%</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Arrives</span><span>Same day</span></div>
+          <button style="font:800 13px Archivo;background:var(--accent);color:var(--accent-ink);border:0;padding:10px 14px;text-align:left;cursor:pointer;margin-top:4px">Continue with partner</button>
+        </div>
+        <div style="font:12px/1.5 Archivo;color:var(--muted)">Your money goes to the partner, who sends USDC to your dvdnd wallet. We never hold your bank details.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 13 PROFILE -->
+<div data-screen-label="13 Profile and settings" style="width:1440px;background:var(--bg);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.2)">
+  <div style="display:flex;align-items:center;gap:32px;padding:0 32px;height:56px;border-bottom:2px solid var(--line)">
+    <div style="font:800 17px Archivo">dvdnd</div>
+    <div style="display:flex;gap:24px;font:14px Archivo;height:56px;align-items:stretch"><span style="display:flex;align-items:center">Discover</span><span style="display:flex;align-items:center">Portfolio</span><span style="display:flex;align-items:center">Wallet</span><span style="display:flex;align-items:center">Simulation</span></div>
+    <div style="margin-left:auto;display:flex;gap:16px;align-items:center"><span style="font:600 11px/1 Archivo;letter-spacing:.04em;padding:5px 9px;background:var(--green-soft);color:var(--green)">Verified</span><span style="font:500 13px 'JetBrains Mono',monospace">1,240.00 <span style="color:var(--muted)">USDC</span></span><span style="width:32px;height:32px;background:var(--accent);color:var(--accent-ink);display:inline-flex;align-items:center;justify-content:center;font:800 12px Archivo">AM</span></div>
+  </div>
+  <div style="padding:32px 32px 48px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:40px;align-items:start">
+    <div style="display:flex;flex-direction:column;font:14px Archivo;border-top:2px solid var(--line)">
+      <span style="padding:12px 0;border-bottom:1px solid var(--hair);font-weight:600;color:var(--accent-text)">Eligibility</span><span style="padding:12px 0;border-bottom:1px solid var(--hair)">Passkeys and devices</span><span style="padding:12px 0;border-bottom:1px solid var(--hair)">Notifications</span><span style="padding:12px 0;border-bottom:1px solid var(--hair)">Bank accounts</span><span style="padding:12px 0;border-bottom:1px solid var(--hair)">Legal notices</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:32px;max-width:860px">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <h1 style="margin:0;font:800 28px/1.1 Archivo;letter-spacing:-.02em">Ana Martins</h1>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--hair);border-top:2px solid var(--line)">
+          <div style="background:var(--bg);padding:20px 20px 20px 0;display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center"><div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Eligibility</div><span style="font:600 11px/1 Archivo;padding:5px 9px;background:var(--green-soft);color:var(--green);display:inline-flex;gap:6px;align-items:center"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg>Verified</span></div>
+            <div style="font:14px Archivo">Residence: Portugal · not a US resident</div>
+            <div style="font:13px Archivo;color:var(--muted)">Credential valid to <b style="font-family:'JetBrains Mono',monospace;font-weight:500;color:var(--text)">Mar 2027</b> · 141 days</div>
+            <div style="height:4px;background:var(--surface2)"><div style="width:62%;height:100%;background:var(--green)"></div></div>
+            <div style="font:12px Archivo;color:var(--muted)">Your identity was never published. Only the proof that you're eligible is on Stellar. <a href="#" style="font-family:'JetBrains Mono',monospace">4b1e…08af ↗</a></div>
+            <button style="font:800 13px Archivo;background:transparent;color:var(--text);border:1px solid var(--line);padding:9px 14px;align-self:flex-start;cursor:pointer">Re-verify early</button>
+          </div>
+          <div style="background:var(--bg);padding:20px;display:flex;flex-direction:column;gap:10px">
+            <div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Passkeys and devices</div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--hair);font:13px Archivo"><div><div style="font-weight:600">iPhone 15 · Face ID</div><div style="color:var(--muted)">Created 12 Jan 2026 · last used today</div></div><span style="font:600 11px/1 Archivo;padding:5px 8px;background:var(--surface2)">This device</span></div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--hair);font:13px Archivo"><div><div style="font-weight:600">MacBook Pro · Touch ID</div><div style="color:var(--muted)">Created 3 Feb 2026 · last used 2 days ago</div></div><a href="#" style="font:12px Archivo">Remove</a></div>
+            <button style="font:800 13px Archivo;background:transparent;color:var(--text);border:1px solid var(--line);padding:9px 14px;align-self:flex-start;cursor:pointer;margin-top:4px">Add a passkey</button>
+            <div style="font:12px Archivo;color:var(--muted)">No seed phrase. Add a second device so you're never locked out.</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px">
+        <div style="display:flex;flex-direction:column">
+          <div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding-bottom:8px;border-bottom:2px solid var(--line)">Notifications</div>
+          <label style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--hair);font:13px Archivo"><span>Dividend ready to claim</span><input type="checkbox" checked style="accent-color:var(--accent)"></label>
+          <label style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--hair);font:13px Archivo"><span>Raise funded or refunding</span><input type="checkbox" checked style="accent-color:var(--accent)"></label>
+          <label style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--hair);font:13px Archivo"><span>Lock period ending in 7 days</span><input type="checkbox" checked style="accent-color:var(--accent)"></label>
+          <label style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--hair);font:13px Archivo"><span>Credential expiring in 30 days</span><input type="checkbox" checked style="accent-color:var(--accent)"></label>
+          <label style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--hair);font:13px Archivo"><span>New raises in sectors I follow</span><input type="checkbox" style="accent-color:var(--accent)"></label>
+        </div>
+        <div style="display:flex;flex-direction:column">
+          <div style="font:600 11px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding-bottom:8px;border-bottom:2px solid var(--line)">Legal notices</div>
+          <a href="#" style="padding:12px 0;border-bottom:1px solid var(--hair);font:13px Archivo;color:var(--text);text-decoration:none;display:flex;justify-content:space-between">Terms of service <span style="color:var(--muted)">↗</span></a>
+          <a href="#" style="padding:12px 0;border-bottom:1px solid var(--hair);font:13px Archivo;color:var(--text);text-decoration:none;display:flex;justify-content:space-between">Risk disclosure <span style="color:var(--muted)">↗</span></a>
+          <a href="#" style="padding:12px 0;border-bottom:1px solid var(--hair);font:13px Archivo;color:var(--text);text-decoration:none;display:flex;justify-content:space-between">Privacy and the zero-knowledge proof <span style="color:var(--muted)">↗</span></a>
+          <a href="#" style="padding:12px 0;border-bottom:1px solid var(--hair);font:13px Archivo;color:var(--text);text-decoration:none;display:flex;justify-content:space-between">US persons notice <span style="color:var(--muted)">↗</span></a>
+          <div style="font:12px Archivo;color:var(--muted);margin-top:12px">dvdnd is not available to US residents. Tokens are profit-share instruments, not deposits; dividends depend on company profit.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;},&quot;tradeMode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;simple&quot;,&quot;advanced&quot;],&quot;default&quot;:&quot;simple&quot;,&quot;tsType&quot;:&quot;'simple'|'advanced'&quot;,&quot;section&quot;:&quot;Trade screen&quot;}}">
+class Component extends DCLogic {
+  state = { tab: 'Overview', advanced: false };
+  applyTheme() { document.documentElement.dataset.theme = this.props.theme ?? 'light'; }
+  componentDidMount() { this.applyTheme(); if (this.props.tradeMode === 'advanced') this.setState({ advanced: true }); }
+  componentDidUpdate(p) { if (p.theme !== this.props.theme) this.applyTheme(); if (p.tradeMode !== this.props.tradeMode) this.setState({ advanced: this.props.tradeMode === 'advanced' }); }
+  renderVals() {
+    const t = this.state.tab, adv = this.state.advanced;
+    const A = 'var(--accent)', AT = 'var(--accent-text)', G = 'var(--green)', R = 'var(--red)', M = 'var(--muted)';
+    const raises = [
+      { initials:'HH', name:'Harbor & Hearth Bakeries', cc:'PT', country:'Portugal', sector:'Food', sub:'4 shops', status:'Open', pillBg:'var(--accent-soft)', pillFg:AT, yield:'18.0%', committed:'50%', days:'9', pct:'70.7%', minPct:'60%', barColor:A, raised:'412,000', investors:318, min:'350k', max:'583,000' },
+      { initials:'NF', name:'Northline Fitness', cc:'EE', country:'Estonia', sector:'Fitness', sub:'3 gyms', status:'Open', pillBg:'var(--accent-soft)', pillFg:AT, yield:'15.0%', committed:'40%', days:'6', pct:'20.7%', minPct:'55%', barColor:A, raised:'188,000', investors:142, min:'500k', max:'907,000' },
+      { initials:'KL', name:'Kora Last-Mile Logistics', cc:'KE', country:'Kenya', sector:'Logistics', sub:'Nairobi', status:'Funded', pillBg:'var(--green-soft)', pillFg:G, yield:'22.0%', committed:'60%', days:'2', pct:'100%', minPct:'61%', barColor:G, raised:'409,000', investors:521, min:'250k', max:'409,000' },
+      { initials:'SS', name:'Solenne Skin Clinic', cc:'FR', country:'France', sector:'Health', sub:'Lyon', status:'Refunding', pillBg:'var(--red-soft)', pillFg:R, yield:'18.0%', committed:'50%', days:'—', pct:'34%', minPct:'57%', barColor:'var(--faint)', raised:'89,500', investors:77, min:'150k', max:'264,000' },
+    ];
+    const tabs = ['Overview','Financials','Agreement','Dividends','Holders'];
+    const detailTabs = tabs.map(l => ({ label:l, border: l===t ? A : 'transparent', color: l===t ? 'var(--text)' : M, onClick: () => this.setState({ tab:l }) }));
+    const reports = [
+      { name:'Annual accounts 2025', meta:'Audited · Moore Portugal · 4.2 MB' },
+      { name:'Annual accounts 2024', meta:'Audited · 3.9 MB' },
+      { name:'Annual accounts 2023', meta:'Audited · 3.6 MB' },
+      { name:'Management report Q3 2026', meta:'Unaudited · 1.1 MB' },
+    ];
+    const bids = [['1.07','2,400'],['1.06','5,100'],['1.05','3,800'],['1.04','9,200'],['1.03','4,000'],['1.02','12,500']].map(([p,s],i)=>({p,s,w:(20+i*13)+'%'}));
+    const asks = [['1.08','1,900'],['1.09','3,300'],['1.10','6,700'],['1.11','2,100'],['1.12','8,400'],['1.14','10,000']].map(([p,s],i)=>({p,s,w:(18+i*14)+'%'}));
+    const trades = [['14:31','Buy','1.08','450'],['14:28','Buy','1.08','1,200'],['14:19','Sell','1.07','800'],['13:52','Buy','1.07','300'],['13:40','Sell','1.07','2,000'],['13:11','Buy','1.06','650']].map(([t,side,p,s])=>({t,side,p,s,c: side==='Buy'?G:'var(--text)'}));
+    const H = (type,bg,fg)=>({type,bg,fg});
+    const T = { Invest:H('Invest','var(--accent-soft)',AT), Dividend:H('Dividend','var(--green-soft)',G), Refund:H('Refund','var(--surface2)','var(--text)'), Trade:H('Trade','var(--surface2)','var(--text)'), Deposit:H('Deposit','var(--green-soft)',G), Withdrawal:H('Withdrawal','var(--surface2)','var(--text)') };
+    const history = [
+      ['25 Oct 2026','Invest','Escrow · Harbor & Hearth Bakeries','−3,000.00','a9d4…77b0',false],
+      ['24 Oct 2026','Refund','Solenne Skin Clinic · minimum missed','+500.00','f20c…1a9e',true],
+      ['30 Jul 2026','Dividend','Andes Craft Brewing · H1 2026 · 0.088/token','+352.00','e71c…b2d9',true],
+      ['12 Jun 2026','Trade','Bought 1,000 Andes at 1.04','−1,040.00','9b7e…44c1',false],
+      ['10 Jun 2026','Deposit','SEPA · partner on-ramp','+2,000.00','03ad…e8f7',true],
+      ['30 Jan 2026','Dividend','Andes Craft Brewing · H2 2025 · 0.091/token','+364.00','7c5d…90ab',true],
+      ['14 Jan 2026','Withdrawal','To bank · SEPA ····4471','−600.00','1e2f…6c3d',false],
+    ].map(([date,type,detail,amount,tx,pos])=>({date,detail,amount,tx,...T[type],amtColor: pos?G:'var(--text)'}));
+    return {
+      raises, detailTabs, reports, bids, asks, trades, history,
+      tabOverview:t==='Overview', tabFinancials:t==='Financials', tabAgreement:t==='Agreement', tabDividends:t==='Dividends', tabHolders:t==='Holders',
+      advanced:adv, setSimple:()=>this.setState({advanced:false}), setAdvanced:()=>this.setState({advanced:true}),
+      simpleBg: adv?'transparent':'var(--text)', simpleFg: adv?'var(--text)':'var(--bg)', advBg: adv?'var(--text)':'transparent', advFg: adv?'var(--bg)':'var(--text)',
+    };
+  }
+}
+</script>
+</body>
+</html>
