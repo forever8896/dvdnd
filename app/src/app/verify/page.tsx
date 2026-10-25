@@ -10,7 +10,7 @@ import { DIDIT_ENABLED, IDOS_ENABLED, IS_TESTNET } from "@/lib/config";
 import { connectEthereum, ENCLAVE_CONTAINER, hasEthereumWallet, hasProfile, logIn, shareKycCredential, type EvmWallet } from "@/lib/idos-client";
 import type { Signer } from "@/lib/stellar";
 import { isEligible, useWallet } from "@/lib/wallet";
-import { fetchLeaves, leafFromCommitment, proveResidence, randomSecret, secretCommitment, type Credential } from "@/lib/zk";
+import { fetchLeaves, leafFromCommitment, proveResidence, randomSecret, secretCommitment, type Credential, type SorobanProof } from "@/lib/zk";
 
 type Method = "didit" | "idos" | "demo";
 
@@ -21,7 +21,7 @@ const METHODS: { key: Method; label: string; on: boolean }[] = [
   { key: "demo", label: "Testnet demo check", on: IS_TESTNET },
 ];
 const AVAILABLE = METHODS.filter((m) => m.on);
-type Step = "form" | "kyc" | "sharing" | "issuing" | "proving" | "verifying" | "done" | "ineligible";
+type Step = "form" | "kyc" | "sharing" | "issuing" | "proving" | "sign" | "verifying" | "done" | "ineligible";
 
 const STEPS: { key: Step; label: string }[] = [
   { key: "form", label: "Identity check" },
@@ -29,7 +29,7 @@ const STEPS: { key: Step; label: string }[] = [
   { key: "proving", label: "Private proof" },
   { key: "verifying", label: "Verified on Stellar" },
 ];
-const STEP_INDEX: Record<Step, number> = { form: 0, kyc: 0, sharing: 0, issuing: 1, proving: 2, verifying: 3, done: 4, ineligible: 0 };
+const STEP_INDEX: Record<Step, number> = { form: 0, kyc: 0, sharing: 0, issuing: 1, proving: 2, sign: 3, verifying: 3, done: 4, ineligible: 0 };
 
 const credKey = (pk: string) => `dvdnd.credential.${pk}`;
 
@@ -62,11 +62,60 @@ export default function Verify() {
     if (ready && !investor) router.replace("/signin");
   }, [ready, investor, router]);
 
+  // A built proof waiting for the wallet's signature (external wallets sign on a click).
+  const [proof, setProof] = useState<SorobanProof | null>(null);
+  // A credential this browser already holds but hasn't registered (e.g. the signature never happened).
+  const [stored, setStored] = useState<Credential | null>(null);
+  useEffect(() => {
+    if (!investor) return;
+    try {
+      const raw = localStorage.getItem(credKey(investor.publicKey));
+      setStored(raw ? (JSON.parse(raw) as Credential) : null);
+    } catch {
+      setStored(null);
+    }
+  }, [investor]);
+
   const fail = useCallback((e: unknown) => {
     setError(e instanceof Error ? e.message : String(e));
     setKycLink(null);
     setStep("form");
   }, []);
+
+  /** Has the gate contract check the proof and register this wallet. */
+  const register = useCallback(
+    async (investor: Signer, p: SorobanProof) => {
+      setStep("verifying");
+      const v = await gate.verifyAndRegister(investor, p);
+      setVerifiedTx(v.hash);
+      setProof(null);
+      await refresh();
+      setStep("done");
+    },
+    [refresh],
+  );
+
+  /**
+   * Builds the proof for a credential. A demo wallet registers straight away;
+   * an external wallet waits for a click, because browsers block wallet
+   * pop-ups that don't follow one, and proving takes several seconds.
+   */
+  const proveAndRegister = useCallback(
+    async (investor: Signer, cred: Credential) => {
+      setStep("proving");
+      const t0 = performance.now();
+      const leaves = await fetchLeaves();
+      const p = await proveResidence(cred, investor.publicKey, leaves, Math.floor(Date.now() / 1000));
+      setProofMs(performance.now() - t0);
+      if (investor.kind === "external") {
+        setProof(p);
+        setStep("sign");
+        return;
+      }
+      await register(investor, p);
+    },
+    [register],
+  );
 
   /** Issues the credential (server builds the leaf from the verified country), then proves and registers. */
   const issueAndProve = useCallback(
@@ -94,20 +143,9 @@ export default function Verify() {
         /* the credential only lives for this page */
       }
       setIssued(out);
-
-      setStep("proving");
-      const t0 = performance.now();
-      const leaves = await fetchLeaves();
-      const proof = await proveResidence(cred, investor.publicKey, leaves, Math.floor(Date.now() / 1000));
-      setProofMs(performance.now() - t0);
-
-      setStep("verifying");
-      const v = await gate.verifyAndRegister(investor, proof);
-      setVerifiedTx(v.hash);
-      await refresh();
-      setStep("done");
-    },
-    [refresh],
+      setStored(cred);
+      await proveAndRegister(investor, cred);
+    },    [proveAndRegister],
   );
 
   /** After idOS KYC: log the EVM wallet in to idOS, share the credential with us, then issue. */
@@ -271,6 +309,34 @@ export default function Verify() {
 
   const activeIndex = STEP_INDEX[step];
   const working = step === "sharing" || step === "issuing" || step === "proving" || step === "verifying";
+  const now = Date.now() / 1000;
+  const resumable = stored && stored.expiry > now && step === "form" && !alreadyEligible;
+
+  async function signAndRegister() {
+    if (!investor || !proof) return;
+    setError(null);
+    try {
+      // The gate accepts proofs made within ~10 minutes of the ledger time; rebuild an old one.
+      if (now - proof.now > 480 && stored) {
+        await proveAndRegister(investor, stored);
+        return;
+      }
+      await register(investor, proof);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+      setStep("sign");
+    }
+  }
+
+  async function resume() {
+    if (!investor || !stored) return;
+    setError(null);
+    try {
+      await proveAndRegister(investor, stored);
+    } catch (e) {
+      fail(e);
+    }
+  }
 
   return (
     <main className="page" style={{ maxWidth: 880 }}>
@@ -313,6 +379,35 @@ export default function Verify() {
           <Link href="/discover" className="btn btn-primary btn-sm">
             Discover raises
           </Link>
+        </div>
+      )}
+
+      {resumable && (
+        <div className="banner banner-green" style={{ maxWidth: 560 }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 800, color: "var(--green)" }}>You already have a verified credential</div>
+            <div>For {countryName(stored!.country)}, kept in this browser. Build the proof and register it with your wallet.</div>
+          </div>
+          <button className="btn btn-primary btn-sm" onClick={resume}>
+            Continue
+          </button>
+        </div>
+      )}
+
+      {step === "sign" && proof && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 560 }}>
+          {issued && (
+            <Toast kind="ok" title={`Credential issued for ${countryName(issued.country)}`}>
+              <TxLink hash={issued.hash} />
+            </Toast>
+          )}
+          <Toast kind="ok" title={`Proof generated${proofMs ? ` in ${(proofMs / 1000).toFixed(1)} s` : ""}`}>
+            One signature registers it on Stellar. The gate contract checks the proof with the BN254 host functions.
+          </Toast>
+          <button className="btn btn-primary btn-wide" style={{ alignSelf: "flex-start" }} onClick={signAndRegister}>
+            Sign with {investor.label} to register
+          </button>
+          {error && <Toast kind="error" title="Registration didn't go through">{error}</Toast>}
         </div>
       )}
 
