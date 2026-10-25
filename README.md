@@ -34,6 +34,15 @@ Real businesses, meanwhile, struggle to raise growth capital without giving up c
 
 Money flows to the company once, at the raise, and back to holders as dividends from real profits. There is no bonding curve, no sniper advantage and no company buyback.
 
+## What's real
+
+- **Identity:** a hosted Didit check (ID document, liveness, face match) behind our own issuer, with only a Stellar wallet. The Didit session is deleted once the investor's proof is registered on Stellar.
+- **Privacy:** a Groth16 proof of non-US residence, verified on-chain with Stellar's BN254 and Poseidon host functions. Keys come from a recorded ceremony.
+- **Sanctions:** wallets screened against OFAC's published crypto addresses.
+- **Securities rules in the contract:** Reg S, Reg D 506(c) or both per raise; minimum ticket, holder cap and a lock-up enforced on-chain; per-raise compliance with recorded reasons and an audit log.
+- **Governance:** a 2-of-3 council multisig (master key disabled) holds the admin roles.
+- **Companies:** DNS and GLEIF ownership checks, and an agreement anyone can verify against its on-chain hash.
+
 ## Compliance model
 
 dvdnd aims to be open compliance software, not a broker (draft strategy, not legal advice):
@@ -132,11 +141,15 @@ pnpm install && pnpm dev                                           # http://loca
 1. **Investor (Reg S):** Sign in → I'm an investor → verify residence (Didit identity check with only the Stellar wallet; then a real Groth16 proof generated in the browser and verified on-chain) → Discover → open a raise → Invest (Add money swaps test XLM for Circle testnet USDC).
    **Investor (506(c)):** open the Harbor & Hearth raise → sign the accreditation statement → get verified by the testnet verifier → Invest.
 2. **Company:** Sign in → I'm raising for my company → register → verify ownership → sign the agreement → Set up raise (issues the share token with compliance flags and opens the raise).
-3. **Close and pay:** once a raise is full or past its deadline, anyone can close it → investors claim tokens in Portfolio and lock them → the company starts the first period and pays a dividend → investors claim USDC.
+3. **Close and pay:** once a raise is full or past its deadline, anyone can close it → investors claim tokens in Portfolio (during lock-up they go straight into the dividend vault) → the company starts the first period and pays a dividend → investors claim USDC.
+4. **Compliance:** Company → Compliance lists every holder (active or frozen, wallet and vault balances); the raise's compliance account can freeze, unfreeze or claw back with a reason, and every action shows in the audit log.
+5. **Agreement:** any raise page → Agreement shows the exact signed text and checks its hash against the one on Stellar.
 
 | Variable | Where | Purpose |
 |---|---|---|
-| `DVDND_ADMIN_SECRET` | server only (`app/.env.local`) | Testnet platform key used by `/api/kyc` (adds credential leaves to the gate) and `/api/kyb` (verifies companies in the registry). |
+| `DVDND_ADMIN_SECRET` | server only (`app/.env.local`) | Testnet platform key: issues credential leaves after an identity check and verifies companies in the registry. |
+| `DIDIT_API_KEY`, `DIDIT_WORKFLOW_ID` | server only | Didit identity check (API key and a published KYC workflow). |
+| `NEXT_PUBLIC_DIDIT_ENABLED` | public | `1` to offer the Didit check on the verify page. |
 | `NEXT_PUBLIC_REGISTRY`, `NEXT_PUBLIC_GATE`, `NEXT_PUBLIC_OFFERING`, `NEXT_PUBLIC_VAULT`, `NEXT_PUBLIC_USDC_SAC` | optional | Override the testnet contract IDs (defaults in `app/src/lib/config.ts`). |
 | `NEXT_PUBLIC_RPC_URL`, `NEXT_PUBLIC_HORIZON_URL` | optional | Override the testnet RPC / Horizon endpoints. |
 
