@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ShieldCheck } from "@/components/icons";
 import { EligibilityPill, Toast, TxLink } from "@/components/ui";
 import { countryName, gate, ISO_COUNTRIES } from "@/lib/chain";
-import { IDOS, IDOS_ENABLED, IS_TESTNET } from "@/lib/config";
+import { IDOS_ENABLED, IS_TESTNET } from "@/lib/config";
 import { ENCLAVE_CONTAINER, hasProfile, logIn, shareKycCredential } from "@/lib/idos-client";
 import type { Signer } from "@/lib/stellar";
 import { isEligible, useWallet } from "@/lib/wallet";
@@ -37,6 +37,8 @@ export default function Verify() {
   const [country, setCountry] = useState(620);
   const [outsideUs, setOutsideUs] = useState(false);
   const [kycLink, setKycLink] = useState<string | null>(null);
+  // The idOS relay runs in its own window: embedding it needs our origin registered with idOS.
+  const kycWindow = useRef<Window | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [issued, setIssued] = useState<IssueResponse | null>(null);
   const [verifiedTx, setVerifiedTx] = useState<string>();
@@ -113,24 +115,17 @@ export default function Verify() {
     }
   }, [investor, issueAndProve, fail]);
 
-  // Messages from the idOS relay iframe: done, rejected, or a request to open a window.
+  // Carry on when the person closes the idOS window.
   useEffect(() => {
-    if (!kycLink) return;
-    const relayOrigin = new URL(IDOS.relayUrl).origin;
-    const onMessage = (ev: MessageEvent) => {
-      if (ev.origin !== relayOrigin) return;
-      const data = ev.data as { response?: string; error?: unknown; open?: string; target?: string; features?: string };
-      if (data?.open) {
-        window.open(data.open, data.target, data.features);
-      } else if (data?.response === "done") {
+    if (step !== "kyc" || !kycLink) return;
+    const t = setInterval(() => {
+      if (kycWindow.current?.closed) {
+        clearInterval(t);
         void continueWithIdos();
-      } else if (data?.response === "rejected" || data?.error) {
-        fail(new Error(typeof data.error === "string" ? data.error : "The identity check was not approved."));
       }
-    };
-    window.addEventListener("message", onMessage);
-    return () => window.removeEventListener("message", onMessage);
-  }, [kycLink, continueWithIdos, fail]);
+    }, 1000);
+    return () => clearInterval(t);
+  }, [step, kycLink, continueWithIdos]);
 
   if (!investor) return null;
   const alreadyEligible = isEligible(eligibleUntil) && step === "form";
@@ -138,9 +133,12 @@ export default function Verify() {
   async function startIdos() {
     if (!investor) return;
     setError(null);
+    // Open the window inside the click so popup blockers allow it; the link comes after.
+    const win = window.open("about:blank", "idos-kyc", "popup,width=520,height=860");
     try {
       setStep("kyc");
       if (await hasProfile(investor.publicKey)) {
+        win?.close();
         await continueWithIdos();
         return;
       }
@@ -151,10 +149,22 @@ export default function Verify() {
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error ?? "Couldn't start the identity check.");
-      setKycLink(body.link);
+      openKycWindow(body.link, win);
     } catch (e) {
+      win?.close();
       fail(e);
     }
+  }
+
+  function openKycWindow(link: string, win: Window | null = null) {
+    const w = win && !win.closed ? win : window.open("about:blank", "idos-kyc", "popup,width=520,height=860");
+    if (!w) {
+      setKycLink(link); // blocked: the link below opens it in a tab instead
+      return;
+    }
+    w.location.href = link;
+    kycWindow.current = w;
+    setKycLink(link);
   }
 
   async function startDemo(e: React.FormEvent) {
@@ -287,21 +297,28 @@ export default function Verify() {
       )}
 
       {step === "kyc" && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 560 }}>
           {kycLink ? (
-            <iframe
-              title="idOS identity check"
-              src={kycLink}
-              allow="camera; fullscreen"
-              sandbox="allow-forms allow-modals allow-popups allow-same-origin allow-scripts"
-              style={{ width: "100%", height: 720, border: "1px solid var(--line)", background: "var(--surface)" }}
-            />
+            <>
+              <Toast kind="pending" title="Complete the identity check in the idOS window">
+                idOS asks for an ID document, a selfie and your address. When it says you&apos;re done, close the window and
+                we&apos;ll continue here.
+              </Toast>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <button className="btn btn-primary btn-sm" onClick={() => void continueWithIdos()}>
+                  I&apos;ve finished
+                </button>
+                <a className="btn btn-secondary btn-sm" href={kycLink} target="idos-kyc" onClick={(e) => { e.preventDefault(); openKycWindow(kycLink); }}>
+                  Reopen the idOS window
+                </a>
+                <button className="btn btn-secondary btn-sm" onClick={() => { kycWindow.current?.close(); fail(new Error("Identity check cancelled.")); }}>
+                  Cancel
+                </button>
+              </div>
+            </>
           ) : (
             <Toast kind="pending" title="Looking for your idOS profile" />
           )}
-          <button className="btn btn-secondary btn-sm" style={{ alignSelf: "flex-start" }} onClick={() => fail(new Error("Identity check cancelled."))}>
-            Cancel
-          </button>
         </div>
       )}
 
