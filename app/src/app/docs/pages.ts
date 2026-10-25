@@ -21,7 +21,6 @@ export const DOCS: DocPage[] = [
   { slug: "companies", title: "Listing a company", statement: "Your profit, on the record.", blurb: "Ownership checks, a verifiable agreement and the raise terms.", group: "Companies" },
   { slug: "compliance", title: "Compliance controls", statement: "Every action leaves a reason.", blurb: "Per-raise freeze, clawback and an audit log anyone can read.", group: "Companies" },
   { slug: "governance", title: "Contracts and governance", statement: "No single key changes the rules.", blurb: "Five contracts, a 2-of-3 council and a timelock on every admin change.", group: "Protocol" },
-  { slug: "simulation", title: "The simulation model", statement: "Same traders. Different asset.", blurb: "What the simulation assumes, where the numbers come from, and its limits.", group: "Protocol" },
 ];
 
 export const href = (p: DocPage) => (p.slug ? `/docs/${p.slug}` : "/docs");

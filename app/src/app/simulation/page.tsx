@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { Bars, ChartCard, Heatmap, Legend, LineChart, SERIES, pct, usd, type SeriesKey } from "@/components/sim-charts";
 import { annualise, DEFAULT_PARAMS, HEAT_FAILURES, HEAT_YIELDS, runSimulation, type SimParams, type Summary, type TraderType } from "@/lib/sim";
@@ -374,7 +373,7 @@ export default function Simulation() {
                 <li>Companies: revenue lognormal (median $700k, σ 0.8), net margin 9% ± 6%, profit growth 4% ± 25% a year; raises need half their maximum or refund in full.</li>
                 <li>{pct(GATE_PASS)} of traders pass the residence proof. Yield investors back a raise when its yield beats 8% plus a risk premium that rises with failure and fraud.</li>
                 <li>Secondary trades happen at period ends at a 10–30% discount to fair value; positions left at the end are marked at that price. The comparators are modelled distributions, not agents.</li>
-                <li>This is a model, not a forecast or investment advice. The figures it rests on are listed in the <Link href="/docs/simulation">docs</Link>.</li>
+                <li>This is a model, not a forecast or investment advice.</li>
               </ul>
             </div>
           </section>

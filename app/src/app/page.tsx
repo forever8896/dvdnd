@@ -14,8 +14,8 @@ export default function Home() {
           <Link href="/signin" className="btn btn-secondary btn-wide">
             Raise for your company
           </Link>
-          <Link href="/simulation" className="btn btn-link">
-            See the simulation →
+          <Link href="/docs" className="btn btn-link">
+            How it works →
           </Link>
         </div>
       </section>

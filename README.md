@@ -4,7 +4,7 @@
 
 dvdnd is tokenized private equity on Stellar. Profitable small and mid-sized businesses raise USDC at a fixed price by selling a share of their future profits. Investors who lock their tokens for a full period receive that period's dividends in USDC, pro-rata. Each raise runs under a securities exemption: **Reg S** (investors prove with a zero-knowledge proof that they live outside the US), **Reg D 506(c)** (verified accredited investors, US residents included), or both side by side. The Stellar protocol itself then limits holding the token to eligible investors.
 
-**Live demo (Stellar testnet): https://dvdnd.vercel.app** · [Docs](https://dvdnd.vercel.app/docs) · [Simulation](https://dvdnd.vercel.app/simulation)
+**Live demo (Stellar testnet): https://dvdnd.vercel.app** · [Docs](https://dvdnd.vercel.app/docs)
 
 Built for HackMeridian · Genesis track · Stellar Unlocked.
 
