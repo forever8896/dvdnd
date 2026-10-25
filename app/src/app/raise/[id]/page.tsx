@@ -12,6 +12,8 @@ import {
   countryName,
   displayStatus,
   dividendPool,
+  acceptsAccredited,
+  acceptsResidents,
   errorText,
   Exemption,
   EXEMPTION_LABEL,
@@ -295,7 +297,7 @@ function Terms({ l }: { l: Listing }) {
   const agent = t.compliance === l.raise.company ? "The company" : `Agent ${t.compliance.slice(0, 4)}…${t.compliance.slice(-4)}`;
   const rows: [string, string][] = [
     ["Offered under", EXEMPTION_LABEL[t.exemption]],
-    ["Minimum investment", t.min_ticket > 0n ? `${fmt(fromUnits(t.min_ticket))} USDC` : t.exemption === Exemption.RegD506c ? "200,000 USDC unless verified" : "None"],
+    ["Minimum investment", t.min_ticket > 0n ? `${fmt(fromUnits(t.min_ticket))} USDC` : acceptsAccredited(t.exemption) ? (t.exemption === Exemption.RegSAnd506c ? "None for residents; 200,000 USDC for unverified accredited" : "200,000 USDC unless verified") : "None"],
     ["Holders", `${l.raise.holders} of ${t.max_holders} max`],
     ["Lock-up until", date(t.lockup_until)],
     ["Compliance", agent],
@@ -316,7 +318,10 @@ function RaisePanel({ l, onChange }: { l: Listing; onChange: () => void }) {
   const { signer, eligibleUntil, refresh } = useWallet();
   const investor = signer.investor;
   const actor = investor ?? signer.company;
-  const regD = l.raise.terms.exemption === Exemption.RegD506c;
+  const e = l.raise.terms.exemption;
+  // A proven non-US resident qualifies where Reg S applies; otherwise, accreditation where 506(c) applies.
+  const resident = acceptsResidents(e) && isEligible(eligibleUntil);
+  const regD = acceptsAccredited(e) && !resident;
   const { data: accreditation, reload: reloadAccreditation } = useAccreditation(l.raise, regD ? (investor ?? undefined) : undefined);
   const { data: mine, reload: reloadMine } = useAsync(
     async () => (investor ? contribution(l.raise.id, investor.publicKey) : 0n),
@@ -395,14 +400,21 @@ function RaisePanel({ l, onChange }: { l: Listing; onChange: () => void }) {
             <Link href="/signin" className="btn btn-primary btn-block">
               Sign in to invest
             </Link>
-          ) : !regD && !isEligible(eligibleUntil) ? (
+          ) : !resident && !regD ? (
             <Link href="/verify" className="btn btn-primary btn-block">
               Verify residence to invest
             </Link>
           ) : regD && !accreditation ? (
             <div className="skeleton" style={{ height: 40 }} />
           ) : regD && !accreditation!.attested && !accreditation!.selfCertified ? (
-            <AccreditationBox raise={r} investor={investor} state={accreditation!} onChange={reloadAccreditation} />
+            <>
+              <AccreditationBox raise={r} investor={investor} state={accreditation!} onChange={reloadAccreditation} />
+              {acceptsResidents(e) && (
+                <Link href="/verify" className="btn btn-secondary btn-block">
+                  Live outside the US? Verify residence instead
+                </Link>
+              )}
+            </>
           ) : (
             <button className="btn btn-primary btn-block" onClick={() => setInvesting(true)} style={{ justifyContent: "space-between" }}>
               <span>Invest</span>

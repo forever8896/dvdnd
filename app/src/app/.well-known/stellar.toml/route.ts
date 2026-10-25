@@ -30,9 +30,12 @@ export async function GET() {
         `desc=${q(`Profit-share token of ${l.company.name} (${countryName(l.company.country)}, ${profile.sector}). Holders who lock for a full period receive ${l.company.payout_bps / 100}% of the company's net profit in USDC.`)}`,
         `conditions=${q(
           (IS_TESTNET ? "Testnet demonstration. " : "") +
-            (l.raise.terms.exemption === Exemption.RegD506c
-              ? "Offered under Rule 506(c) of Regulation D: only verified accredited investors can hold this token. "
-              : "Offered under Regulation S: only wallets that have proven residence outside the United States can hold this token. ") +
+            {
+              [Exemption.RegS]: "Offered under Regulation S: only wallets that have proven residence outside the United States can hold this token. ",
+              [Exemption.RegD506c]: "Offered under Rule 506(c) of Regulation D: only verified accredited investors can hold this token. ",
+              [Exemption.RegSAnd506c]:
+                "Offered under Regulation S to wallets that have proven residence outside the United States, and under Rule 506(c) of Regulation D to verified accredited investors; only those can hold this token. ",
+            }[l.raise.terms.exemption] +
             `Restricted until ${new Date(Number(l.raise.terms.lockup_until) * 1000).toISOString().slice(0, 10)}: tokens stay in the dividend vault until then. ` +
             "The company's compliance account can freeze or claw back holdings, with a recorded reason. Supply equals what was sold in the raise and cannot be increased.",
         )}`,

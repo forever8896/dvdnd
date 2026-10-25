@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { CountryChip, RaiseProgress, StatusPill, Stat, fmt } from "@/components/ui";
-import {
+import { EXEMPTION_LABEL,
   countryName,
   displayStatus,
   fromUnits,
@@ -116,6 +116,7 @@ function RaiseCard({ l }: { l: Listing }) {
             {countryName(l.company.country)} · {l.profile.sector}
             {l.profile.city && ` · ${l.profile.city}`}
           </div>
+          <span className="pill pill-outline" style={{ marginTop: 6 }}>{EXEMPTION_LABEL[l.raise.terms.exemption]}</span>
         </div>
         <StatusPill status={status} />
       </div>

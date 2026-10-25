@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     const issued = await issueCredential(residence.country, commitment, body.userId);
     return NextResponse.json({ ...issued, basis: residence.basis });
   } catch (e) {
-    if (e instanceof IssueError) return NextResponse.json({ error: e.message, ineligible: e.ineligible }, { status: e.status });
+    if (e instanceof IssueError) return NextResponse.json({ error: e.message, ineligible: e.ineligible, us: e.us }, { status: e.status });
     if (e instanceof TxError) return NextResponse.json({ error: e.message, hash: e.hash }, { status: 502 });
     console.error("idos credential", e instanceof Error ? e.message : e);
     return NextResponse.json({ error: "Couldn't read your idOS credential." }, { status: 502 });

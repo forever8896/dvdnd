@@ -7,26 +7,28 @@ import { AddMoney } from "./add-money";
 import { Modal, ReceiptRow } from "./modal";
 import { Toast, TxLink, fmt } from "./ui";
 import {
+  acceptsAccredited,
+  acceptsResidents,
   contribution,
   dividendPool,
   errorText,
-  Exemption,
   fromUnits,
   isEligibleFor,
   lockedUp,
   offering,
-  SELF_CERTIFIED_MINIMUM,
+  selfCertification,
   targetYield,
   toUnits,
   type Listing,
 } from "@/lib/chain";
+import { selfCertifiedMinimum } from "./accreditation";
 import { useAsync } from "@/lib/hooks";
-import { useWallet } from "@/lib/wallet";
+import { isEligible, useWallet } from "@/lib/wallet";
 
 type Step = "amount" | "confirm" | "sending" | "done";
 
 export function InvestModal({ listing, onClose, onInvested }: { listing: Listing; onClose: () => void; onInvested: () => void }) {
-  const { signer, balances, refresh } = useWallet();
+  const { signer, balances, refresh, eligibleUntil } = useWallet();
   const investor = signer.investor!;
   const available = balances.investor?.usdc ?? 0;
   const room = fromUnits(listing.raise.max_raise - listing.raise.raised);
@@ -38,15 +40,18 @@ export function InvestModal({ listing, onClose, onInvested }: { listing: Listing
   const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hash, setHash] = useState<string>();
-  const regD = listing.raise.terms.exemption === Exemption.RegD506c;
-  // What this investor already has in escrow, and whether a verifier attested them (506(c)).
+  const e = listing.raise.terms.exemption;
+  // Residents qualify under Reg S where it applies; everyone else through accreditation (506(c)).
+  const regD = acceptsAccredited(e) && !(acceptsResidents(e) && isEligible(eligibleUntil));
+  // What this investor already has in escrow, and whether a verifier attested them.
   const { data: standing } = useAsync(async () => {
-    const [existing, attested] = await Promise.all([
+    const [existing, attested, cert] = await Promise.all([
       contribution(listing.raise.id, investor.publicKey),
       regD ? isEligibleFor(listing.raise.id, investor.publicKey, 1n) : Promise.resolve(true),
+      regD ? selfCertification(investor.publicKey) : Promise.resolve(null),
     ]);
-    return { existing: fromUnits(existing), attested };
-  }, [listing.raise.id, investor.publicKey]);
+    return { existing: fromUnits(existing), attested, entity: Boolean(cert?.entity) };
+  }, [listing.raise.id, investor.publicKey, regD]);
 
   const value = Number(amount);
   const tokens = value / price;
@@ -57,7 +62,7 @@ export function InvestModal({ listing, onClose, onInvested }: { listing: Listing
   // The raise's minimum, or 200,000 USDC for a self-certified 506(c) investor; counted on their total.
   const minimum = Math.max(
     fromUnits(listing.raise.terms.min_ticket),
-    regD && standing && !standing.attested ? fromUnits(SELF_CERTIFIED_MINIMUM) : 0,
+    regD && standing && !standing.attested ? selfCertifiedMinimum(standing.entity) : 0,
   );
   const belowMin = standing ? standing.existing + value < minimum : false;
 

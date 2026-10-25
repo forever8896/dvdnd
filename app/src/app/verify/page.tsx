@@ -47,6 +47,7 @@ export default function Verify() {
   const [issued, setIssued] = useState<IssueResponse | null>(null);
   const [verifiedTx, setVerifiedTx] = useState<string>();
   const [proofMs, setProofMs] = useState<number | null>(null);
+  const [usResident, setUsResident] = useState(false);
 
   useEffect(() => {
     if (ready && !investor) router.replace("/signin");
@@ -67,6 +68,7 @@ export default function Verify() {
       const res = await issue(await secretCommitment(s));
       const body = await res.json();
       if (body.ineligible) {
+        setUsResident(Boolean(body.us));
         setStep("ineligible");
         return;
       }
@@ -217,6 +219,10 @@ export default function Verify() {
         <p className="muted" style={{ marginTop: 8, maxWidth: 640 }}>
           dvdnd is open to non-US residents. Your identity is checked once, then your browser builds a zero-knowledge
           proof. Stellar verifies the proof without learning who you are or where you live.
+        </p>
+        <p className="small" style={{ marginTop: 6, maxWidth: 640 }}>
+          Living in the US? Accredited investors skip this step: open a raise marked 506(c) and sign the accreditation
+          statement there.
         </p>
       </div>
 
@@ -429,14 +435,36 @@ export default function Verify() {
       {step === "ineligible" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 560 }}>
           <EligibilityPill state="ineligible" />
-          <h2 className="h2">US residents can&apos;t invest on dvdnd</h2>
-          <p className="muted">
-            dvdnd offers company tokens only to people living outside the United States or sanctioned countries. No
-            credential was issued.
-          </p>
-          <button className="btn btn-secondary btn-sm" style={{ alignSelf: "flex-start" }} onClick={() => setStep("form")}>
-            Back
-          </button>
+          {usResident ? (
+            <>
+              <h2 className="h2">You can invest as an accredited investor</h2>
+              <p className="muted">
+                Raises under Reg S are only for people living outside the US, so no residence credential was issued. US
+                residents can still join raises marked <b>Reg D 506(c)</b> or <b>Reg S + 506(c)</b> as accredited investors:
+                sign the accreditation statement on the raise page, then invest at least 200,000 USDC (1,000,000 for an
+                entity), or less once a verification service has confirmed you.
+              </p>
+              <div style={{ display: "flex", gap: 8 }}>
+                <Link href="/discover" className="btn btn-primary btn-sm">
+                  Find raises open to accredited investors
+                </Link>
+                <button className="btn btn-secondary btn-sm" onClick={() => setStep("form")}>
+                  Back
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <h2 className="h2">dvdnd isn&apos;t available where you live</h2>
+              <p className="muted">
+                Residents of sanctioned countries (North Korea, Iran, Cuba and Syria) can&apos;t invest on dvdnd. No
+                credential was issued.
+              </p>
+              <button className="btn btn-secondary btn-sm" style={{ alignSelf: "flex-start" }} onClick={() => setStep("form")}>
+                Back
+              </button>
+            </>
+          )}
         </div>
       )}
     </main>

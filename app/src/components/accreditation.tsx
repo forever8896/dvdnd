@@ -1,37 +1,60 @@
 "use client";
 
 // Rule 506(c) eligibility on a raise page: the investor signs the written
-// accreditation statement on-chain (its sha256), then either invests at least
-// 200,000 USDC (the SEC staff's March 2025 high-minimum route) or gets an
-// attestation from the raise's accreditation verifier.
+// accreditation statement on-chain (its sha256), as a person or an entity,
+// then either invests at least 200,000 USDC (1,000,000 for an entity), the
+// SEC staff's March 2025 high-minimum route, or gets an attestation from the
+// raise's accreditation verifier.
 
 import { useState } from "react";
 import { Toast, TxLink, fmt } from "./ui";
-import { errorText, fromUnits, isEligibleFor, offering, selfCertification, SELF_CERTIFIED_MINIMUM, type Raise } from "@/lib/chain";
+import {
+  ENTITY_SELF_CERTIFIED_MINIMUM,
+  errorText,
+  fromUnits,
+  isEligibleFor,
+  offering,
+  selfCertification,
+  SELF_CERTIFIED_MINIMUM,
+  type Raise,
+} from "@/lib/chain";
 import { IS_TESTNET } from "@/lib/config";
 import { sha256 } from "@/lib/company";
 import { useAsync } from "@/lib/hooks";
 import type { Signer } from "@/lib/stellar";
 
-export const ACCREDITATION_STATEMENT = [
-  "dvdnd accreditation statement (Rule 506(c))",
-  "1. I am an accredited investor as defined in Rule 501(a) of Regulation D: for example, income over $200,000 (or $300,000 with a spouse or partner) in each of the last two years with the same expected this year; net worth over $1,000,000 excluding my primary residence; or a Series 7, 65 or 82 licence in good standing.",
-  "2. My investment is not financed, in whole or in part, by a third party for the specific purpose of making it.",
-  "3. I will tell the issuer if either of these stops being true before I invest.",
-].join("\n");
+const COMMON = [
+  "2. The investment is not financed, in whole or in part, by a third party for the specific purpose of making it.",
+  "3. I will tell the issuer if either of these stops being true before investing.",
+];
 
-export type Accreditation = { attested: boolean; selfCertified: boolean };
+export const ACCREDITATION_STATEMENT = {
+  person: [
+    "dvdnd accreditation statement (Rule 506(c)), individual",
+    "1. I am an accredited investor as defined in Rule 501(a) of Regulation D: for example, income over $200,000 (or $300,000 with a spouse or partner) in each of the last two years with the same expected this year; net worth over $1,000,000 excluding my primary residence; or a Series 7, 65 or 82 licence in good standing.",
+    ...COMMON,
+  ].join("\n"),
+  entity: [
+    "dvdnd accreditation statement (Rule 506(c)), entity",
+    "1. The entity I sign for is an accredited investor as defined in Rule 501(a) of Regulation D: for example, a company, partnership or trust with total assets over $5,000,000 not formed to make this investment, an entity whose equity owners are all accredited investors, or a regulated financial institution.",
+    ...COMMON,
+  ].join("\n"),
+};
 
-/** What this investor can do under a 506(c) raise. */
+export const selfCertifiedMinimum = (entity: boolean) => fromUnits(entity ? ENTITY_SELF_CERTIFIED_MINIMUM : SELF_CERTIFIED_MINIMUM);
+
+export type Accreditation = { attested: boolean; selfCertified: boolean; entity: boolean };
+
+/** What this investor can do under a raise that accepts accredited investors. */
 export function useAccreditation(raise: Raise, investor?: Signer) {
   return useAsync(async (): Promise<Accreditation | null> => {
     if (!investor) return null;
     const [attested, cert] = await Promise.all([
-      // Eligible for any amount only through a verifier's attestation.
+      // Eligible for any amount only through a verifier's attestation (or residence, checked separately).
       isEligibleFor(raise.id, investor.publicKey, 1n),
       selfCertification(investor.publicKey),
     ]);
-    return { attested, selfCertified: Boolean(cert) };
+    return { attested, selfCertified: Boolean(cert), entity: Boolean(cert?.entity) };
   }, [raise.id, investor?.publicKey]);
 }
 
@@ -40,13 +63,14 @@ export function AccreditationBox({ raise, investor, state, onChange }: { raise: 
   const [error, setError] = useState<string | null>(null);
   const [hash, setHash] = useState<string>();
   const [agreed, setAgreed] = useState(false);
-  const minimum = fromUnits(SELF_CERTIFIED_MINIMUM);
+  const [entity, setEntity] = useState(false);
+  const statement = ACCREDITATION_STATEMENT[entity ? "entity" : "person"];
 
   async function sign() {
     setBusy("sign");
     setError(null);
     try {
-      const res = await offering.selfCertify(investor, await sha256(ACCREDITATION_STATEMENT));
+      const res = await offering.selfCertify(investor, await sha256(statement), entity);
       setHash(res.hash);
       onChange();
     } catch (e) {
@@ -79,24 +103,36 @@ export function AccreditationBox({ raise, investor, state, onChange }: { raise: 
   if (state.attested) return null;
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10, borderTop: "1px solid var(--hair)", paddingTop: 12 }}>
-      <div className="label">Accredited investors only</div>
+      <div className="label">Accredited investors</div>
       {!state.selfCertified ? (
         <>
+          <div className="seg" role="group" aria-label="Investing as" style={{ alignSelf: "flex-start" }}>
+            <button aria-pressed={!entity} onClick={() => setEntity(false)}>
+              As a person
+            </button>
+            <button aria-pressed={entity} onClick={() => setEntity(true)}>
+              For an entity
+            </button>
+          </div>
           <pre className="small" style={{ whiteSpace: "pre-wrap", margin: 0, font: "12px/1.5 var(--font-sans)", background: "var(--bg)", padding: 10 }}>
-            {ACCREDITATION_STATEMENT}
+            {statement}
           </pre>
           <label style={{ display: "flex", gap: 10, alignItems: "flex-start", fontSize: 13 }}>
             <input id="accreditedAgree" type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} style={{ marginTop: 3 }} />
-            <span>This is true for me. Record my signed statement on Stellar.</span>
+            <span>This is true. Record the signed statement on Stellar.</span>
           </label>
           <button className="btn btn-primary btn-block" disabled={!agreed || busy !== null} onClick={sign}>
             {busy === "sign" ? "Signing…" : "Sign accreditation statement"}
           </button>
+          <p className="small" style={{ margin: 0 }}>
+            On the statement alone you can invest {fmt(selfCertifiedMinimum(entity))} USDC or more
+            {raise.terms.verifier ? "; a verification service lets you invest less." : "."}
+          </p>
         </>
       ) : (
         <p className="small" style={{ margin: 0 }}>
-          Statement signed. You can invest {fmt(minimum)} USDC or more on your statement alone
-          {raise.terms.verifier ? ", or get verified to invest any amount." : "."}
+          Statement signed{state.entity ? " for an entity" : ""}. You can invest {fmt(selfCertifiedMinimum(state.entity))} USDC or
+          more on it alone{raise.terms.verifier ? ", or get verified to invest any amount." : "."}
         </p>
       )}
       {state.selfCertified && raise.terms.verifier && IS_TESTNET && (

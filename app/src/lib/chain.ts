@@ -114,15 +114,25 @@ export enum Exemption {
   RegS = 0,
   /** Rule 506(c): accredited investors, verified (attestation, or self-certified with $200,000+). */
   RegD506c = 1,
+  /** Both side by side: non-US residents under Reg S, accredited investors (US included) under 506(c). */
+  RegSAnd506c = 2,
 }
 
 export const EXEMPTION_LABEL: Record<Exemption, string> = {
   [Exemption.RegS]: "Reg S · non-US residents",
   [Exemption.RegD506c]: "Reg D 506(c) · accredited investors",
+  [Exemption.RegSAnd506c]: "Reg S + 506(c) · non-US residents or accredited",
 };
 
-/** Rule 506(c) high-minimum route: a self-certified investor puts in at least this much. */
+/** Whether accredited investors can join (506(c) alone or alongside Reg S). */
+export const acceptsAccredited = (e: Exemption) => e !== Exemption.RegS;
+/** Whether proven non-US residents can join (Reg S alone or alongside 506(c)). */
+export const acceptsResidents = (e: Exemption) => e !== Exemption.RegD506c;
+
+/** Rule 506(c) high-minimum route: a self-certified person puts in at least this much... */
 export const SELF_CERTIFIED_MINIMUM = 200_000n * UNIT;
+/** ...and an entity (company, fund, trust) at least this much. */
+export const ENTITY_SELF_CERTIFIED_MINIMUM = 1_000_000n * UNIT;
 /** Rule 144 holding period for a non-reporting issuer's restricted securities. */
 export const REG_D_LOCKUP_SECS = 365 * 24 * 60 * 60;
 
@@ -197,7 +207,7 @@ export async function isEligibleFor(raiseId: number, investor: string, amount: b
 }
 
 /** The investor's own 506(c) accreditation statement, if they signed one. */
-export async function selfCertification(investor: string): Promise<{ statement: Uint8Array; at: bigint } | null> {
+export async function selfCertification(investor: string): Promise<{ statement: Uint8Array; entity: boolean; at: bigint } | null> {
   return (await read(CONTRACTS.offering, "self_certification", [sc.address(investor)])) ?? null;
 }
 
@@ -254,9 +264,9 @@ export const offering = {
   /** After lock-up: lifts the lock-up freeze on the holder's wallet. */
   release: (s: Signer, raiseId: number, holder = s.publicKey) =>
     invoke(s, CONTRACTS.offering, "release", [sc.u32(raiseId), sc.address(holder)]),
-  /** 506(c): the investor signs their accreditation statement (its sha256). */
-  selfCertify: (s: Signer, statementHash: Uint8Array) =>
-    invoke(s, CONTRACTS.offering, "self_certify", [sc.address(s.publicKey), sc.bytes(statementHash)]),
+  /** 506(c): the investor signs their accreditation statement (its sha256), as a person or an entity. */
+  selfCertify: (s: Signer, statementHash: Uint8Array, entity: boolean) =>
+    invoke(s, CONTRACTS.offering, "self_certify", [sc.address(s.publicKey), sc.bytes(statementHash), xdr.ScVal.scvBool(entity)]),
   /** The raise's compliance account. */
   freezeHolder: (s: Signer, raiseId: number, holder: string, reason: string) =>
     invoke(s, CONTRACTS.offering, "freeze_holder", [sc.u32(raiseId), sc.address(holder), sc.string(reason)]),

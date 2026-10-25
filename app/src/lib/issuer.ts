@@ -23,6 +23,8 @@ export class IssueError extends Error {
     message: string,
     public readonly status: number,
     public readonly ineligible = false,
+    /** Refused as a US resident (who can still invest as an accredited investor), not a sanctioned country. */
+    public readonly us = false,
   ) {
     super(message);
   }
@@ -58,6 +60,9 @@ const claimKey = (idosUserId: string) => `idos:${createHash("sha256").update(ido
 
 /** Adds the investor's credential leaf on-chain. `idosUserId` makes it one per idOS identity. */
 export async function issueCredential(country: number, commitment: bigint, idosUserId?: string): Promise<Issued> {
+  if (country === 840) {
+    throw new IssueError("US residents can't hold a Reg S credential; invest as an accredited investor instead.", 403, true, true);
+  }
   if (BLOCKED_COUNTRIES.includes(country)) {
     throw new IssueError("dvdnd isn't available to residents of this country.", 403, true);
   }

@@ -18,7 +18,7 @@ export async function POST(req: Request) {
     const issued = await issueCredential(countryCode(body.country), parseCommitment(body.commitment));
     return NextResponse.json(issued);
   } catch (e) {
-    if (e instanceof IssueError) return NextResponse.json({ error: e.message, ineligible: e.ineligible }, { status: e.status });
+    if (e instanceof IssueError) return NextResponse.json({ error: e.message, ineligible: e.ineligible, us: e.us }, { status: e.status });
     const message = e instanceof TxError ? e.message : "Couldn't add the credential on-chain.";
     return NextResponse.json({ error: message, hash: e instanceof TxError ? e.hash : undefined }, { status: 502 });
   }

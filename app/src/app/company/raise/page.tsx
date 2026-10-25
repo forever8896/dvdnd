@@ -6,7 +6,7 @@ import { useState } from "react";
 import { StrKey } from "@stellar/stellar-sdk";
 import { AddMoney } from "@/components/add-money";
 import { Toast, TxLink, fmt } from "@/components/ui";
-import { CompanyStatus, Exemption, EXEMPTION_LABEL, fromUnits, listingFee, parseProfile, REG_D_LOCKUP_SECS, toUnits } from "@/lib/chain";
+import { acceptsAccredited, CompanyStatus, Exemption, EXEMPTION_LABEL, fromUnits, listingFee, parseProfile, REG_D_LOCKUP_SECS, toUnits } from "@/lib/chain";
 import { IS_TESTNET } from "@/lib/config";
 import { assetCode, findMyCompany, issueShareToken, myListings, openRaise } from "@/lib/company";
 import { useAsync } from "@/lib/hooks";
@@ -14,6 +14,18 @@ import type { TxResult } from "@/lib/stellar";
 import { useWallet } from "@/lib/wallet";
 
 const REG_D_LOCKUP_DAYS = REG_D_LOCKUP_SECS / 86400;
+const SHORT_LABEL: Record<Exemption, string> = {
+  [Exemption.RegS]: "Reg S",
+  [Exemption.RegD506c]: "Reg D 506(c)",
+  [Exemption.RegSAnd506c]: "Both",
+};
+const EXEMPTION_HELP: Record<Exemption, string> = {
+  [Exemption.RegS]: "Regulation S: only people who prove, with a zero-knowledge proof, that they live outside the US.",
+  [Exemption.RegD506c]:
+    "Rule 506(c): accredited investors only, US residents included, verified by an accreditation service or self-certified with at least 200,000 USDC (1,000,000 for an entity). You can market it publicly; file Form D within 15 days of the first sale.",
+  [Exemption.RegSAnd506c]:
+    "Both side by side: non-US residents under Reg S with the residence proof, and accredited investors, US residents included, under 506(c). Takes the one-year Reg D lock-up; file Form D for the 506(c) sales.",
+};
 
 export default function RaiseSetup() {
   const router = useRouter();
@@ -60,7 +72,7 @@ export default function RaiseSetup() {
   const min = Math.round((max * Number(minPct)) / 100);
   const impliedYield = max > 0 ? pool / max : 0;
   const lockup = Number(lockupDays);
-  const minLockup = exemption === Exemption.RegD506c ? REG_D_LOCKUP_DAYS : 0;
+  const minLockup = acceptsAccredited(exemption) ? REG_D_LOCKUP_DAYS : 0;
   const holders = Number(maxHolders);
   const complianceAccount = compliance.trim() || me.publicKey;
   const complianceValid = StrKey.isValidEd25519PublicKey(complianceAccount);
@@ -97,7 +109,7 @@ export default function RaiseSetup() {
           max_holders: holders,
           lockup_until: BigInt(deadline + lockup * 86400),
           compliance: complianceAccount,
-          verifier: exemption === Exemption.RegD506c && acceptVerifier && testnetVerifier ? testnetVerifier : undefined,
+          verifier: acceptsAccredited(exemption) && acceptVerifier && testnetVerifier ? testnetVerifier : undefined,
         },
       });
       push("Raise open to verified investors", res);
@@ -131,26 +143,24 @@ export default function RaiseSetup() {
           <div className="field">
             <span>Who can invest</span>
             <div className="seg" role="group" aria-label="Exemption" style={{ alignSelf: "flex-start" }}>
-              {[Exemption.RegS, Exemption.RegD506c].map((e) => (
+              {[Exemption.RegS, Exemption.RegD506c, Exemption.RegSAnd506c].map((e) => (
                 <button
                   key={e}
                   aria-pressed={exemption === e}
                   onClick={() => {
                     setExemption(e);
-                    setLockupDays(String(e === Exemption.RegD506c ? REG_D_LOCKUP_DAYS : 0));
+                    setLockupDays(String(acceptsAccredited(e) ? REG_D_LOCKUP_DAYS : 0));
                   }}
                 >
-                  {EXEMPTION_LABEL[e]}
+                  {SHORT_LABEL[e]}
                 </button>
               ))}
             </div>
             <span className="small">
-              {exemption === Exemption.RegS
-                ? "Regulation S: only people who prove, with a zero-knowledge proof, that they live outside the US."
-                : "Rule 506(c): accredited investors only, verified by an accreditation service or self-certified with at least 200,000 USDC invested. You can market it publicly; file Form D within 15 days of the first sale."}
+              {EXEMPTION_HELP[exemption]}
             </span>
           </div>
-          <Field id="lockup" label="Lock-up after the deadline" value={lockupDays} onChange={setLockupDays} suffix="days" hint={exemption === Exemption.RegD506c ? `Reg D shares are restricted for at least a year (Rule 144): minimum ${REG_D_LOCKUP_DAYS} days. Tokens earn dividends in the vault meanwhile but can't move.` : "Tokens earn dividends in the vault during lock-up but can't move. No new holders join until it ends."} />
+          <Field id="lockup" label="Lock-up after the deadline" value={lockupDays} onChange={setLockupDays} suffix="days" hint={acceptsAccredited(exemption) ? `Reg D shares are restricted for at least a year (Rule 144): minimum ${REG_D_LOCKUP_DAYS} days. Tokens earn dividends in the vault meanwhile but can't move.` : "Tokens earn dividends in the vault during lock-up but can't move. No new holders join until it ends."} />
           <Field id="maxHolders" label="Holder cap" value={maxHolders} onChange={setMaxHolders} suffix="holders" hint="Stays under the Exchange Act §12(g) registration trigger (at most 2,000)." />
           <Field id="minTicket" label="Minimum investment" value={minTicket} onChange={setMinTicket} suffix="USDC" />
           <label className="field">
@@ -160,7 +170,7 @@ export default function RaiseSetup() {
             </span>
             <span className="small">Freezes, unfreezes and claws back holdings, each with a recorded reason. Your company by default, or your transfer agent&apos;s Stellar address.</span>
           </label>
-          {exemption === Exemption.RegD506c && testnetVerifier && (
+          {acceptsAccredited(exemption) && testnetVerifier && (
             <label style={{ display: "flex", gap: 10, alignItems: "flex-start", fontSize: 13 }}>
               <input id="acceptVerifier" type="checkbox" checked={acceptVerifier} onChange={(e) => setAcceptVerifier(e.target.checked)} style={{ marginTop: 3 }} />
               <span>Accept attestations from dvdnd&apos;s testnet accreditation verifier (a stand-in for a verification service), so verified investors can put in less than 200,000 USDC.</span>
