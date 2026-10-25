@@ -1,7 +1,6 @@
 // Thin client for reading and invoking dvdnd's Soroban contracts and for the
 // few classic operations the app needs (trustlines, path payments).
 
-import { Buffer } from "buffer";
 import {
   Account,
   Asset,
@@ -31,8 +30,6 @@ export type Signer = {
   kind: "demo" | "external";
   label: string;
   sign: (tx: Transaction) => Promise<Transaction>;
-  /** Signs raw bytes with the account's ed25519 key (idOS logs wallets in this way). */
-  signMessage: (message: Uint8Array) => Promise<Uint8Array>;
 };
 
 export function keypairSigner(kp: Keypair): Signer {
@@ -44,7 +41,6 @@ export function keypairSigner(kp: Keypair): Signer {
       tx.sign(kp);
       return tx;
     },
-    signMessage: async (message) => new Uint8Array(kp.sign(Buffer.from(message))),
   };
 }
 

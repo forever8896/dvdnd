@@ -31,13 +31,13 @@ function getConsumer() {
   return consumer;
 }
 
-/** A one-hour link to the idOS relay's KYC flow for this Stellar address. */
-export function kycLink(address: string) {
+/** A one-hour link to the idOS relay's KYC flow; the relay only accepts this EVM wallet. */
+export function kycLink(evmAddress: string) {
   const key = process.env.IDOS_RELAY_PRIVATE_KEY;
   const clientId = process.env.NEXT_PUBLIC_IDOS_RELAY_CLIENT_ID;
   if (!key || !clientId) throw new IssueError("idOS KYC is not configured on the server.", 500);
   const token = jwt.sign(
-    { clientId, level: "plus+liveness+idos", walletAddress: address, externalUserId: address, kyc: true },
+    { clientId, level: "plus+liveness+idos", walletAddress: evmAddress, externalUserId: evmAddress, kyc: true },
     key.replace(/\\n/g, "\n"),
     { algorithm: "ES512", expiresIn: "1h" },
   );

@@ -7,7 +7,7 @@ import { ShieldCheck } from "@/components/icons";
 import { EligibilityPill, Toast, TxLink } from "@/components/ui";
 import { COUNTRY_OPTIONS, countryName, gate } from "@/lib/chain";
 import { IDOS_ENABLED, IS_TESTNET } from "@/lib/config";
-import { ENCLAVE_CONTAINER, hasProfile, logIn, shareKycCredential } from "@/lib/idos-client";
+import { connectEthereum, ENCLAVE_CONTAINER, hasEthereumWallet, hasProfile, logIn, shareKycCredential, type EvmWallet } from "@/lib/idos-client";
 import type { Signer } from "@/lib/stellar";
 import { isEligible, useWallet } from "@/lib/wallet";
 import { fetchLeaves, leafFromCommitment, proveResidence, randomSecret, secretCommitment, type Credential } from "@/lib/zk";
@@ -36,6 +36,10 @@ export default function Verify() {
   const [fullName, setFullName] = useState("");
   const [country, setCountry] = useState(620);
   const [outsideUs, setOutsideUs] = useState(false);
+  // The investor's idOS identity is an EVM wallet: the idOS relay only logs in EVM wallets.
+  const [evm, setEvm] = useState<EvmWallet | null>(null);
+  const [evmHasProfile, setEvmHasProfile] = useState<boolean | null>(null);
+  const [connecting, setConnecting] = useState(false);
   const [kycLink, setKycLink] = useState<string | null>(null);
   // The idOS relay runs in its own window: embedding it needs our origin registered with idOS.
   const kycWindow = useRef<Window | null>(null);
@@ -95,13 +99,13 @@ export default function Verify() {
     [refresh],
   );
 
-  /** After idOS KYC: log the wallet in to idOS, share the credential with us, then issue. */
+  /** After idOS KYC: log the EVM wallet in to idOS, share the credential with us, then issue. */
   const continueWithIdos = useCallback(async () => {
-    if (!investor) return;
+    if (!investor || !evm) return;
     try {
       setKycLink(null);
       setStep("sharing");
-      const user = await logIn(investor);
+      const user = await logIn(evm);
       await shareKycCredential(user);
       await issueAndProve(investor, (commitment) =>
         fetch("/api/idos/credential", {
@@ -113,7 +117,7 @@ export default function Verify() {
     } catch (e) {
       fail(e);
     }
-  }, [investor, issueAndProve, fail]);
+  }, [investor, evm, issueAndProve, fail]);
 
   // Carry on when the person closes the idOS window.
   useEffect(() => {
@@ -130,22 +134,31 @@ export default function Verify() {
   if (!investor) return null;
   const alreadyEligible = isEligible(eligibleUntil) && step === "form";
 
+  async function connectEvm() {
+    setError(null);
+    setConnecting(true);
+    try {
+      const w = await connectEthereum();
+      setEvm(w);
+      setEvmHasProfile(await hasProfile(w.address));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setConnecting(false);
+    }
+  }
+
   async function startIdos() {
-    if (!investor) return;
+    if (!evm) return;
     setError(null);
     // Open the window inside the click so popup blockers allow it; the link comes after.
     const win = window.open("about:blank", "idos-kyc", "popup,width=520,height=860");
     try {
       setStep("kyc");
-      if (await hasProfile(investor.publicKey)) {
-        win?.close();
-        await continueWithIdos();
-        return;
-      }
       const res = await fetch("/api/idos/kyc-link", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ address: investor.publicKey }),
+        body: JSON.stringify({ evmAddress: evm.address }),
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error ?? "Couldn't start the identity check.");
@@ -248,14 +261,45 @@ export default function Verify() {
                 reuse with other apps. You then share it with dvdnd, and we only read your country of residence from it.
               </p>
               <p className="small" style={{ margin: 0 }}>
-                {investor.kind === "demo"
-                  ? "Your demo wallet signs the idOS requests in this browser."
-                  : `${investor.label} asks you to sign a few idOS messages. None of them move funds.`}
+                Your idOS identity uses an Ethereum wallet such as MetaMask, because idOS&apos;s identity check signs in with
+                EVM wallets. It only signs idOS messages and never moves funds. Your proof and investments stay on your
+                Stellar wallet ({investor.label}), and the two aren&apos;t linked on-chain.
                 {IS_TESTNET && " Testnet uses the idOS playground."}
               </p>
-              <button className="btn btn-primary btn-wide" style={{ alignSelf: "flex-start" }} onClick={startIdos}>
-                Verify with idOS
-              </button>
+              {!evm ? (
+                <>
+                  <button className="btn btn-primary btn-wide" style={{ alignSelf: "flex-start" }} disabled={connecting || !hasEthereumWallet()} onClick={connectEvm}>
+                    {connecting ? "Connecting…" : "Connect Ethereum wallet"}
+                  </button>
+                  {!hasEthereumWallet() && (
+                    <div className="small red">
+                      No Ethereum wallet found in this browser. Install{" "}
+                      <a href="https://metamask.io" target="_blank" rel="noreferrer">MetaMask</a> (or another EVM wallet) and reload.
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <div className="small mono" style={{ color: "var(--text)" }}>
+                    idOS identity {evm.address.slice(0, 6)}…{evm.address.slice(-4)}
+                    {evmHasProfile ? " · idOS profile found" : " · no idOS profile yet"}
+                  </div>
+                  {evmHasProfile ? (
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      <button className="btn btn-primary btn-wide" onClick={() => void continueWithIdos()}>
+                        Share my idOS credential
+                      </button>
+                      <button className="btn btn-secondary btn-sm" onClick={startIdos}>
+                        Run the identity check
+                      </button>
+                    </div>
+                  ) : (
+                    <button className="btn btn-primary btn-wide" style={{ alignSelf: "flex-start" }} onClick={startIdos}>
+                      Start the identity check
+                    </button>
+                  )}
+                </>
+              )}
             </>
           ) : (
             <form onSubmit={startDemo} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -329,7 +373,7 @@ export default function Verify() {
         <div style={{ display: "flex", flexDirection: "column", gap: 8, maxWidth: 560 }}>
           {step === "sharing" && (
             <Toast kind="pending" title="Sharing your idOS credential with dvdnd">
-              Sign in to idOS with your wallet. idOS re-encrypts a copy of your KYC credential for dvdnd.
+              Your Ethereum wallet signs you in to idOS, then idOS re-encrypts a copy of your KYC credential for dvdnd.
             </Toast>
           )}
           {issued && (

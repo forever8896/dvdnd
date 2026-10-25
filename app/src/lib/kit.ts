@@ -4,7 +4,6 @@
 // through Stellar Wallets Kit. Keys never leave the user's wallet; every
 // transaction is approved there.
 
-import { Buffer } from "buffer";
 import { TransactionBuilder, type Transaction } from "@stellar/stellar-sdk";
 import { IS_TESTNET, NETWORK } from "./config";
 import type { Signer } from "./stellar";
@@ -89,23 +88,6 @@ export function externalSigner(w: ExternalWallet): Signer {
       } catch (e) {
         const err = walletError(e);
         throw isUserCancel(err) ? new Error(`You declined the request in ${w.walletName}. Nothing was sent.`) : err;
-      }
-    },
-    signMessage: async (message) => {
-      const kit = await getKit();
-      try {
-        kit.setWallet(w.walletId);
-        const { signedMessage } = await kit.signMessage(Buffer.from(message).toString("base64"), {
-          networkPassphrase: NETWORK.passphrase,
-          address: w.address,
-        });
-        // Some wallets base64-encode the signature twice (as idOS's own dashboard handles).
-        let sig = Buffer.from(signedMessage, "base64");
-        if (sig.length > 64) sig = Buffer.from(sig.toString(), "base64");
-        return new Uint8Array(sig);
-      } catch (e) {
-        const err = walletError(e);
-        throw isUserCancel(err) ? new Error(`You declined the request in ${w.walletName}.`) : err;
       }
     },
   };
