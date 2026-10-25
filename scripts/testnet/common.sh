@@ -5,6 +5,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 NETWORK=testnet
+NETWORK_HORIZON=https://horizon-testnet.stellar.org
 WASM_DIR="$ROOT/contracts/target/wasm32v1-none/release"
 DEPLOYMENTS="$ROOT/deployments/testnet.env"
 

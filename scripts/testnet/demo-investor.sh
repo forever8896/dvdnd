@@ -20,7 +20,7 @@ echo "Credential for $WHO added at index $INDEX"
 
 # 2. The investor proves non-US residence without revealing the credential.
 NOW=$(date +%s)
-ARGS=$(node "$ROOT/scripts/testnet/zk.mjs" prove "$CRED_DIR/$WHO.json" "$LEAVES" "$(addr "$WHO")" "$NOW")
+ARGS=$(node "$ROOT/scripts/testnet/zk.mjs" prove "$CRED_DIR/$WHO.json" "$GATE" "$(addr "$WHO")" "$NOW")
 field() { echo "$ARGS" | python3 -c "import sys,json; v=json.load(sys.stdin)['$1']; print(json.dumps(v) if isinstance(v, dict) else v)"; }
 UNTIL=$(invoke "$GATE" "$WHO" -- verify_and_register --investor "$(addr "$WHO")" \
   --proof "$(field proof)" --root "$(field root)" --now "$(field now)" \
