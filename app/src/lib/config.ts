@@ -82,3 +82,20 @@ export const UNIT = 10_000_000n;
 
 /** Nullifier scope pinned in the gate contract. */
 export const PLATFORM_SCOPE = 1n;
+
+/** idOS, the reusable KYC network: its relay runs the identity check and its
+ *  nodes hold the resulting credential, which the investor shares with us. */
+export const IDOS = {
+  nodeUrl: process.env.NEXT_PUBLIC_IDOS_NETWORK_URL ?? "",
+  relayUrl: process.env.NEXT_PUBLIC_IDOS_RELAY_URL ?? "",
+  enclaveUrl: process.env.NEXT_PUBLIC_IDOS_ENCLAVE_URL || "https://enclave.idos.network",
+  acceptedIssuerPublicKey: process.env.NEXT_PUBLIC_IDOS_ACCEPTED_ISSUER_PUBLIC_KEY ?? "",
+  acceptedIssuerId: process.env.NEXT_PUBLIC_IDOS_ACCEPTED_ISSUER_ID ?? "",
+  /** Our consumer's ed25519 public key (hex): grants name it as the grantee. */
+  consumerAuthPublicKey: process.env.NEXT_PUBLIC_IDOS_CONSUMER_PUBLIC_IDENTIFIER ?? "",
+  /** Our consumer's encryption public key (base64): shared copies are encrypted to it. */
+  consumerEncryptionPublicKey: process.env.NEXT_PUBLIC_IDOS_CONSUMER_ENCRYPTION_PUBLIC_KEY ?? "",
+};
+export const IDOS_ENABLED = Boolean(
+  IDOS.nodeUrl && IDOS.relayUrl && IDOS.acceptedIssuerPublicKey && IDOS.consumerAuthPublicKey && IDOS.consumerEncryptionPublicKey,
+);

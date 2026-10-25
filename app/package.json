@@ -10,17 +10,23 @@
   },
   "dependencies": {
     "@creit.tech/stellar-wallets-kit": "2.7.1",
+    "@idos-network/client": "1.5.0",
+    "@idos-network/consumer": "1.5.0",
     "@stellar/stellar-sdk": "17.3.0",
     "buffer": "6.0.3",
     "circomlibjs": "0.1.7",
     "framer-motion": "12.43.0",
+    "jsonwebtoken": "9.0.3",
     "next": "15.5.28",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "snarkjs": "0.7.6"
+    "server-only": "0.0.1",
+    "snarkjs": "0.7.6",
+    "tweetnacl": "1.0.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/jsonwebtoken": "9.0.10",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
