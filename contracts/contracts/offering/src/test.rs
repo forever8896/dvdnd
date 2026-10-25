@@ -337,7 +337,7 @@ fn reg_d_self_certified_needs_the_high_minimum() {
     assert_eq!(s.offering.try_invest(&id, &us, &(200_000 * USDC)), Err(err(Error::NotEligible)));
 
     let statement = BytesN::from_array(&s.env, &[7; 32]);
-    s.offering.self_certify(&us, &statement);
+    s.offering.self_certify(&us, &statement, &false);
     assert_eq!(s.offering.self_certification(&us).unwrap().statement, statement);
     assert_eq!(s.offering.try_invest(&id, &us, &(199_999 * USDC)), Err(err(Error::NotEligible)));
     s.offering.invest(&id, &us, &(200_000 * USDC));
@@ -413,4 +413,54 @@ fn admin_sets_the_listing_fee() {
     s.offering.set_listing_fee(&0);
     assert_eq!(s.offering.config().listing_fee, 0);
     assert_eq!(s.offering.try_set_listing_fee(&-1), Err(err(Error::InvalidTerms)));
+}
+
+#[test]
+fn an_entity_needs_the_one_million_minimum() {
+    let s = setup();
+    let mut terms = reg_d(&s);
+    terms.verifier = None;
+    let id = open(&s, 10 * USDC, 2_000_000 * USDC, &terms);
+    let fund = Address::generate(&s.env);
+    s.usdc_admin.mint(&fund, &(1_500_000 * USDC));
+    s.offering.self_certify(&fund, &BytesN::from_array(&s.env, &[9; 32]), &true);
+    assert!(s.offering.self_certification(&fund).unwrap().entity);
+    assert_eq!(s.offering.try_invest(&id, &fund, &(999_999 * USDC)), Err(err(Error::NotEligible)));
+    s.offering.invest(&id, &fund, &(1_000_000 * USDC));
+}
+
+#[test]
+fn combined_raise_takes_residents_and_accredited_investors() {
+    let s = setup();
+    let mut terms = reg_d(&s);
+    terms.exemption = Exemption::RegSAnd506c;
+    terms.verifier = None;
+    let id = open(&s, 10 * USDC, 1_000_000 * USDC, &terms);
+
+    // Non-US resident with a gate proof: any amount.
+    let resident = investor(&s, 100 * USDC);
+    s.offering.invest(&id, &resident, &(100 * USDC));
+
+    // US accredited investor without a gate proof: the self-certified minimum.
+    let us = Address::generate(&s.env);
+    s.usdc_admin.mint(&us, &(300_000 * USDC));
+    assert_eq!(s.offering.try_invest(&id, &us, &(100 * USDC)), Err(err(Error::NotEligible)));
+    s.offering.self_certify(&us, &BytesN::from_array(&s.env, &[7; 32]), &false);
+    assert_eq!(s.offering.try_invest(&id, &us, &(100 * USDC)), Err(err(Error::NotEligible)));
+    s.offering.invest(&id, &us, &(200_000 * USDC));
+
+    // Neither: refused.
+    let stranger = Address::generate(&s.env);
+    s.usdc_admin.mint(&stranger, &(100 * USDC));
+    assert_eq!(s.offering.try_invest(&id, &stranger, &(100 * USDC)), Err(err(Error::NotEligible)));
+
+    // It takes the Reg D lock-up.
+    let mut short = terms.clone();
+    short.lockup_until = DEADLINE;
+    let other = s.env.register_stellar_asset_contract_v2(Address::generate(&s.env));
+    StellarAssetClient::new(&s.env, &other.address()).set_admin(&s.offering.address);
+    assert_eq!(
+        s.offering.try_open_raise(&1, &other.address(), &USDC, &USDC, &(10 * USDC), &DEADLINE, &short),
+        Err(err(Error::InvalidTerms))
+    );
 }

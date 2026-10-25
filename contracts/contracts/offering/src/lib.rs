@@ -11,9 +11,11 @@
 //!
 //! Every raise carries its own terms:
 //! - *exemption*: Reg S (non-US residents, proven to the gate with a ZK
-//!   proof) or Reg D 506(c) (accredited investors: attested by the raise's
+//!   proof), Reg D 506(c) (accredited investors: attested by the raise's
 //!   accreditation verifier, or a signed self-certification with at least
-//!   $200,000 invested, the SEC staff's March 2025 high-minimum route),
+//!   $200,000 invested, or $1,000,000 for an entity, the SEC staff's March
+//!   2025 high-minimum route), or both side by side, so non-US investors
+//!   qualify by residence and US investors by accreditation,
 //! - a minimum ticket and a cap on holders (Exchange Act §12(g) margin),
 //! - a lock-up date: until then, claimed tokens go straight into the dividend
 //!   vault and the holder's wallet is frozen, so they earn but can't move, and
@@ -35,8 +37,10 @@ const TTL_THRESHOLD: u32 = 7 * DAY_IN_LEDGERS;
 const TTL_EXTEND_TO: u32 = 14 * DAY_IN_LEDGERS;
 /// Share tokens and USDC both use 7 decimals; price is USDC units per whole token.
 const TOKEN_UNIT: i128 = 10_000_000;
-/// Rule 506(c) high-minimum route: at least $200,000 from a natural person.
+/// Rule 506(c) high-minimum route: at least $200,000 from a natural person...
 pub const SELF_CERTIFIED_MINIMUM: i128 = 200_000 * TOKEN_UNIT;
+/// ...and at least $1,000,000 from a legal entity.
+pub const ENTITY_SELF_CERTIFIED_MINIMUM: i128 = 1_000_000 * TOKEN_UNIT;
 /// Rule 144 holding period for a non-reporting issuer's restricted securities.
 pub const REG_D_LOCKUP_SECS: u64 = 365 * 24 * 60 * 60;
 /// Exchange Act §12(g) registration starts at 2,000 holders of record.
@@ -96,6 +100,9 @@ pub enum Exemption {
     RegS = 0,
     /// Rule 506(c) of Regulation D: accredited investors, verified.
     RegD506c = 1,
+    /// Both at once: non-US residents under Reg S, accredited investors
+    /// (including US residents) under 506(c). Takes the Reg D lock-up.
+    RegSAnd506c = 2,
 }
 
 /// What the company chooses when it opens a raise.
@@ -159,6 +166,8 @@ pub struct Config {
 pub struct Accreditation {
     /// sha256 of the written statement the investor signed.
     pub statement: BytesN<32>,
+    /// Signed for a legal entity (company, fund, trust), which needs the higher minimum.
+    pub entity: bool,
     pub at: u64,
 }
 
@@ -319,7 +328,7 @@ impl Offering {
             || terms.max_holders == 0
             || terms.max_holders > MAX_HOLDERS
             || terms.lockup_until < deadline
-            || (terms.exemption == Exemption::RegD506c
+            || (terms.exemption != Exemption::RegS
                 && terms.lockup_until < deadline + REG_D_LOCKUP_SECS)
         {
             panic_with_error!(&env, Error::InvalidTerms);
@@ -378,12 +387,14 @@ impl Offering {
     }
 
     /// An investor records their own accreditation statement for 506(c)
-    /// raises: `statement` is the sha256 of the text they agreed to. Without a
-    /// verifier's attestation, it only counts with $200,000 or more invested.
-    pub fn self_certify(env: Env, investor: Address, statement: BytesN<32>) {
+    /// raises: `statement` is the sha256 of the text they agreed to, `entity`
+    /// whether they invest for a legal entity. Without a verifier's
+    /// attestation, it only counts with $200,000 or more invested ($1,000,000
+    /// for an entity).
+    pub fn self_certify(env: Env, investor: Address, statement: BytesN<32>, entity: bool) {
         investor.require_auth();
         let at = env.ledger().timestamp();
-        set_persistent(&env, &DataKey::SelfCertified(investor.clone()), &Accreditation { statement, at });
+        set_persistent(&env, &DataKey::SelfCertified(investor.clone()), &Accreditation { statement, entity, at });
         AccreditationRecorded { investor: investor.clone(), by: investor, until: u64::MAX }.publish(&env);
     }
 
@@ -646,28 +657,36 @@ fn config(env: &Env) -> Config {
 }
 
 /// Reg S: a registered non-US residence proof. 506(c): a verifier's current
-/// attestation, or a self-certification with at least $200,000 invested.
+/// attestation, or a self-certification with the high minimum invested. The
+/// combined exemption accepts either.
 fn eligible(env: &Env, config: &Config, raise: &Raise, investor: &Address, amount: i128) -> bool {
+    let resident = || GateClient::new(env, &config.gate).is_eligible(investor);
     match raise.terms.exemption {
-        Exemption::RegS => GateClient::new(env, &config.gate).is_eligible(investor),
-        Exemption::RegD506c => {
-            let now = env.ledger().timestamp();
-            let attested = raise.terms.verifier.as_ref().is_some_and(|v| {
-                env.storage()
-                    .persistent()
-                    .get::<_, u64>(&DataKey::Attested(v.clone(), investor.clone()))
-                    .is_some_and(|until| until > now)
-            });
-            attested
-                || (amount >= SELF_CERTIFIED_MINIMUM
-                    && env.storage().persistent().has(&DataKey::SelfCertified(investor.clone())))
-        }
+        Exemption::RegS => resident(),
+        Exemption::RegD506c => accredited(env, raise, investor, amount),
+        Exemption::RegSAnd506c => resident() || accredited(env, raise, investor, amount),
     }
+}
+
+fn accredited(env: &Env, raise: &Raise, investor: &Address, amount: i128) -> bool {
+    let now = env.ledger().timestamp();
+    let attested = raise.terms.verifier.as_ref().is_some_and(|v| {
+        env.storage()
+            .persistent()
+            .get::<_, u64>(&DataKey::Attested(v.clone(), investor.clone()))
+            .is_some_and(|until| until > now)
+    });
+    attested
+        || env
+            .storage()
+            .persistent()
+            .get::<_, Accreditation>(&DataKey::SelfCertified(investor.clone()))
+            .is_some_and(|a| amount >= if a.entity { ENTITY_SELF_CERTIFIED_MINIMUM } else { SELF_CERTIFIED_MINIMUM })
 }
 
 fn check_eligible(env: &Env, config: &Config, raise: &Raise, investor: &Address, amount: i128) {
     // A self-certified 506(c) holder who already met the minimum in the raise stays eligible.
-    let met_minimum = raise.terms.exemption == Exemption::RegD506c
+    let met_minimum = raise.terms.exemption != Exemption::RegS
         && amount == 0
         && env.storage().persistent().has(&DataKey::Holder(raise.id, investor.clone()))
         && env.storage().persistent().has(&DataKey::SelfCertified(investor.clone()));
