@@ -102,3 +102,24 @@ balance of 0 and 600 tokens active in the vault; `vault.unlock` fails with the t
 ## Reg S and 506(c) side by side (2026-10-25)
 Offering `CCJCRABWLOEOXVDRHSJXLS5HDOCUCZWY2X2N27NUP24H62N6DKYISX5P`: raises can run both exemptions; self-certified entities need 1,000,000 USDC.
 Raises: 1 Northline (Reg S + 506(c), one-year lock-up), 2 Harbor & Hearth (506(c)), 3 Andes (Reg S, full cycle above).
+
+## ANDES lifecycle (2026-10-25)
+- investor-eve invests 600 USDC: https://stellar.expert/explorer/testnet/tx/aa1be942be364baa256b05b54c7530690e69480007601c575c480257aed6f914
+- investor-finn invests 400 USDC: https://stellar.expert/explorer/testnet/tx/1722045d000c585783523578d4bc751bbd455367c21780caaf3e13d9b64a8660
+- Raise finalized (company paid in full; flat fee was paid at open): https://stellar.expert/explorer/testnet/tx/45d20708e9c1d2a4d6ecf81f0a15ee0b74093c9c82519d84613ef7c6aa368430
+- investor-eve claims share tokens (locked in the vault during lock-up): https://stellar.expert/explorer/testnet/tx/e0d69184d7974414417769811edb23b254325464d1e03de08a76033c2271fb05
+- investor-finn claims share tokens (locked in the vault during lock-up): https://stellar.expert/explorer/testnet/tx/5153184964d54a2e2a238fb9442be5583b498443e64fb0ae4fbdd27cf759c9bd
+- First dividend period starts: https://stellar.expert/explorer/testnet/tx/1787fc7cd91a92d5ae6829746745a39f5acca0a6986ef8de751259b5486e1f27
+- Company pays 80 USDC dividend: https://stellar.expert/explorer/testnet/tx/d56f5c934e27e8a55aa51d738d4dbf796049135f033e2df3ee20219de0ee1a3c
+- investor-eve claims dividend: https://stellar.expert/explorer/testnet/tx/66730f93302700044e7dc7723ee498c2144744422e9c3e6fc74413c17c7305c7
+- investor-finn claims dividend: https://stellar.expert/explorer/testnet/tx/204967a1717c2010f7ee0f2bd43dc1a4d5a5477a815da00598e439d9deca0a28
+
+## Verifiable agreements, council multisig, compliance console (2026-10-25)
+Companies now sign the exact plain-language agreement the app shows (app/src/lib/agreement.ts); raise pages rebuild it from on-chain fields and check its sha256 against the registry.
+Reseeded raises: 4 Northline (Reg S + 506(c)), 5 Harbor & Hearth (506(c)), 6 Andes (Reg S, full cycle above).
+Old demo companies suspended by the 2-of-3 council (two council signatures, master key disabled):
+- company 8: https://stellar.expert/explorer/testnet/tx/c23e67f2ca431892ae08abb87eb8a9c3cc0c6413209f774592b95b4f5dc806d3
+- company 9: https://stellar.expert/explorer/testnet/tx/475401ce6ec96a32aa24bb6fddb485adca9232da3757e448d4a839e1469f9b5a
+- company 10: https://stellar.expert/explorer/testnet/tx/7b3d56351153fc40d0a062df6e94740719b6c3fcdb9f81f7fd256533a5cd897e
+Compliance action recorded with a reason (Andes compliance account freezes a holder, shown in the console's audit log):
+- https://stellar.expert/explorer/testnet/tx/8fa64eebe1bcf36e0ffaf521f56b828ea48a77025836174121d2e18c3c081244

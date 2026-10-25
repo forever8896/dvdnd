@@ -33,7 +33,7 @@ describe.skipIf(!process.env.LIVE || !process.env.DVDND_ADMIN_SECRET)("investor 
     expect(await eligibleUntil(kp.publicKey())).toBeGreaterThan(Date.now() / 1000);
 
     // Add money (XLM -> USDC path payment) and invest in the open raise.
-    const raiseId = Number(process.env.RAISE_ID ?? 1);
+    const raiseId = Number(process.env.RAISE_ID ?? 4);
     const buy = await buyUsdc(signer, 150);
     expect((await balances(kp.publicKey())).usdc).toBeGreaterThanOrEqual(150);
     const inv = await offering.invest(signer, raiseId, toUnits(100));

@@ -36,7 +36,13 @@ fi
 COMPANY_ID=$(invoke "$REGISTRY" "$OWNER" -- register --owner "$(addr "$OWNER")" \
   --name "\"$NAME\"" --country "$COUNTRY" --profile_uri "\"$PROFILE_URI\"" | tr -d '"')
 KYB_HASH=$(printf 'kyb:%s' "$NAME" | sha256sum | cut -d' ' -f1)
-AGREEMENT_HASH=$(printf 'agreement:%s:%s' "$NAME" "$PAYOUT_BPS" | sha256sum | cut -d' ' -f1)
+# The same plain-language agreement the app shows and verifies (app/src/lib/agreement.ts).
+AGREEMENT_HASH=$(node --no-warnings --input-type=module -e "
+  import { signedAgreement } from '$ROOT/app/src/lib/agreement.ts';
+  import { createHash } from 'node:crypto';
+  const [name, bps, secs] = process.argv.slice(1);
+  process.stdout.write(createHash('sha256').update(signedAgreement({ name, payout_bps: Number(bps), period_secs: Number(secs) })).digest('hex'));
+" "$NAME" "$PAYOUT_BPS" "$YEAR")
 invoke "$REGISTRY" "$ADMIN" -- verify --id "$COMPANY_ID" --kyb_hash "$KYB_HASH" >/dev/null
 invoke "$REGISTRY" "$OWNER" -- sign_agreement --id "$COMPANY_ID" \
   --agreement_hash "$AGREEMENT_HASH" --payout_bps "$PAYOUT_BPS" --period_secs "$YEAR" >/dev/null
