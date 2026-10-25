@@ -238,7 +238,7 @@ html { scroll-behavior: smooth; }
       <p class="kicker">Live checklist</p>
       <h2>What's built against the vision</h2>
       <p>Every piece of the plan below, with where it stands in the live app at <a href="https://dvdnd.vercel.app">dvdnd.vercel.app</a> and on Stellar testnet. "Built, real" means it runs for real on testnet; stand-ins are marked; the last group needs vendors, auditors or lawyers rather than code.</p>
-      <p class="updated">Updated 25 Oct 2026 · <span class="built-count">17 of 40 built for real</span></p>
+      <p class="updated">Updated 25 Oct 2026 · <span class="built-count">20 of 40 built for real</span></p>
       <div class="meter" role="img" aria-label="17 built, 3 stand-ins, 4 in progress, 9 not started, 7 need vendors or legal"><i style="width:42.50%;background:var(--accent)" title="Built, real"></i><i style="width:7.50%;background:var(--warn)" title="Testnet stand-in"></i><i style="width:10.00%;background:#4a6fa5" title="In progress"></i><i style="width:22.50%;background:var(--line)" title="Not started"></i><i style="width:17.50%;background:transparent" title="Needs vendor or legal"></i></div>
       <div class="meter-legend"><span><span class="pill ok">Built, real</span> <b>17</b></span><span><span class="pill mid">Testnet stand-in</span> <b>3</b></span><span><span class="pill prog">In progress</span> <b>4</b></span><span><span class="pill todo">Not started</span> <b>9</b></span><span><span class="pill ext">Needs vendor or legal</span> <b>7</b></span></div>
       <div class="table-wrap wide">
@@ -279,11 +279,11 @@ html { scroll-behavior: smooth; }
             <tr><td>Demo wallet with backup and restore</td><td><span class="pill ok">Built, real</span></td><td>Testnet only</td></tr>
             <tr><td>Passkey smart wallets</td><td><span class="pill todo">Not started</span></td><td>Needs reworking classic operations</td></tr>
             <tr class="status-group"><th colspan="3">Compliance operations</th></tr>
-            <tr><td>Freeze and unfreeze a holder</td><td><span class="pill prog">In progress</span></td><td>In the contract; console and role split in progress</td></tr>
-            <tr><td>Clawback with a recorded reason</td><td><span class="pill prog">In progress</span></td><td>Contract update in progress</td></tr>
-            <tr><td>Admin powers behind a multisig</td><td><span class="pill prog">In progress</span></td><td>In progress</td></tr>
+            <tr><td>Freeze and unfreeze a holder</td><td><span class="pill ok">Built, real</span></td><td>Compliance role on the offering contract, with a recorded reason</td></tr>
+            <tr><td>Clawback with a recorded reason</td><td><span class="pill ok">Built, real</span></td><td>Burns from the holder's wallet; reason emitted as an on-chain event</td></tr>
+            <tr><td>Admin powers behind a multisig</td><td><span class="pill ok">Built, real</span></td><td>Council account, 2 of 3 signers, master key disabled; platform key keeps only verification and credential issuing</td></tr>
             <tr><td>Timelock on admin changes</td><td><span class="pill todo">Not started</span></td><td></td></tr>
-            <tr><td>Compliance console with audit log</td><td><span class="pill prog">In progress</span></td><td>In progress</td></tr>
+            <tr><td>Compliance console with audit log</td><td><span class="pill prog">In progress</span></td><td>Contract actions and events exist; the screen with multisig signing is next</td></tr>
             <tr><td>stellar.toml (SEP-1) for dvdnd and its assets</td><td><span class="pill ok">Built, real</span></td><td>Generated from the chain at <a href="https://dvdnd.vercel.app/.well-known/stellar.toml">/.well-known/stellar.toml</a>; issuers point to it</td></tr>
             <tr><td>Contract and ZK circuit audit</td><td><span class="pill ext">Needs vendor or legal</span></td><td>Veridise, Certora, Runtime Verification, OtterSec, Halborn</td></tr>
             <tr><td>Multi-party trusted setup ceremony</td><td><span class="pill ext">Needs vendor or legal</span></td><td>Today: single-contributor development setup</td></tr>
