@@ -5,6 +5,8 @@
 #
 # Usage: scripts/testnet/demo-company.sh <CODE> <owner-identity> <issuer-identity> \
 #          "<name>" <country-numeric> <payout-bps> <min-usdc> <max-usdc> <duration-seconds>
+# Optional: PROFILE_JSON='{"sector":…,"city":…,"description":…,"netProfit":…}' stores the
+# profile on-chain as a data: URI, which the app reads.
 source "$(dirname "$0")/common.sh"
 
 CODE=$1 OWNER=$2 ISSUER=$3 NAME=$4 COUNTRY=$5 PAYOUT_BPS=$6 MIN=$7 MAX=$8 DURATION_SECS=$9
@@ -20,9 +22,15 @@ echo "Share token $CODE SAC: $SHARE_SAC"
 # 2. Only the offering contract can mint or authorize from now on.
 invoke "$SHARE_SAC" "$ISSUER" -- set_admin --new_admin "$OFFERING" >/dev/null
 
+if [ -n "${PROFILE_JSON:-}" ]; then
+  PROFILE_URI="data:application/json;base64,$(printf '%s' "$PROFILE_JSON" | base64 -w0)"
+else
+  PROFILE_URI="https://example.com/$CODE.json"
+fi
+
 # 3. Registry: register, platform verifies ownership, owner signs the agreement.
 COMPANY_ID=$(invoke "$REGISTRY" "$OWNER" -- register --owner "$(addr "$OWNER")" \
-  --name "\"$NAME\"" --country "$COUNTRY" --profile_uri "\"https://example.com/$CODE.json\"" | tr -d '"')
+  --name "\"$NAME\"" --country "$COUNTRY" --profile_uri "\"$PROFILE_URI\"" | tr -d '"')
 KYB_HASH=$(printf 'kyb:%s' "$NAME" | sha256sum | cut -d' ' -f1)
 AGREEMENT_HASH=$(printf 'agreement:%s:%s' "$NAME" "$PAYOUT_BPS" | sha256sum | cut -d' ' -f1)
 invoke "$REGISTRY" "$ADMIN" -- verify --id "$COMPANY_ID" --kyb_hash "$KYB_HASH" >/dev/null
