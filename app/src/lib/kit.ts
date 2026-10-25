@@ -8,6 +8,8 @@ import { TransactionBuilder, type Transaction } from "@stellar/stellar-sdk";
 import { NETWORK } from "./config";
 import type { Signer } from "./stellar";
 
+const HIDDEN_WALLETS = new Set(["metamask"]);
+
 type Kit = typeof import("@creit.tech/stellar-wallets-kit/sdk").StellarWalletsKit;
 let kitPromise: Promise<Kit> | null = null;
 
@@ -20,7 +22,12 @@ export function getKit(): Promise<Kit> {
         import("@creit.tech/stellar-wallets-kit/modules/utils"),
         import("@creit.tech/stellar-wallets-kit/types"),
       ]);
-      StellarWalletsKit.init({ modules: defaultModules(), network: Networks.TESTNET });
+      StellarWalletsKit.init({
+        // MetaMask's Stellar connector needs multichain scopes that current MetaMask
+        // releases reject ("Requested scopes are not supported"), so it is left out.
+        modules: defaultModules({ filterBy: (m) => !HIDDEN_WALLETS.has(m.productId) }),
+        network: Networks.TESTNET,
+      });
       return StellarWalletsKit;
     })();
   }
