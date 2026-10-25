@@ -1,10 +1,12 @@
 // Company flow against testnet and the running dev server: register, mock KYB,
 // sign the agreement, issue the share token and open a raise.
-// Opt-in: LIVE=1 APP_URL=http://localhost:3100 pnpm vitest run company-flow.live
+// Opt-in: LIVE=1 APP_URL=http://localhost:3100 DVDND_ADMIN_SECRET=… pnpm vitest run company-flow.live
+// Without the admin secret it stops after checking that KYB refuses a domain without the record.
 import { describe, expect, it } from "vitest";
-import { CompanyStatus, getCompany, getRaise, RaiseState, toUnits } from "./chain";
+import { CompanyStatus, getCompany, getRaise, RaiseState, sc, toUnits } from "./chain";
+import { CONTRACTS } from "./config";
 import { agreementText, assetCode, issueShareToken, openRaise, register, sha256, signAgreement } from "./company";
-import { friendbot, Keypair, keypairSigner } from "./stellar";
+import { friendbot, invoke, Keypair, keypairSigner } from "./stellar";
 
 const APP_URL = process.env.APP_URL ?? "http://localhost:3100";
 
@@ -19,14 +21,27 @@ describe.skipIf(!process.env.LIVE)("company flow on testnet", () => {
       sector: "Food",
       city: "Lisbon",
       description: "Test company from the live test.",
+      website: "https://example.com",
       netProfit: 900,
     });
+    // Ownership needs the DNS record, which a fresh test company can't have.
+    const status = await (await fetch(`${APP_URL}/api/kyb/dns?companyId=${reg.id}`)).json();
+    expect(status.value).toBe(`dvdnd-verify=${reg.id}:${kp.publicKey()}`);
+    expect(status.check.verified).toBe(false);
     const kyb = await fetch(`${APP_URL}/api/kyb`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ companyId: reg.id, registryNumber: "PT 500 000 000", director: "Ana Test", domain: "example.com" }),
+      body: JSON.stringify({ companyId: reg.id, registryNumber: "PT 500 000 000", director: "Ana Test" }),
     });
-    expect(kyb.status, await kyb.clone().text()).toBe(200);
+    expect(kyb.status).toBe(422);
+
+    // Continue as the platform would after a successful check.
+    const adminSecret = process.env.DVDND_ADMIN_SECRET;
+    if (!adminSecret) return;
+    await invoke(keypairSigner(Keypair.fromSecret(adminSecret)), CONTRACTS.registry, "verify", [
+      sc.u32(reg.id),
+      sc.bytes(new Uint8Array(32).fill(1)),
+    ]);
 
     const text = agreementText({ name, payoutPct: 50, periodLabel: "Annually" });
     await signAgreement(owner, reg.id, await sha256(text), 5000, 31_536_000);

@@ -21,6 +21,7 @@ import {
   targetYield,
   type Listing,
 } from "@/lib/chain";
+import { normalizeDomain } from "@/lib/dns";
 import { useAsync } from "@/lib/hooks";
 import { isEligible, useWallet } from "@/lib/wallet";
 
@@ -115,6 +116,12 @@ function Header({ l }: { l: Listing }) {
             <span className="pill pill-green">
               <ShieldCheck size={11} />
               Ownership verified
+            </span>
+          )}
+          {l.company.kyb_hash && normalizeDomain(l.profile.website) && (
+            <span className="pill pill-green">
+              <ShieldCheck size={11} />
+              Domain verified · {normalizeDomain(l.profile.website)}
             </span>
           )}
           {l.company.agreement_hash && (

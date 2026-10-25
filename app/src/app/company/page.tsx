@@ -139,7 +139,7 @@ function DetailsStep({ onDone }: { onDone: () => Promise<void> }) {
       </label>
       <TextField id="sector" label="Sector" value={f.sector} onChange={set("sector")} />
       <TextField id="city" label="City" value={f.city} onChange={set("city")} />
-      <TextField id="website" label="Website" value={f.website} onChange={set("website")} />
+      <TextField id="website" label="Website" value={f.website} onChange={set("website")} hint="You'll prove you control this domain with a DNS record." />
       <TextField id="netProfit" label="Last year's net profit (USD)" value={f.netProfit} onChange={set("netProfit")} mono hint="Testnet demo: use a figure at the scale of your test raise." />
       <label className="field" style={{ gridColumn: "1 / -1" }}>
         <span>About the business</span>
@@ -149,7 +149,7 @@ function DetailsStep({ onDone }: { onDone: () => Promise<void> }) {
       </label>
       <div style={{ gridColumn: "1 / -1", display: "flex", flexDirection: "column", gap: 8 }}>
         <p className="small">Your profile is stored on Stellar in the dvdnd registry so investors can see it.</p>
-        <button className="btn btn-primary btn-wide" style={{ alignSelf: "flex-start" }} disabled={busy || !f.name.trim()}>
+        <button className="btn btn-primary btn-wide" style={{ alignSelf: "flex-start" }} disabled={busy || !f.name.trim() || !f.website.trim()}>
           {busy ? "Registering on Stellar…" : "Register company"}
         </button>
         {error && <Toast kind="error" title="Registration failed">{error}</Toast>}
@@ -158,13 +158,49 @@ function DetailsStep({ onDone }: { onDone: () => Promise<void> }) {
   );
 }
 
+type DnsStatus = {
+  domain: string;
+  names: string[];
+  value: string;
+  check?: { verified: boolean; foundAt?: string; seen: string[] };
+  error?: string;
+};
+
 function VerifyStep({ company, onDone }: { company: Company; onDone: () => Promise<void> }) {
   const [registryNumber, setRegistryNumber] = useState("");
   const [director, setDirector] = useState("");
   const [busy, setBusy] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [dns, setDns] = useState<DnsStatus | null>(null);
+  const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const profile = parseProfile(company);
-  const domain = profile.website?.replace(/^https?:\/\//, "").replace(/\/.*$/, "");
+  const { data: initial } = useAsync(() => fetchDns(company.id), [company.id]);
+  const status = dns ?? initial;
+  const verified = status?.check?.verified === true;
+
+  async function fetchDns(id: number): Promise<DnsStatus> {
+    const res = await fetch(`/api/kyb/dns?companyId=${id}`, { cache: "no-store" });
+    return res.json();
+  }
+
+  async function check() {
+    setChecking(true);
+    try {
+      setDns(await fetchDns(company.id));
+    } finally {
+      setChecking(false);
+    }
+  }
+
+  async function copy(text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* the value stays selectable */
+    }
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -173,40 +209,85 @@ function VerifyStep({ company, onDone }: { company: Company; onDone: () => Promi
     const res = await fetch("/api/kyb", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ companyId: company.id, registryNumber, director, domain }),
+      body: JSON.stringify({ companyId: company.id, registryNumber, director }),
     });
     const body = await res.json();
     if (!res.ok) {
       setError(body.error ?? "Verification failed.");
+      if (body.dns) setDns((d) => (d ? { ...d, check: body.dns } : d));
       setBusy(false);
       return;
     }
     await onDone();
   }
 
+  if (status?.error && !status.domain)
+    return (
+      <div className="empty">
+        <div style={{ fontWeight: 800 }}>No website to verify</div>
+        <div className="muted">Ownership is proven through your website&apos;s DNS. Register the company again with its website.</div>
+      </div>
+    );
+
   return (
-    <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 560 }}>
-      <p className="muted">
-        We match you against the {countryName(company.country)} company registry and check you control the business&apos;s
-        domain. Testnet demo: the check is simulated, and the evidence hash is recorded on Stellar.
-      </p>
-      <TextField id="registryNumber" label="Registry number" value={registryNumber} onChange={setRegistryNumber} hint="As shown in the company registry" />
-      <TextField id="director" label="Your name, as listed director" value={director} onChange={setDirector} />
-      {domain && (
-        <div style={{ background: "var(--surface)", padding: 12, fontSize: 13 }}>
-          <div className="label" style={{ marginBottom: 6 }}>
-            Domain check
-          </div>
-          Add this TXT record to <b>{domain}</b>:
-          <div className="mono" style={{ marginTop: 6, overflowWrap: "anywhere" }}>
-            dvdnd-verify={company.owner.slice(0, 12)}
-          </div>
-        </div>
-      )}
-      <button className="btn btn-primary btn-wide" style={{ alignSelf: "flex-start" }} disabled={busy || !registryNumber.trim() || !director.trim()}>
-        {busy ? "Verifying…" : "Verify ownership"}
-      </button>
-      {error && <Toast kind="error" title="Verification failed">{error}</Toast>}
+    <form onSubmit={submit} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 24 }}>
+      <section style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <div className="label">1 · Prove you control the domain</div>
+        {!status ? (
+          <div className="skeleton" style={{ height: 160 }} />
+        ) : (
+          <>
+            <p className="muted" style={{ fontSize: 13 }}>
+              Add this TXT record in your DNS provider for <b style={{ color: "var(--text)" }}>{status.domain}</b>. It ties
+              the domain to this registration and your wallet.
+            </p>
+            <div style={{ background: "var(--surface)", padding: 14, display: "grid", gridTemplateColumns: "70px 1fr", rowGap: 8, columnGap: 12, fontSize: 13 }}>
+              <span className="label" style={{ paddingTop: 2 }}>Type</span>
+              <span className="mono">TXT</span>
+              <span className="label" style={{ paddingTop: 2 }}>Name</span>
+              <span className="mono" style={{ overflowWrap: "anywhere" }}>
+                _dvdnd <span className="muted">(or @ for {status.domain} itself)</span>
+              </span>
+              <span className="label" style={{ paddingTop: 2 }}>Value</span>
+              <span className="mono" style={{ overflowWrap: "anywhere", userSelect: "all" }}>{status.value}</span>
+            </div>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <button type="button" className="btn btn-secondary btn-sm" onClick={() => copy(status.value)}>
+                {copied ? "Copied" : "Copy value"}
+              </button>
+              <button type="button" className="btn btn-secondary btn-sm" onClick={check} disabled={checking}>
+                {checking ? "Checking DNS…" : "Check DNS"}
+              </button>
+            </div>
+            {verified ? (
+              <Toast kind="ok" title={`Record found on ${status.check!.foundAt}`}>
+                {status.domain} is under your control.
+              </Toast>
+            ) : status.error ? (
+              <Toast kind="error" title="DNS lookup failed">{status.error}</Toast>
+            ) : (
+              <Toast kind="pending" title="Waiting for the record">
+                New records usually appear within a few minutes, sometimes up to an hour.
+                {status.check?.seen.length ? ` Found a different dvdnd record: ${status.check.seen.join("; ")}` : ""}
+              </Toast>
+            )}
+          </>
+        )}
+      </section>
+      <section style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <div className="label">2 · Company registry</div>
+        <p className="muted" style={{ fontSize: 13 }}>
+          We match you against the {countryName(company.country)} company registry. Testnet demo: this part is
+          simulated and your answers are recorded as evidence.
+        </p>
+        <TextField id="registryNumber" label="Registry number" value={registryNumber} onChange={setRegistryNumber} hint="As shown in the company registry" />
+        <TextField id="director" label="Your name, as listed director" value={director} onChange={setDirector} />
+        <button className="btn btn-primary btn-wide" style={{ alignSelf: "flex-start" }} disabled={busy || !verified || !registryNumber.trim() || !director.trim()}>
+          {busy ? "Verifying…" : "Verify ownership"}
+        </button>
+        {!verified && <span className="small">Available once the DNS record is found.</span>}
+        {error && <Toast kind="error" title="Verification failed">{error}</Toast>}
+      </section>
     </form>
   );
 }
