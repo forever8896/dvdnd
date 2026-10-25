@@ -7,10 +7,14 @@
 //! - only investors the gate has verified can ever hold the token, and
 //! - tokens are minted once, exactly for what was sold. There is no other
 //!   mint path and no way to move the SAC admin, so supply is fixed by code.
+//!
+//! Roles: the *admin* reassigns roles; *compliance* (a multisig council)
+//! freezes, unfreezes and claws back holdings, each with a recorded reason
+//! that is emitted as an event for the audit log.
 
 use soroban_sdk::{
     contract, contractclient, contracterror, contractevent, contractimpl, contracttype,
-    panic_with_error, token, Address, Env,
+    panic_with_error, symbol_short, token, Address, Env, String, Symbol,
 };
 
 const DAY_IN_LEDGERS: u32 = 17_280;
@@ -82,6 +86,7 @@ pub struct Raise {
 #[derive(Clone)]
 pub struct Config {
     pub admin: Address,
+    pub compliance: Address,
     pub gate: Address,
     pub registry: Address,
     pub vault: Address,
@@ -152,6 +157,24 @@ pub struct Refunded {
 }
 
 #[contractevent]
+pub struct ComplianceAction {
+    #[topic]
+    pub token: Address,
+    #[topic]
+    pub holder: Address,
+    pub action: Symbol,
+    pub amount: i128,
+    pub reason: String,
+}
+
+#[contractevent]
+pub struct RoleChanged {
+    #[topic]
+    pub role: Symbol,
+    pub account: Address,
+}
+
+#[contractevent]
 pub struct HolderAuthorized {
     #[topic]
     pub token: Address,
@@ -167,6 +190,7 @@ impl Offering {
     pub fn __constructor(
         env: Env,
         admin: Address,
+        compliance: Address,
         gate: Address,
         registry: Address,
         vault: Address,
@@ -177,7 +201,7 @@ impl Offering {
         if fee_bps > 2_000 {
             panic_with_error!(&env, Error::InvalidTerms);
         }
-        let config = Config { admin, gate, registry, vault, usdc, treasury, fee_bps };
+        let config = Config { admin, compliance, gate, registry, vault, usdc, treasury, fee_bps };
         env.storage().instance().set(&DataKey::Config, &config);
         env.storage().instance().set(&DataKey::NextId, &1u32);
     }
@@ -360,13 +384,50 @@ impl Offering {
         HolderAuthorized { token: raise.token, holder, authorized: true }.publish(&env);
     }
 
-    /// Platform admin freezes a holder (e.g. they became a US resident or a court order).
-    /// The balance stays; transfers stop.
-    pub fn revoke_holder(env: Env, raise_id: u32, holder: Address) {
-        config(&env).admin.require_auth();
+    /// Compliance freezes a holder (e.g. they moved to the US, or a court
+    /// order). The balance stays; transfers stop.
+    pub fn freeze_holder(env: Env, raise_id: u32, holder: Address, reason: String) {
+        config(&env).compliance.require_auth();
         let raise = load_raise(&env, raise_id);
         token::StellarAssetClient::new(&env, &raise.token).set_authorized(&holder, &false);
-        HolderAuthorized { token: raise.token, holder, authorized: false }.publish(&env);
+        ComplianceAction { token: raise.token, holder, action: symbol_short!("freeze"), amount: 0, reason }.publish(&env);
+    }
+
+    /// Compliance lifts a freeze.
+    pub fn unfreeze_holder(env: Env, raise_id: u32, holder: Address, reason: String) {
+        config(&env).compliance.require_auth();
+        let raise = load_raise(&env, raise_id);
+        token::StellarAssetClient::new(&env, &raise.token).set_authorized(&holder, &true);
+        ComplianceAction { token: raise.token, holder, action: symbol_short!("unfreeze"), amount: 0, reason }.publish(&env);
+    }
+
+    /// Compliance claws back (burns) tokens from a holder's wallet, for a
+    /// court order, fraud, or a lost-key reissue. Tokens locked in the vault
+    /// must be unlocked first.
+    pub fn clawback(env: Env, raise_id: u32, holder: Address, amount: i128, reason: String) {
+        config(&env).compliance.require_auth();
+        if amount <= 0 || reason.len() == 0 {
+            panic_with_error!(&env, Error::InvalidTerms);
+        }
+        let raise = load_raise(&env, raise_id);
+        token::StellarAssetClient::new(&env, &raise.token).clawback(&holder, &amount);
+        ComplianceAction { token: raise.token, holder, action: symbol_short!("clawback"), amount, reason }.publish(&env);
+    }
+
+    pub fn set_admin(env: Env, new_admin: Address) {
+        let mut c = config(&env);
+        c.admin.require_auth();
+        c.admin = new_admin.clone();
+        env.storage().instance().set(&DataKey::Config, &c);
+        RoleChanged { role: symbol_short!("admin"), account: new_admin }.publish(&env);
+    }
+
+    pub fn set_compliance(env: Env, new_compliance: Address) {
+        let mut c = config(&env);
+        c.admin.require_auth();
+        c.compliance = new_compliance.clone();
+        env.storage().instance().set(&DataKey::Config, &c);
+        RoleChanged { role: symbol_short!("comply"), account: new_compliance }.publish(&env);
     }
 
     pub fn raise(env: Env, raise_id: u32) -> Raise {

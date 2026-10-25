@@ -47,6 +47,7 @@ struct Setup {
     company: Address,
     treasury: Address,
     vault: Address,
+    compliance: Address,
 }
 
 fn setup() -> Setup {
@@ -55,6 +56,7 @@ fn setup() -> Setup {
     env.ledger().set_timestamp(1_000);
 
     let admin = Address::generate(&env);
+    let compliance = Address::generate(&env);
     let company = Address::generate(&env);
     let treasury = Address::generate(&env);
     let vault = Address::generate(&env);
@@ -68,11 +70,13 @@ fn setup() -> Setup {
     let share = env.register_stellar_asset_contract_v2(share_issuer);
     share.issuer().set_flag(soroban_sdk::testutils::IssuerFlags::RequiredFlag);
     share.issuer().set_flag(soroban_sdk::testutils::IssuerFlags::RevocableFlag);
+    share.issuer().set_flag(soroban_sdk::testutils::IssuerFlags::ClawbackEnabledFlag);
 
     let offering_id = env.register(
         Offering,
         (
             admin,
+            compliance.clone(),
             gate_id.clone(),
             registry_id,
             vault.clone(),
@@ -94,6 +98,7 @@ fn setup() -> Setup {
         company,
         treasury,
         vault,
+        compliance,
         env,
     }
 }
@@ -209,9 +214,43 @@ fn secondary_holder_authorization() {
     let buyer = investor(&s, 0);
     s.offering.authorize_holder(&id, &buyer);
     assert!(s.share_sac.authorized(&buyer));
-    s.offering.revoke_holder(&id, &buyer);
+    let reason = soroban_sdk::String::from_str(&s.env, "Moved to the US");
+    s.offering.freeze_holder(&id, &buyer, &reason);
+    assert_eq!(s.env.auths()[0].0, s.compliance);
     assert!(!s.share_sac.authorized(&buyer));
+    s.offering.unfreeze_holder(&id, &buyer, &soroban_sdk::String::from_str(&s.env, "Residence re-proven"));
+    assert!(s.share_sac.authorized(&buyer));
 
     let outsider = Address::generate(&s.env);
     assert!(s.offering.try_authorize_holder(&id, &outsider).is_err());
+}
+
+#[test]
+fn compliance_clawback_burns_with_a_reason() {
+    let s = setup();
+    let id = s
+        .offering
+        .open_raise(&1, &s.share.address, &USDC, &(10 * USDC), &(100 * USDC), &2_000);
+    let a = investor(&s, 100 * USDC);
+    s.offering.invest(&id, &a, &(100 * USDC));
+    s.offering.finalize(&id);
+    s.offering.claim_tokens(&id, &a);
+
+    let reason = soroban_sdk::String::from_str(&s.env, "Court order 2026/114");
+    s.offering.clawback(&id, &a, &(30 * USDC), &reason);
+    assert_eq!(s.env.auths()[0].0, s.compliance);
+    assert_eq!(s.share.balance(&a), 70 * USDC);
+
+    // A clawback needs a reason and a positive amount.
+    let empty = soroban_sdk::String::from_str(&s.env, "");
+    assert!(s.offering.try_clawback(&id, &a, &(1 * USDC), &empty).is_err());
+    assert!(s.offering.try_clawback(&id, &a, &0, &reason).is_err());
+}
+
+#[test]
+fn admin_reassigns_compliance() {
+    let s = setup();
+    let next = Address::generate(&s.env);
+    s.offering.set_compliance(&next);
+    assert_eq!(s.offering.config().compliance, next);
 }
