@@ -24,10 +24,21 @@ export async function getPoseidon() {
   return _poseidon;
 }
 
-/** Credential leaf = Poseidon(country_code, expiry, secret). */
-export async function credentialLeaf(country, expiry, secret) {
+/** Commitment the investor gives the issuer: Poseidon(secret). */
+export async function secretCommitment(secret) {
   const H = await getPoseidon();
-  return H([BigInt(country), BigInt(expiry), BigInt(secret)]);
+  return H([BigInt(secret)]);
+}
+
+/** Leaf the issuer adds: Poseidon(country_code, expiry, commitment). */
+export async function leafFromCommitment(country, expiry, commitment) {
+  const H = await getPoseidon();
+  return H([BigInt(country), BigInt(expiry), BigInt(commitment)]);
+}
+
+/** Credential leaf = Poseidon(country_code, expiry, Poseidon(secret)). */
+export async function credentialLeaf(country, expiry, secret) {
+  return leafFromCommitment(country, expiry, await secretCommitment(secret));
 }
 
 /** nullifier = Poseidon(secret, scope). */

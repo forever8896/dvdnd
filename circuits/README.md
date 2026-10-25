@@ -9,7 +9,8 @@ credential tree is recomputed on-chain with the Poseidon host function.
 ## Statement
 
 ```
-leaf      = Poseidon(country_code, expiry, secret)        // ISO 3166-1 numeric, unix secs, random Fr
+commitment = Poseidon(secret)                             // what the investor gives the issuer
+leaf      = Poseidon(country_code, expiry, commitment)    // ISO 3166-1 numeric, unix secs
 leaf ∈ MerkleTree(root)                                   // Poseidon(2) per level, depth 16
 country_code ∉ {840 US, 408 KP, 364 IR, 192 CU, 760 SY}
 now < expiry                                              // both range-checked to 64 bits
@@ -40,34 +41,47 @@ the app can rebuild the tree from the contract's `credential` events
 `d = sha256(XDR(ScVal::Address(addr)))`, `hi = d[0..16]`, `lo = d[16..32]`
 (big-endian u128), `address_hash = Poseidon(hi, lo)`.
 
-Size: 4,587 constraints (circom `--O2`), so a 2^13 Powers of Tau is enough.
+The issuer builds the leaf itself from the country its KYC check verified, so an
+investor can't choose their own country, and the issuer never sees the secret
+(the nullifier and the proof both need it).
+
+Size: 4,800 constraints (circom `--O2`), so a 2^13 Powers of Tau is enough.
 
 ## Build
 
 ```sh
 pnpm install
 pnpm build      # circom -> build/residence.r1cs, build/residence.wasm
-pnpm setup      # DEV trusted setup -> build/residence_final.zkey, verification_key.json, vk_soroban.json
 pnpm fixture    # real proof -> build/fixture.json + contracts/contracts/gate/src/fixtures/residence.rs
-# or all three: pnpm all
 ```
 
-**The trusted setup is a dev setup.** `scripts/setup.sh` runs phase 1 (Powers of
-Tau, 2^13) and phase 2 locally with one random contribution each. Whoever runs
-it could keep the toxic waste and forge proofs. That is fine for a hackathon. For
-production, use a public ptau (e.g. Hermez `powersOfTau28_hez_final_13.ptau`)
-and a multi-party phase-2 ceremony.
+## Trusted setup
 
-Each `pnpm setup` gives a **new** key. After running it, re-run `pnpm fixture`
-so the Rust tests match, and deploy (or `set_vk`) with the new
-`build/vk_soroban.json`. The zkey the app serves must match the VK on-chain.
+The committed keys come from a ceremony recorded in
+[`ceremony/TRANSCRIPT.md`](ceremony/TRANSCRIPT.md):
+
+- **Phase 1:** the PSE Perpetual Powers of Tau (80 public contributions and a
+  beacon), truncated to 2^13 and checked with `snarkjs powersoftau verify`.
+- **Phase 2:** contributions with `scripts/ceremony.sh contribute "Name"`, each on
+  the contributor's own machine, then a beacon from the hash of a Stellar mainnet
+  ledger chosen before it closed.
+
+The keys are sound if any single contributor destroyed their randomness. To
+add a contribution, take the latest `build/ceremony/residence_NNNN.zkey`, run
+`contribute`, then `beacon` and `finish` again. After any new key, re-run
+`pnpm fixture` so the Rust tests match, `pnpm copy-to-app`, and
+`scripts/testnet/set-vk.sh` so the gate verifies against it. The circuit and the
+tree don't change, so existing credentials stay valid.
+
+`pnpm setup` runs all ceremony steps with one local contribution, for
+development only.
 
 ## Artifacts
 
 | file | used by | in git |
 |---|---|---|
-| `build/residence.wasm` (~2.2 MB) | browser prover (witness) | no (regenerate) |
-| `build/residence_final.zkey` (~2.8 MB) | browser prover | no (regenerate) |
+| `build/residence.wasm` (~2.2 MB) | browser prover (witness) | yes |
+| `build/residence_final.zkey` (~2.7 MB) | browser prover, from the ceremony | yes |
 | `build/verification_key.json` | snarkjs off-chain verify | yes |
 | `build/vk_soroban.json` | gate constructor / `set_vk` (hex, CLI JSON shape) | yes |
 | `build/fixture.json` | example proof + encodings | yes |
@@ -80,7 +94,7 @@ so the Rust tests match, and deploy (or `set_vk`) with the new
 ```js
 import { proveResidence } from "./scripts/prove.mjs";
 const out = await proveResidence({
-  country: 276, expiry: 1792936000, secret,   // the credential handed out by the issuer
+  country: 276, expiry: 1792936000, secret,   // the investor's credential; the leaf is Poseidon(country, expiry, Poseidon(secret))
   leaves, // all leaves in insertion order (or path_elements + path_indices [+ root])
   now: Math.floor(Date.now() / 1000), scope: 1, address: "G...",
   wasm: "/zk/residence.wasm", zkey: "/zk/residence_final.zkey",

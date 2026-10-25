@@ -60,3 +60,12 @@ Ana locks 600 tokens and Ben 200, then the company pays an 80 USDC dividend: Ana
 - Company pays 80 USDC dividend: https://stellar.expert/explorer/testnet/tx/a37f923524f8f1e614a00d843f5e4d45edc408f003f9f02cd5ff451640bdb7f0
 - investor-eve claims dividend: https://stellar.expert/explorer/testnet/tx/1be8fee535cef0b1d064177c3360b6d77ec1848d65c4af38389d3885c13b047b
 - investor-finn claims dividend: https://stellar.expert/explorer/testnet/tx/01d7b686d1bf1319305af86914c7abc2439775d3125595f62781f58f49b68ec7
+
+## Residence circuit v2 + trusted setup (2026-10-25)
+Leaf = Poseidon(country, expiry, Poseidon(secret)); the issuer builds it from the country it verified.
+Keys from the ceremony in `circuits/ceremony/TRANSCRIPT.md` (PSE Perpetual Powers of Tau + phase 2 with a Stellar-ledger beacon).
+- Gate verifying key replaced in place (`set_vk`): https://stellar.expert/explorer/testnet/tx/eac1ca528fe9bac89a19a6960f7670a725e0bb5c2641c53b0869fda421cd3fae
+- vera (Japan) credential added at index 14: https://stellar.expert/explorer/testnet/tx/42a2e485980807603216f8d5a8d67a46eb3771732da1cf248da13c48ac412179
+- vera's v2 proof verified on-chain: https://stellar.expert/explorer/testnet/tx/727eeabf8aa40fa8c80b3c5c1ec8f34b45100670bc2cab03376968511aa0f614
+- App issuer from a commitment (live test), credential: https://stellar.expert/explorer/testnet/tx/390e4abc721c1f0950c6285c7de23980ac0fb71abca6136429ba1bdb3623b4c5
+- Its proof verified: https://stellar.expert/explorer/testnet/tx/c468ba58aa94765a466e4958d33f95fd20f92c97277790f90c7d1d646079c896

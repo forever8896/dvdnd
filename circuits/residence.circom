@@ -3,8 +3,10 @@ pragma circom 2.1.6;
 // Residence eligibility proof (Reg S "not a US person").
 //
 // Proves, without revealing the investor's country, expiry or secret, that:
-//   1. Poseidon(country_code, expiry, secret) is a leaf of the issuer's
-//      Poseidon Merkle tree with the given (on-chain) root,
+//   1. Poseidon(country_code, expiry, Poseidon(secret)) is a leaf of the
+//      issuer's Poseidon Merkle tree with the given (on-chain) root. The
+//      issuer builds the leaf from the country it verified and the commitment
+//      Poseidon(secret), so it never learns the secret,
 //   2. country_code is not the US (840) nor on a small sanctions list,
 //   3. the credential has not expired (expiry > now),
 //   4. nullifier == Poseidon(secret, scope)  (one registration per credential and scope),
@@ -69,10 +71,12 @@ template Residence(depth) {
     signal input path_indices[depth];
 
     // 1. credential leaf is in the tree
+    component commitment = Poseidon(1);
+    commitment.inputs[0] <== secret;
     component leafHasher = Poseidon(3);
     leafHasher.inputs[0] <== country_code;
     leafHasher.inputs[1] <== expiry;
-    leafHasher.inputs[2] <== secret;
+    leafHasher.inputs[2] <== commitment.out;
 
     component tree = MerkleRoot(depth);
     tree.leaf <== leafHasher.out;
