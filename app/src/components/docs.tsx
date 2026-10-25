@@ -25,15 +25,40 @@ export function DocsNav() {
   );
 }
 
-/** Page header: the page's place in the docs, its title and one-line summary. */
+/** Page header: the page's place in the docs, a large headline and a one-line summary. */
 export function DocHeader({ slug }: { slug: string }) {
-  const page = DOCS.find((d) => d.slug === slug)!;
+  const i = DOCS.findIndex((d) => d.slug === slug);
+  const page = DOCS[i];
   return (
     <header className="doc-header">
-      <div className="label">{page.group}</div>
-      <h1 className="display doc-title">{page.title}</h1>
+      <div className="doc-kicker">
+        <span className="num">{String(i + 1).padStart(2, "0")}</span>
+        <span>{page.group}</span>
+        <span className="doc-kicker-title">{page.title}</span>
+      </div>
+      <h1 className="doc-statement">
+        {/* One sentence per line, so a claim never breaks mid-phrase. */}
+        {page.statement.split(/(?<=\.)\s+/).map((line) => (
+          <span key={line}>{line}</span>
+        ))}
+      </h1>
       <p className="doc-lede">{page.blurb}</p>
     </header>
+  );
+}
+
+/** Large numbered principles, one claim each. */
+export function Pillars({ items }: { items: { title: string; body: React.ReactNode }[] }) {
+  return (
+    <div className="pillars">
+      {items.map((p, i) => (
+        <div key={p.title} className="pillar">
+          <span className="num pillar-n">{String(i + 1).padStart(2, "0")}</span>
+          <div className="pillar-title">{p.title}</div>
+          <div className="pillar-body">{p.body}</div>
+        </div>
+      ))}
+    </div>
   );
 }
 

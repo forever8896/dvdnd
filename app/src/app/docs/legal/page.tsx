@@ -1,4 +1,4 @@
-import { Aspects, Callout, DocHeader, DocPager } from "@/components/docs";
+import { Aspects, Callout, DocHeader, DocPager, Pillars } from "@/components/docs";
 
 export const metadata = { title: "Legal model" };
 
@@ -18,11 +18,13 @@ export default function Legal() {
         invests. dvdnd&apos;s design avoids all three, following the conditions of Securities Act §4(b) for platforms
         that only host offerings:
       </p>
-      <ul>
-        <li><b>No transaction-based pay.</b> A company pays a flat listing fee when it opens a raise, never a share of what it raises. The fee is set by the council and is the same for every raise.</li>
-        <li><b>No custody.</b> Investor USDC sits in the offering contract. It can only go to the company when a raise succeeds, or back to each investor when it fails. No admin key can withdraw it.</li>
-        <li><b>No gatekeeping by dvdnd.</b> Each raise names its own compliance account, the company or its transfer agent. Only that account can freeze or claw back holdings.</li>
-      </ul>
+      <Pillars
+        items={[
+          { title: "No cut.", body: "A company pays a flat listing fee when it opens a raise, never a share of what it raises. The fee is set by the council and is the same for every raise." },
+          { title: "No custody.", body: "Investor USDC sits in the offering contract. It can only go to the company when a raise succeeds, or back to each investor when it fails. No admin key can withdraw it." },
+          { title: "No gatekeeper.", body: "Each raise names its own compliance account, the company or its transfer agent. Only that account can freeze or claw back holdings. dvdnd has no such power." },
+        ]}
+      />
 
       <h2>Exemptions, chosen per raise</h2>
       <table className="table">

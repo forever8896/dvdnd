@@ -10,7 +10,7 @@ const INVESTOR_LINKS = [
   { href: "/discover", label: "Discover" },
   { href: "/portfolio", label: "Portfolio" },
   { href: "/wallet", label: "Wallet" },
-  { href: "/simulation", label: "Simulation" },
+  { href: "/docs", label: "Docs" },
 ];
 
 const COMPANY_LINKS = [
