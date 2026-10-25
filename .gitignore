@@ -6,3 +6,4 @@ node_modules/
 circuits/build/*.ptau
 deployments/credentials/
 contracts/contracts/*/test_snapshots/
+.vercel
