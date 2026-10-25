@@ -1,6 +1,6 @@
 // Reads the live testnet deployment. Opt-in: LIVE=1 pnpm vitest run chain.live
 import { describe, expect, it } from "vitest";
-import { displayStatus, fromUnits, listListings, pool, targetYield } from "./chain";
+import { displayStatus, fromUnits, listListings, pool, RaiseState, targetYield } from "./chain";
 
 describe.skipIf(!process.env.LIVE)("testnet reads", () => {
   it("lists raises with their companies", async () => {
@@ -16,7 +16,9 @@ describe.skipIf(!process.env.LIVE)("testnet reads", () => {
       );
       expect(l.company.id).toBe(l.raise.company_id);
     }
-    const p = await pool(listings[0]!.raise.token);
-    expect(p.total_distributed).toBeGreaterThan(0n);
+    // The seeded Andes raise went through a full cycle, dividend included.
+    const paid = listings.find((l) => l.raise.state === RaiseState.Succeeded);
+    expect(paid).toBeDefined();
+    expect((await pool(paid!.raise.token)).total_distributed).toBeGreaterThan(0n);
   }, 30_000);
 });

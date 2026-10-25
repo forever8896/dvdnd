@@ -3,36 +3,51 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { StrKey } from "@stellar/stellar-sdk";
+import { AddMoney } from "@/components/add-money";
 import { Toast, TxLink, fmt } from "@/components/ui";
-import { CompanyStatus, parseProfile, toUnits } from "@/lib/chain";
+import { CompanyStatus, Exemption, EXEMPTION_LABEL, fromUnits, listingFee, parseProfile, REG_D_LOCKUP_SECS, toUnits } from "@/lib/chain";
+import { IS_TESTNET } from "@/lib/config";
 import { assetCode, findMyCompany, issueShareToken, myListings, openRaise } from "@/lib/company";
 import { useAsync } from "@/lib/hooks";
 import type { TxResult } from "@/lib/stellar";
 import { useWallet } from "@/lib/wallet";
 
-const FEE = 0.05;
+const REG_D_LOCKUP_DAYS = REG_D_LOCKUP_SECS / 86400;
 
 export default function RaiseSetup() {
   const router = useRouter();
-  const { signer } = useWallet();
+  const { signer, balances, refresh } = useWallet();
   const me = signer.company;
   const { data } = useAsync(async () => {
     if (!me) return null;
     const company = await findMyCompany(me.publicKey);
-    return company ? { company, listings: await myListings(company.id) } : null;
+    if (!company) return null;
+    const [listings, fee, verifier] = await Promise.all([
+      myListings(company.id),
+      listingFee(),
+      IS_TESTNET ? fetch("/api/accredit").then((r) => (r.ok ? r.json() : {})).then((b: { verifier?: string }) => b.verifier ?? null) : null,
+    ]);
+    return { company, listings, fee: fromUnits(fee), testnetVerifier: verifier };
   }, [me?.publicKey]);
 
   const [targetYield, setTargetYield] = useState("18");
   const [minPct, setMinPct] = useState("40");
   const [days, setDays] = useState("7");
   const [maxOverride, setMaxOverride] = useState<string | null>(null);
+  const [exemption, setExemption] = useState<Exemption>(Exemption.RegS);
+  const [lockupDays, setLockupDays] = useState("0");
+  const [maxHolders, setMaxHolders] = useState("500");
+  const [minTicket, setMinTicket] = useState("0");
+  const [compliance, setCompliance] = useState("");
+  const [acceptVerifier, setAcceptVerifier] = useState(true);
   const [log, setLog] = useState<{ step: string; tx?: TxResult }[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   if (!me) return <Gate text="Sign in as a company first." href="/signin" cta="Sign in" />;
   if (!data) return <main className="page"><div className="skeleton" style={{ height: 240 }} /></main>;
-  const { company, listings } = data;
+  const { company, listings, fee, testnetVerifier } = data;
   if (company.status !== CompanyStatus.Active) return <Gate text="Finish onboarding first: verify ownership and sign the agreement." href="/company" cta="Continue onboarding" />;
   const open = listings.find((l) => l.raise.state === 0);
   if (open) return <Gate text="You already have a raise open." href={`/raise/${open.raise.id}`} cta="View raise" />;
@@ -44,7 +59,16 @@ export default function RaiseSetup() {
   const max = maxOverride !== null ? Number(maxOverride) : suggestedMax;
   const min = Math.round((max * Number(minPct)) / 100);
   const impliedYield = max > 0 ? pool / max : 0;
-  const valid = max > 0 && min > 0 && min <= max && Number(days) > 0;
+  const lockup = Number(lockupDays);
+  const minLockup = exemption === Exemption.RegD506c ? REG_D_LOCKUP_DAYS : 0;
+  const holders = Number(maxHolders);
+  const complianceAccount = compliance.trim() || me.publicKey;
+  const complianceValid = StrKey.isValidEd25519PublicKey(complianceAccount);
+  const usdc = balances.company?.usdc ?? 0;
+  const valid =
+    max > 0 && min > 0 && min <= max && Number(days) > 0 &&
+    lockup >= minLockup && Number.isInteger(holders) && holders >= 1 && holders <= 2000 &&
+    Number(minTicket) >= 0 && Number(minTicket) <= max && complianceValid && usdc >= fee;
 
   async function publish() {
     setBusy(true);
@@ -59,13 +83,22 @@ export default function RaiseSetup() {
         /* the issuer key is only needed for classic admin actions */
       }
       push("Opening the raise");
+      const deadline = Math.floor(Date.now() / 1000) + Number(days) * 86400;
       const res = await openRaise(me!, {
         companyId: company.id,
         token,
         price: toUnits(1),
         min: toUnits(min),
         max: toUnits(max),
-        deadline: Math.floor(Date.now() / 1000) + Number(days) * 86400,
+        deadline,
+        terms: {
+          exemption,
+          min_ticket: toUnits(Number(minTicket)),
+          max_holders: holders,
+          lockup_until: BigInt(deadline + lockup * 86400),
+          compliance: complianceAccount,
+          verifier: exemption === Exemption.RegD506c && acceptVerifier && testnetVerifier ? testnetVerifier : undefined,
+        },
       });
       push("Raise open to verified investors", res);
       router.push(`/raise/${res.raiseId}`);
@@ -83,8 +116,9 @@ export default function RaiseSetup() {
           Set up your raise
         </h1>
         <p className="muted" style={{ marginTop: 6, maxWidth: 640 }}>
-          Investors pay 1.00 USDC per token. The raise is all-or-nothing: you receive the funds, minus dvdnd&apos;s 5%
-          fee, only if the minimum is reached by the deadline.
+          Investors pay 1.00 USDC per token. The raise is all-or-nothing: you receive everything raised if the minimum
+          is reached by the deadline. dvdnd charges a flat {fmt(fee, 2)} USDC listing fee when you open the raise, never
+          a share of what you raise.
         </p>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 32 }}>
@@ -93,6 +127,45 @@ export default function RaiseSetup() {
           <Field id="max" label="Maximum raise" value={String(max)} onChange={setMaxOverride} suffix="USDC" hint={`Suggested ${fmt(suggestedMax)} from ${fmt(pool)} USDC/yr of committed profit.`} />
           <Field id="minPct" label="Minimum, as share of maximum" value={minPct} onChange={setMinPct} suffix="%" />
           <Field id="days" label="Raise open for" value={days} onChange={setDays} suffix="days" />
+
+          <div className="field">
+            <span>Who can invest</span>
+            <div className="seg" role="group" aria-label="Exemption" style={{ alignSelf: "flex-start" }}>
+              {[Exemption.RegS, Exemption.RegD506c].map((e) => (
+                <button
+                  key={e}
+                  aria-pressed={exemption === e}
+                  onClick={() => {
+                    setExemption(e);
+                    setLockupDays(String(e === Exemption.RegD506c ? REG_D_LOCKUP_DAYS : 0));
+                  }}
+                >
+                  {EXEMPTION_LABEL[e]}
+                </button>
+              ))}
+            </div>
+            <span className="small">
+              {exemption === Exemption.RegS
+                ? "Regulation S: only people who prove, with a zero-knowledge proof, that they live outside the US."
+                : "Rule 506(c): accredited investors only, verified by an accreditation service or self-certified with at least 200,000 USDC invested. You can market it publicly; file Form D within 15 days of the first sale."}
+            </span>
+          </div>
+          <Field id="lockup" label="Lock-up after the deadline" value={lockupDays} onChange={setLockupDays} suffix="days" hint={exemption === Exemption.RegD506c ? `Reg D shares are restricted for at least a year (Rule 144): minimum ${REG_D_LOCKUP_DAYS} days. Tokens earn dividends in the vault meanwhile but can't move.` : "Tokens earn dividends in the vault during lock-up but can't move. No new holders join until it ends."} />
+          <Field id="maxHolders" label="Holder cap" value={maxHolders} onChange={setMaxHolders} suffix="holders" hint="Stays under the Exchange Act §12(g) registration trigger (at most 2,000)." />
+          <Field id="minTicket" label="Minimum investment" value={minTicket} onChange={setMinTicket} suffix="USDC" />
+          <label className="field">
+            <span>Compliance account</span>
+            <span className="input-wrap" data-error={!complianceValid}>
+              <input id="compliance" value={compliance} placeholder={me.publicKey} onChange={(e) => setCompliance(e.target.value)} style={{ fontFamily: "var(--font-mono)", fontSize: 12 }} />
+            </span>
+            <span className="small">Freezes, unfreezes and claws back holdings, each with a recorded reason. Your company by default, or your transfer agent&apos;s Stellar address.</span>
+          </label>
+          {exemption === Exemption.RegD506c && testnetVerifier && (
+            <label style={{ display: "flex", gap: 10, alignItems: "flex-start", fontSize: 13 }}>
+              <input id="acceptVerifier" type="checkbox" checked={acceptVerifier} onChange={(e) => setAcceptVerifier(e.target.checked)} style={{ marginTop: 3 }} />
+              <span>Accept attestations from dvdnd&apos;s testnet accreditation verifier (a stand-in for a verification service), so verified investors can put in less than 200,000 USDC.</span>
+            </label>
+          )}
         </div>
         <div style={{ background: "var(--surface)", padding: 20, display: "flex", flexDirection: "column", gap: 12, alignSelf: "start" }}>
           <div className="label">Preview</div>
@@ -102,7 +175,10 @@ export default function RaiseSetup() {
             ["Minimum raise", `${fmt(min)} USDC`],
             ["Tokens at maximum", fmt(max)],
             ["Yield at 1.00 / token", `${(impliedYield * 100).toFixed(1)}%`],
-            ["You receive at maximum", `${fmt(max * (1 - FEE), 2)} USDC`],
+            ["You receive at maximum", `${fmt(max, 2)} USDC`],
+            ["Listing fee, paid now", `${fmt(fee, 2)} USDC`],
+            ["Exemption", EXEMPTION_LABEL[exemption]],
+            ["Lock-up ends", `${lockup} days after the deadline`],
           ].map(([k, v]) => (
             <div key={k} style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid var(--hair)", paddingBottom: 8 }}>
               <span className="muted">{k}</span>
@@ -113,6 +189,7 @@ export default function RaiseSetup() {
             Publishing issues your share token on Stellar with compliance flags (only verified investors can hold it)
             and hands its admin to the dvdnd escrow contract, so no one can mint more.
           </p>
+          {usdc < fee && <AddMoney signer={me} suggested={Math.ceil(fee - usdc + 1)} onDone={refresh} />}
           <button className="btn btn-primary btn-block" onClick={publish} disabled={!valid || busy}>
             {busy ? "Publishing…" : "Issue token and open raise"}
           </button>

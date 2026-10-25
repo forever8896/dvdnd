@@ -6,7 +6,21 @@ import { Check } from "./icons";
 import { AddMoney } from "./add-money";
 import { Modal, ReceiptRow } from "./modal";
 import { Toast, TxLink, fmt } from "./ui";
-import { dividendPool, errorText, fromUnits, offering, targetYield, toUnits, type Listing } from "@/lib/chain";
+import {
+  contribution,
+  dividendPool,
+  errorText,
+  Exemption,
+  fromUnits,
+  isEligibleFor,
+  lockedUp,
+  offering,
+  SELF_CERTIFIED_MINIMUM,
+  targetYield,
+  toUnits,
+  type Listing,
+} from "@/lib/chain";
+import { useAsync } from "@/lib/hooks";
 import { useWallet } from "@/lib/wallet";
 
 type Step = "amount" | "confirm" | "sending" | "done";
@@ -24,6 +38,15 @@ export function InvestModal({ listing, onClose, onInvested }: { listing: Listing
   const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hash, setHash] = useState<string>();
+  const regD = listing.raise.terms.exemption === Exemption.RegD506c;
+  // What this investor already has in escrow, and whether a verifier attested them (506(c)).
+  const { data: standing } = useAsync(async () => {
+    const [existing, attested] = await Promise.all([
+      contribution(listing.raise.id, investor.publicKey),
+      regD ? isEligibleFor(listing.raise.id, investor.publicKey, 1n) : Promise.resolve(true),
+    ]);
+    return { existing: fromUnits(existing), attested };
+  }, [listing.raise.id, investor.publicKey]);
 
   const value = Number(amount);
   const tokens = value / price;
@@ -31,6 +54,12 @@ export function InvestModal({ listing, onClose, onInvested }: { listing: Listing
   const yearly = (dividendPool(listing) * sharePct) / 100;
   const tooMuch = value > available;
   const overMax = value > room;
+  // The raise's minimum, or 200,000 USDC for a self-certified 506(c) investor; counted on their total.
+  const minimum = Math.max(
+    fromUnits(listing.raise.terms.min_ticket),
+    regD && standing && !standing.attested ? fromUnits(SELF_CERTIFIED_MINIMUM) : 0,
+  );
+  const belowMin = standing ? standing.existing + value < minimum : false;
 
   async function send() {
     setStep("sending");
@@ -126,6 +155,12 @@ export function InvestModal({ listing, onClose, onInvested }: { listing: Listing
           <span className={tooMuch ? "red" : undefined}>Available {fmt(available, 2)}</span>
           <span className={overMax ? "red" : undefined}>Room left {fmt(room, 2)}</span>
         </span>
+        {minimum > 0 && (
+          <span className={`small${belowMin ? " red" : ""}`}>
+            Minimum {fmt(minimum)} USDC in total{standing?.existing ? ` (you have ${fmt(standing.existing, 2)} in escrow)` : ""}
+            {regD && standing && !standing.attested ? ", the 506(c) minimum without a verifier's attestation." : "."}
+          </span>
+        )}
       </label>
       <div className="grid-cells" style={{ gridTemplateColumns: "1fr 1fr" }}>
         {[
@@ -146,13 +181,19 @@ export function InvestModal({ listing, onClose, onInvested }: { listing: Listing
       <p className="small">
         Funds are held in escrow and refunded in full if the minimum isn&apos;t reached by {deadline}. Expected
         dividends are based on last year&apos;s profit and aren&apos;t guaranteed.
+        {lockedUp(listing.raise) &&
+          ` Your tokens stay in the dividend vault until the lock-up ends on ${new Date(Number(listing.raise.terms.lockup_until) * 1000).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}: they earn, but can't be sold before then.`}
       </p>
       <label style={{ display: "flex", gap: 10, alignItems: "flex-start", fontSize: 13 }}>
         <input id="investAgree" type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} style={{ marginTop: 3 }} />
-        <span>I&apos;m currently outside the United States and I&apos;ve read the agreement summary.</span>
+        <span>
+          {regD
+            ? "I'm an accredited investor, my accreditation statement is still true, and I've read the agreement summary."
+            : "I'm currently outside the United States and I've read the agreement summary."}
+        </span>
       </label>
       <div style={{ display: "flex", gap: 8 }}>
-        <button className="btn btn-primary btn-sm" style={{ flex: 1 }} disabled={!agreed || !(value > 0) || tooMuch || overMax} onClick={() => setStep("confirm")}>
+        <button className="btn btn-primary btn-sm" style={{ flex: 1 }} disabled={!agreed || !(value > 0) || tooMuch || overMax || belowMin || !standing} onClick={() => setStep("confirm")}>
           Continue
         </button>
         <button className="btn btn-secondary btn-sm" onClick={onClose}>

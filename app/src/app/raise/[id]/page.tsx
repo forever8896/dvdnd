@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { use, useState } from "react";
 import { ShieldCheck } from "@/components/icons";
+import { AccreditationBox, useAccreditation } from "@/components/accreditation";
 import { InvestModal } from "@/components/invest-modal";
 import { CountryChip, RaiseProgress, StatusPill, Toast, TxLink, fmt } from "@/components/ui";
 import { CONTRACTS, NETWORK } from "@/lib/config";
@@ -12,7 +13,10 @@ import {
   displayStatus,
   dividendPool,
   errorText,
+  Exemption,
+  EXEMPTION_LABEL,
   fromUnits,
+  lockedUp,
   getListing,
   initials,
   offering,
@@ -136,6 +140,7 @@ function Header({ l }: { l: Listing }) {
               Agreement signed
             </span>
           )}
+          <span className="pill pill-accent">{EXEMPTION_LABEL[l.raise.terms.exemption]}</span>
           {l.company.agreement_hash && (
             <span className="mono" style={{ fontSize: 12, background: "var(--surface)", padding: "3px 6px" }}>
               sha256 {hex(l.company.agreement_hash).slice(0, 6)}…{hex(l.company.agreement_hash).slice(-4)}
@@ -285,10 +290,34 @@ function Holders({ l }: { l: Listing }) {
   );
 }
 
+function Terms({ l }: { l: Listing }) {
+  const t = l.raise.terms;
+  const agent = t.compliance === l.raise.company ? "The company" : `Agent ${t.compliance.slice(0, 4)}…${t.compliance.slice(-4)}`;
+  const rows: [string, string][] = [
+    ["Offered under", EXEMPTION_LABEL[t.exemption]],
+    ["Minimum investment", t.min_ticket > 0n ? `${fmt(fromUnits(t.min_ticket))} USDC` : t.exemption === Exemption.RegD506c ? "200,000 USDC unless verified" : "None"],
+    ["Holders", `${l.raise.holders} of ${t.max_holders} max`],
+    ["Lock-up until", date(t.lockup_until)],
+    ["Compliance", agent],
+  ];
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      {rows.map(([k, v]) => (
+        <div key={k} className="small" style={{ display: "flex", justifyContent: "space-between", gap: 12, borderBottom: "1px solid var(--hair)", paddingBottom: 6 }}>
+          <span>{k}</span>
+          <span style={{ color: "var(--text)", textAlign: "right" }}>{v}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function RaisePanel({ l, onChange }: { l: Listing; onChange: () => void }) {
   const { signer, eligibleUntil, refresh } = useWallet();
   const investor = signer.investor;
   const actor = investor ?? signer.company;
+  const regD = l.raise.terms.exemption === Exemption.RegD506c;
+  const { data: accreditation, reload: reloadAccreditation } = useAccreditation(l.raise, regD ? (investor ?? undefined) : undefined);
   const { data: mine, reload: reloadMine } = useAsync(
     async () => (investor ? contribution(l.raise.id, investor.publicKey) : 0n),
     [l.raise.id, investor?.publicKey],
@@ -345,6 +374,14 @@ function RaisePanel({ l, onChange }: { l: Listing; onChange: () => void }) {
         ))}
       </div>
 
+      <Terms l={l} />
+      {regD && accreditation?.attested && (
+        <span className="pill pill-green" style={{ alignSelf: "flex-start" }}>
+          <ShieldCheck size={11} />
+          Verified accredited investor
+        </span>
+      )}
+
       {myUsdc > 0 && (
         <div className="pill pill-accent" style={{ alignSelf: "flex-start" }}>
           You have {fmt(myUsdc, 2)} USDC {r.state === RaiseState.Open ? "in escrow" : r.state === RaiseState.Succeeded ? "to claim as tokens" : "to refund"}
@@ -358,10 +395,14 @@ function RaisePanel({ l, onChange }: { l: Listing; onChange: () => void }) {
             <Link href="/signin" className="btn btn-primary btn-block">
               Sign in to invest
             </Link>
-          ) : !isEligible(eligibleUntil) ? (
+          ) : !regD && !isEligible(eligibleUntil) ? (
             <Link href="/verify" className="btn btn-primary btn-block">
               Verify residence to invest
             </Link>
+          ) : regD && !accreditation ? (
+            <div className="skeleton" style={{ height: 40 }} />
+          ) : regD && !accreditation!.attested && !accreditation!.selfCertified ? (
+            <AccreditationBox raise={r} investor={investor} state={accreditation!} onChange={reloadAccreditation} />
           ) : (
             <button className="btn btn-primary btn-block" onClick={() => setInvesting(true)} style={{ justifyContent: "space-between" }}>
               <span>Invest</span>
@@ -370,9 +411,13 @@ function RaisePanel({ l, onChange }: { l: Listing; onChange: () => void }) {
               </span>
             </button>
           )}
+          {regD && investor && accreditation?.selfCertified && !accreditation.attested && (
+            <AccreditationBox raise={r} investor={investor} state={accreditation} onChange={reloadAccreditation} />
+          )}
           <p className="small">
             All-or-nothing. Your USDC stays in escrow until the deadline. If the minimum isn&apos;t reached, it&apos;s
             refunded to you.
+            {lockedUp(r) && ` Tokens stay in the dividend vault, earning, until the lock-up ends on ${date(r.terms.lockup_until)}.`}
           </p>
         </>
       )}
@@ -398,10 +443,16 @@ function RaisePanel({ l, onChange }: { l: Listing; onChange: () => void }) {
         <button
           className="btn btn-green btn-block"
           disabled={busy !== null}
-          onClick={() => act("claim", () => offering.claimTokens(investor, r.id), "Tokens claimed")}
+          onClick={() => act("claim", () => offering.claimTokens(investor, r.id), lockedUp(r) ? "Tokens claimed into the dividend vault" : "Tokens claimed")}
         >
-          {busy === "claim" ? "Claiming…" : `Claim ${fmt(myUsdc / fromUnits(r.price))} tokens`}
+          {busy === "claim" ? "Claiming…" : `Claim ${fmt(myUsdc / fromUnits(r.price))} tokens${lockedUp(r) ? " into the vault" : ""}`}
         </button>
+      )}
+      {r.state === RaiseState.Succeeded && investor && myUsdc > 0 && lockedUp(r) && (
+        <p className="small">
+          Lock-up runs until {date(r.terms.lockup_until)}: your tokens go straight into the dividend vault and earn from
+          the next period, but can&apos;t be moved or sold until then.
+        </p>
       )}
 
       {r.state === RaiseState.Failed && investor && myUsdc > 0 && (
@@ -412,7 +463,8 @@ function RaisePanel({ l, onChange }: { l: Listing; onChange: () => void }) {
 
       {r.state === RaiseState.Succeeded && myUsdc === 0 && (
         <p className="small">
-          This raise closed{r.fee_paid > 0n ? ` with ${fmt(fromUnits(r.raised))} USDC raised` : ""}. Tokens trade between verified holders.
+          This raise closed with {fmt(fromUnits(r.raised))} USDC raised.{" "}
+          {lockedUp(r) ? `Tokens are locked up until ${date(r.terms.lockup_until)}; after that they trade between eligible holders.` : "Tokens trade between eligible holders."}
         </p>
       )}
 

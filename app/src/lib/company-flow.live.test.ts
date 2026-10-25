@@ -1,17 +1,18 @@
 // Company flow against testnet and the running dev server: register, mock KYB,
-// sign the agreement, issue the share token and open a raise.
+// sign the agreement, issue the share token, and simulate opening a 506(c)
+// raise (simulated, so test companies never show up on Discover).
 // Opt-in: LIVE=1 APP_URL=http://localhost:3100 DVDND_ADMIN_SECRET=… pnpm vitest run company-flow.live
 // Without the admin secret it stops after checking that KYB refuses a domain without the record.
 import { describe, expect, it } from "vitest";
-import { CompanyStatus, getCompany, getRaise, RaiseState, sc, toUnits } from "./chain";
+import { CompanyStatus, Exemption, getCompany, raiseCount, REG_D_LOCKUP_SECS, sc, termsVal, toUnits } from "./chain";
 import { CONTRACTS } from "./config";
-import { agreementText, assetCode, issueShareToken, openRaise, register, sha256, signAgreement } from "./company";
-import { friendbot, invoke, Keypair, keypairSigner } from "./stellar";
+import { agreementText, assetCode, issueShareToken, register, sha256, signAgreement } from "./company";
+import { buyUsdc, friendbot, invoke, Keypair, keypairSigner, read } from "./stellar";
 
 const APP_URL = process.env.APP_URL ?? "http://localhost:3100";
 
 describe.skipIf(!process.env.LIVE)("company flow on testnet", () => {
-  it("onboards a company and opens a raise", async () => {
+  it("onboards a company and can open a 506(c) raise", async () => {
     const kp = Keypair.random();
     await friendbot(kp.publicKey());
     const owner = keypairSigner(kp);
@@ -49,15 +50,28 @@ describe.skipIf(!process.env.LIVE)("company flow on testnet", () => {
 
     const steps: string[] = [];
     const { token } = await issueShareToken(assetCode(name), (s) => steps.push(s), owner);
-    const raise = await openRaise(owner, {
-      companyId: reg.id,
-      token,
-      price: toUnits(1),
-      min: toUnits(100),
-      max: toUnits(2500),
-      deadline: Math.floor(Date.now() / 1000) + 7 * 86400,
-    });
-    console.log("company", reg.id, "token", token, "raise", raise.raiseId, raise.hash);
-    expect((await getRaise(raise.raiseId)).state).toBe(RaiseState.Open);
+    await buyUsdc(owner, 12); // the flat listing fee
+    const deadline = Math.floor(Date.now() / 1000) + 7 * 86400;
+    const open = (lockup: number) =>
+      read(CONTRACTS.offering, "open_raise", [
+        sc.u32(reg.id),
+        sc.address(token),
+        sc.i128(toUnits(1)),
+        sc.i128(toUnits(100)),
+        sc.i128(toUnits(2500)),
+        sc.u64(deadline),
+        termsVal({
+          exemption: Exemption.RegD506c,
+          min_ticket: 0n,
+          max_holders: 100,
+          lockup_until: BigInt(deadline + lockup),
+          compliance: kp.publicKey(),
+        }),
+      ]);
+    // The next raise id comes back from the simulation; nothing is submitted.
+    expect(Number(await open(REG_D_LOCKUP_SECS))).toBe((await raiseCount()) + 1);
+    // Reg D needs a year of lock-up.
+    await expect(open(REG_D_LOCKUP_SECS - 1)).rejects.toThrow();
+    console.log("company", reg.id, "token", token, "506(c) raise simulated");
   }, 180_000);
 });

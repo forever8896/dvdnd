@@ -3,7 +3,7 @@
 // find it through each token issuer's home_domain.
 
 import { CONTRACTS, IS_TESTNET, NETWORK, SITE_DOMAIN, USDC_ISSUER } from "@/lib/config";
-import { countryName, fromUnits, listListings, parseProfile, RaiseState } from "@/lib/chain";
+import { countryName, Exemption, fromUnits, listListings, parseProfile, RaiseState } from "@/lib/chain";
 import { read } from "@/lib/stellar";
 
 export const revalidate = 300;
@@ -28,7 +28,14 @@ export async function GET() {
         `display_decimals=2`,
         `name=${q(l.company.name.slice(0, 20))}`,
         `desc=${q(`Profit-share token of ${l.company.name} (${countryName(l.company.country)}, ${profile.sector}). Holders who lock for a full period receive ${l.company.payout_bps / 100}% of the company's net profit in USDC.`)}`,
-        `conditions=${q((IS_TESTNET ? "Testnet demonstration. " : "") + "Only wallets that have proven residence outside the United States can hold this token (Regulation S). dvdnd can freeze holdings for compliance. Supply equals what was sold in the raise and cannot be increased.")}`,
+        `conditions=${q(
+          (IS_TESTNET ? "Testnet demonstration. " : "") +
+            (l.raise.terms.exemption === Exemption.RegD506c
+              ? "Offered under Rule 506(c) of Regulation D: only verified accredited investors can hold this token. "
+              : "Offered under Regulation S: only wallets that have proven residence outside the United States can hold this token. ") +
+            `Restricted until ${new Date(Number(l.raise.terms.lockup_until) * 1000).toISOString().slice(0, 10)}: tokens stay in the dividend vault until then. ` +
+            "The company's compliance account can freeze or claw back holdings, with a recorded reason. Supply equals what was sold in the raise and cannot be increased.",
+        )}`,
         sold !== null ? `fixed_number=${sold}` : `is_unlimited=false`,
         `is_asset_anchored=false`,
         "",

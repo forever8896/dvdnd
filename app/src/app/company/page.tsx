@@ -479,7 +479,7 @@ function Dashboard({ company }: { company: Company }) {
               <div className="banner banner-green">
                 <div>
                   <div style={{ fontWeight: 800, color: "var(--green)" }}>Funded</div>
-                  {fmt(fromUnits(listing.raise.raised - listing.raise.fee_paid), 2)} USDC received after the {fmt(fromUnits(listing.raise.fee_paid), 2)} USDC platform fee.
+                  {fmt(fromUnits(listing.raise.raised), 2)} USDC received in full. You paid a flat {fmt(fromUnits(listing.raise.fee_paid), 2)} USDC listing fee when the raise opened.
                 </div>
               </div>
             )}

@@ -7,11 +7,13 @@ import {
   pool,
   position,
   RaiseState,
+  sc,
   tokenBalance,
   type Listing,
   type Pool,
   type Position,
 } from "./chain";
+import { read } from "./stellar";
 
 export type Holding = {
   listing: Listing;
@@ -23,6 +25,8 @@ export type Holding = {
   pending: number;
   /** USDC dividends ready to claim. */
   claimable: number;
+  /** The wallet's share-token trustline is frozen (lock-up, or compliance). */
+  frozen: boolean;
   pool: Pool;
   position: Position;
 };
@@ -39,20 +43,21 @@ export async function loadPortfolio(investor: string): Promise<Portfolio> {
   const listings = await listListings();
   const rows = await Promise.all(
     listings.map(async (listing) => {
-      const [escrowed, wallet, pos, pl] = await Promise.all([
+      const [escrowed, wallet, pos, pl, authorized] = await Promise.all([
         contribution(listing.raise.id, investor),
         // No trustline yet means no balance.
         tokenBalance(listing.raise.token, investor).catch(() => 0n),
         position(listing.raise.token, investor),
         pool(listing.raise.token),
+        read<boolean>(listing.raise.token, "authorized", [sc.address(investor)]).catch(() => true),
       ]);
-      return { listing, escrowed, wallet, pos, pl };
+      return { listing, escrowed, wallet, pos, pl, authorized };
     }),
   );
 
   const holdings: Holding[] = [];
   const escrow: EscrowEntry[] = [];
-  for (const { listing, escrowed, wallet, pos, pl } of rows) {
+  for (const { listing, escrowed, wallet, pos, pl, authorized } of rows) {
     if (escrowed > 0n) escrow.push({ listing, amount: fromUnits(escrowed) });
     if (listing.raise.state === RaiseState.Succeeded && (wallet > 0n || pos.active > 0n || pos.pending > 0n || pos.owed > 0n)) {
       holdings.push({
@@ -61,6 +66,7 @@ export async function loadPortfolio(investor: string): Promise<Portfolio> {
         locked: fromUnits(pos.active),
         pending: fromUnits(pos.pending),
         claimable: fromUnits(pos.owed),
+        frozen: !authorized,
         pool: pl,
         position: pos,
       });

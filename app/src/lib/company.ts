@@ -8,6 +8,8 @@ import {
   getCompany,
   listListings,
   sc,
+  termsVal,
+  type Terms,
   type Company,
   type Listing,
   type Profile,
@@ -61,7 +63,7 @@ export function agreementText(c: { name: string; payoutPct: number; periodLabel:
     `3. The commitment lasts for as long as the business operates.`,
     `4. If the business is sold, the obligation transfers to the buyer.`,
     `5. Late payments are flagged publicly on the company's listing.`,
-    `6. The company holds no tokens and receives the raise, minus the platform's 5% fee, only if the minimum is reached.`,
+    `6. The company holds no tokens and receives the full raise only if the minimum is reached. It pays dvdnd a flat listing fee per raise, never a share of what is raised.`,
   ].join("\n");
 }
 
@@ -115,7 +117,7 @@ export async function issueShareToken(code: string, progress: IssueProgress, own
 
 export async function openRaise(
   s: Signer,
-  r: { companyId: number; token: string; price: bigint; min: bigint; max: bigint; deadline: number },
+  r: { companyId: number; token: string; price: bigint; min: bigint; max: bigint; deadline: number; terms: Terms },
 ) {
   // The company receives the raise and pays dividends in USDC.
   if ((await balances(s.publicKey)).usdc === null) await classic(s, [ops.trustUsdc()]);
@@ -126,6 +128,7 @@ export async function openRaise(
     sc.i128(r.min),
     sc.i128(r.max),
     sc.u64(r.deadline),
+    termsVal(r.terms),
   ]);
   return { ...res, raiseId: Number(res.returnValue) };
 }

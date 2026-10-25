@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Lock } from "@/components/icons";
 import { LockModal } from "@/components/lock-modal";
 import { StatusPill, Toast, TxLink, fmt } from "@/components/ui";
-import { countryName, displayStatus, errorText, fromUnits, initials, offering, RaiseState, targetYield, vault } from "@/lib/chain";
+import { countryName, displayStatus, errorText, fromUnits, initials, lockedUp, offering, RaiseState, targetYield, vault } from "@/lib/chain";
 import { useAsync } from "@/lib/hooks";
 import { loadPortfolio, type Holding } from "@/lib/portfolio";
 import { useWallet } from "@/lib/wallet";
@@ -142,17 +142,29 @@ export default function PortfolioPage() {
                               )}
                               {h.pending > 0 && <span className="pill pill-accent">{fmt(h.pending)} from next period</span>}
                               {h.wallet > 0 && <span className="pill pill-outline">{fmt(h.wallet)} unlocked</span>}
+                              {lockedUp(h.listing.raise) && (
+                                <span className="pill pill-outline">Lock-up until {new Date(Number(h.listing.raise.terms.lockup_until) * 1000).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</span>
+                              )}
                             </div>
                           </td>
                           <td className="r num">{fmt(total * price, 2)}</td>
                           <td className="r num green">{(targetYield(h.listing) * 100).toFixed(1)}%</td>
                           <td className="r" style={{ whiteSpace: "nowrap" }}>
-                            {h.wallet > 0 && (
+                            {h.frozen && !lockedUp(h.listing.raise) && (
+                              <button
+                                className="btn btn-primary btn-sm"
+                                disabled={busy !== null}
+                                onClick={() => act(`release-${h.listing.raise.id}`, "Lock-up released", () => offering.release(investor!, h.listing.raise.id), "offering")}
+                              >
+                                {busy === `release-${h.listing.raise.id}` ? "Releasing…" : "Release lock-up"}
+                              </button>
+                            )}
+                            {h.wallet > 0 && !h.frozen && (
                               <button className="btn btn-primary btn-sm" onClick={() => setModal({ h, mode: "lock" })}>
                                 Lock {fmt(h.wallet)}
                               </button>
                             )}{" "}
-                            {h.locked + h.pending > 0 && (
+                            {h.locked + h.pending > 0 && !h.frozen && (
                               <button className="btn btn-secondary btn-sm" onClick={() => setModal({ h, mode: "unlock" })}>
                                 Unlock
                               </button>
@@ -215,7 +227,7 @@ export default function PortfolioPage() {
                                 disabled={busy !== null}
                                 onClick={() => act(`claim-${l.raise.id}`, `${fmt(tokens)} ${l.company.name} tokens claimed`, () => offering.claimTokens(investor!, l.raise.id), "offering")}
                               >
-                                {busy === `claim-${l.raise.id}` ? "Claiming…" : `Claim ${fmt(tokens)} tokens`}
+                                {busy === `claim-${l.raise.id}` ? "Claiming…" : `Claim ${fmt(tokens)} tokens${lockedUp(l.raise) ? " into the vault" : ""}`}
                               </button>
                             )}
                             {l.raise.state === RaiseState.Failed && (

@@ -108,6 +108,35 @@ export enum RaiseState {
   Failed = 2,
 }
 
+/** The securities exemption a raise is offered under. */
+export enum Exemption {
+  /** Regulation S: non-US residents only, proven with the ZK residence proof. */
+  RegS = 0,
+  /** Rule 506(c): accredited investors, verified (attestation, or self-certified with $200,000+). */
+  RegD506c = 1,
+}
+
+export const EXEMPTION_LABEL: Record<Exemption, string> = {
+  [Exemption.RegS]: "Reg S · non-US residents",
+  [Exemption.RegD506c]: "Reg D 506(c) · accredited investors",
+};
+
+/** Rule 506(c) high-minimum route: a self-certified investor puts in at least this much. */
+export const SELF_CERTIFIED_MINIMUM = 200_000n * UNIT;
+/** Rule 144 holding period for a non-reporting issuer's restricted securities. */
+export const REG_D_LOCKUP_SECS = 365 * 24 * 60 * 60;
+
+export type Terms = {
+  exemption: Exemption;
+  min_ticket: bigint;
+  max_holders: number;
+  lockup_until: bigint;
+  /** The company or its transfer agent: freezes, unfreezes and claws back. */
+  compliance: string;
+  /** 506(c) accreditation verifier, if any. */
+  verifier?: string;
+};
+
 export type Raise = {
   id: number;
   company_id: number;
@@ -119,8 +148,11 @@ export type Raise = {
   deadline: bigint;
   raised: bigint;
   investors: number;
+  holders: number;
   state: RaiseState;
+  /** Flat listing fee the company paid when opening. */
   fee_paid: bigint;
+  terms: Terms;
 };
 
 export async function getRaise(id: number): Promise<Raise> {
@@ -130,8 +162,48 @@ export async function getRaise(id: number): Promise<Raise> {
     id: Number(r.id),
     company_id: Number(r.company_id),
     investors: Number(r.investors),
+    holders: Number(r.holders),
     state: Number(r.state),
+    terms: {
+      ...r.terms,
+      exemption: Number(r.terms.exemption),
+      max_holders: Number(r.terms.max_holders),
+      verifier: r.terms.verifier ?? undefined,
+    },
   };
+}
+
+/** Raise terms as the contract's struct (a map with keys in sorted order). */
+export function termsVal(t: Terms): xdr.ScVal {
+  const entries: [string, xdr.ScVal][] = [
+    ["compliance", sc.address(t.compliance)],
+    ["exemption", sc.u32(t.exemption)],
+    ["lockup_until", sc.u64(t.lockup_until)],
+    ["max_holders", sc.u32(t.max_holders)],
+    ["min_ticket", sc.i128(t.min_ticket)],
+    ["verifier", t.verifier ? sc.address(t.verifier) : xdr.ScVal.scvVoid()],
+  ];
+  return xdr.ScVal.scvMap(entries.map(([k, v]) => new xdr.ScMapEntry({ key: xdr.ScVal.scvSymbol(k), val: v })));
+}
+
+/** True while tokens from this raise are locked up (in the vault, wallets frozen). */
+export const lockedUp = (r: Raise, now = Date.now() / 1000) => now < Number(r.terms.lockup_until);
+
+/** Whether `investor` meets the raise's exemption for a total of `amount`. */
+export async function isEligibleFor(raiseId: number, investor: string, amount: bigint): Promise<boolean> {
+  return Boolean(
+    await read(CONTRACTS.offering, "is_eligible_for", [sc.u32(raiseId), sc.address(investor), sc.i128(amount)]),
+  );
+}
+
+/** The investor's own 506(c) accreditation statement, if they signed one. */
+export async function selfCertification(investor: string): Promise<{ statement: Uint8Array; at: bigint } | null> {
+  return (await read(CONTRACTS.offering, "self_certification", [sc.address(investor)])) ?? null;
+}
+
+/** The flat listing fee (USDC units) a company pays to open a raise. */
+export async function listingFee(): Promise<bigint> {
+  return BigInt((await read<{ listing_fee: bigint }>(CONTRACTS.offering, "config")).listing_fee);
 }
 
 export async function raiseCount(): Promise<number> {
@@ -179,6 +251,21 @@ export const offering = {
     invoke(s, CONTRACTS.offering, "refund", [sc.u32(raiseId), sc.address(s.publicKey)]),
   authorizeHolder: (s: Signer, raiseId: number) =>
     invoke(s, CONTRACTS.offering, "authorize_holder", [sc.u32(raiseId), sc.address(s.publicKey)]),
+  /** After lock-up: lifts the lock-up freeze on the holder's wallet. */
+  release: (s: Signer, raiseId: number, holder = s.publicKey) =>
+    invoke(s, CONTRACTS.offering, "release", [sc.u32(raiseId), sc.address(holder)]),
+  /** 506(c): the investor signs their accreditation statement (its sha256). */
+  selfCertify: (s: Signer, statementHash: Uint8Array) =>
+    invoke(s, CONTRACTS.offering, "self_certify", [sc.address(s.publicKey), sc.bytes(statementHash)]),
+  /** The raise's compliance account. */
+  freezeHolder: (s: Signer, raiseId: number, holder: string, reason: string) =>
+    invoke(s, CONTRACTS.offering, "freeze_holder", [sc.u32(raiseId), sc.address(holder), sc.string(reason)]),
+  unfreezeHolder: (s: Signer, raiseId: number, holder: string, reason: string) =>
+    invoke(s, CONTRACTS.offering, "unfreeze_holder", [sc.u32(raiseId), sc.address(holder), sc.string(reason)]),
+  clawback: (s: Signer, raiseId: number, holder: string, amount: bigint, reason: string) =>
+    invoke(s, CONTRACTS.offering, "clawback", [sc.u32(raiseId), sc.address(holder), sc.i128(amount), sc.string(reason)]),
+  setRaiseCompliance: (s: Signer, raiseId: number, account: string) =>
+    invoke(s, CONTRACTS.offering, "set_raise_compliance", [sc.u32(raiseId), sc.address(account)]),
 };
 
 // ── gate ──────────────────────────────────────────────────────────────
@@ -293,11 +380,17 @@ const CONTRACT_ERRORS: Record<string, Record<number, string>> = {
     1: "This company isn't active on dvdnd.",
     3: "Those raise terms aren't valid.",
     5: "This raise is no longer open.",
-    6: "Verify your residence before investing.",
+    2: "This contract isn't the share token's admin.",
+    4: "That raise doesn't exist.",
+    6: "You don't meet this raise's eligibility rules yet.",
     7: "That would take the raise over its maximum.",
     8: "This raise can't close yet: it isn't full and the deadline hasn't passed.",
     9: "There's nothing to claim for this wallet.",
     10: "This raise isn't in the right state for that.",
+    11: "That share token already backs a raise.",
+    12: "That's below this raise's minimum investment.",
+    13: "This raise has reached its maximum number of holders.",
+    14: "Tokens from this raise are still in lock-up.",
   },
   vault: {
     1: "Enter an amount above zero.",
