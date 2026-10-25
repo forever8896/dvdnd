@@ -7,8 +7,8 @@
 #          "<name>" <country-numeric> <payout-bps> <min-usdc> <max-usdc> <duration-seconds>
 # Optional: PROFILE_JSON='{"sector":…,"city":…,"description":…,"netProfit":…}' stores the
 # profile on-chain as a data: URI, which the app reads.
-# Raise terms (env): EXEMPTION=regs|506c (default regs), LOCKUP_SECS after the
-# deadline (default 0; 506c needs at least a year), MIN_TICKET and MAX_HOLDERS
+# Raise terms (env): EXEMPTION=regs|506c|both (default regs), LOCKUP_SECS after the
+# deadline (default 0; 506c and both need at least a year), MIN_TICKET and MAX_HOLDERS
 # (default 0 and 500), COMPLIANCE identity (default the owner), VERIFIER identity
 # (506c accreditation verifier, optional). The owner pays the flat listing fee.
 source "$(dirname "$0")/common.sh"
@@ -50,7 +50,8 @@ DEADLINE=$(( $(date +%s) + DURATION_SECS ))
 case "${EXEMPTION:-regs}" in
   regs) EX=0 ;;
   506c) EX=1 ;;
-  *) echo "EXEMPTION must be regs or 506c" >&2; exit 1 ;;
+  both) EX=2 ;;
+  *) echo "EXEMPTION must be regs, 506c or both" >&2; exit 1 ;;
 esac
 VERIFIER_JSON=$([ -n "${VERIFIER:-}" ] && echo "\"$(addr "$VERIFIER")\"" || echo null)
 TERMS=$(printf '{"exemption":%s,"min_ticket":"%s","max_holders":%s,"lockup_until":%s,"compliance":"%s","verifier":%s}' \

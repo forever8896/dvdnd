@@ -87,3 +87,18 @@ Raises: 1 Northline (Reg S, open), 2 Harbor & Hearth (Reg D 506(c), one-year loc
 Lock-up check after the ANDES cycle (simulated calls, nothing sent): investor-eve's ANDES trustline is deauthorized with a wallet
 balance of 0 and 600 tokens active in the vault; `vault.unlock` fails with the token's BalanceDeauthorizedError (#11) and
 `offering.release` fails with LockedUp (#14) until the lock-up date.
+
+## ANDES lifecycle (2026-10-25)
+- investor-eve invests 600 USDC: https://stellar.expert/explorer/testnet/tx/e1322854f2603c4771fb5680b2e49dcc3e3e565122ab8a1e757f3ddb0c6eb186
+- investor-finn invests 400 USDC: https://stellar.expert/explorer/testnet/tx/9a87cf73b0d57413875795ecef0e389d700178b7215fb0bf24c62deee023d8ac
+- Raise finalized (company paid in full; flat fee was paid at open): https://stellar.expert/explorer/testnet/tx/9eb66157fc7364573c66afbef8ae7122097c45cf8e8e067065850e72df088045
+- investor-eve claims share tokens (locked in the vault during lock-up): https://stellar.expert/explorer/testnet/tx/0941618c99f629d038a5d7415e3031c0187c9bc46a9f2ead153f8c7081f58bf5
+- investor-finn claims share tokens (locked in the vault during lock-up): https://stellar.expert/explorer/testnet/tx/003e6bdbd9f6b55e4ddcc43759a340150f846b77ee6c2f05a803dbe6ec7fd5c7
+- First dividend period starts: https://stellar.expert/explorer/testnet/tx/fd44396e02348c65465b8844ade79bb4cf7d67f7ba18e4753d5706db7fc0ebec
+- Company pays 80 USDC dividend: https://stellar.expert/explorer/testnet/tx/abd8e9112097a806292cc6cddecc7ee1ad75d71eabf7a82a8e505500c67dff96
+- investor-eve claims dividend: https://stellar.expert/explorer/testnet/tx/c930bdb098cc1ddf3dfb3fd727aa546e580161b71f42374adc0df0d44baf9406
+- investor-finn claims dividend: https://stellar.expert/explorer/testnet/tx/9b8804a6f071520a239ce45397ab804af7ff5b4ddec58a724bc19111ac94c1eb
+
+## Reg S and 506(c) side by side (2026-10-25)
+Offering `CCJCRABWLOEOXVDRHSJXLS5HDOCUCZWY2X2N27NUP24H62N6DKYISX5P`: raises can run both exemptions; self-certified entities need 1,000,000 USDC.
+Raises: 1 Northline (Reg S + 506(c), one-year lock-up), 2 Harbor & Hearth (506(c)), 3 Andes (Reg S, full cycle above).
