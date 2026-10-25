@@ -8,6 +8,7 @@ import { NextResponse } from "next/server";
 import { StrKey } from "@stellar/stellar-sdk";
 import { sc, selfCertification } from "@/lib/chain";
 import { CONTRACTS, IS_TESTNET } from "@/lib/config";
+import { isSanctioned } from "@/lib/ofac";
 import { invoke, Keypair, keypairSigner, TxError } from "@/lib/stellar";
 
 function verifier() {
@@ -27,6 +28,9 @@ export async function POST(req: Request) {
   const { investor } = (await req.json().catch(() => ({}))) as { investor?: string };
   if (!investor || !StrKey.isValidEd25519PublicKey(investor)) {
     return NextResponse.json({ error: "Invalid Stellar address." }, { status: 400 });
+  }
+  if (await isSanctioned(investor).catch(() => true)) {
+    return NextResponse.json({ error: "This wallet can't be verified (sanctions screening)." }, { status: 403 });
   }
   if (!(await selfCertification(investor))) {
     return NextResponse.json({ error: "Sign your accreditation statement first." }, { status: 409 });

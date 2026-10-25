@@ -7,6 +7,7 @@ import { NextResponse } from "next/server";
 import { StrKey } from "@stellar/stellar-sdk";
 import { getDecision, residenceFromDecision } from "@/lib/didit";
 import { issueCredential, IssueError, parseCommitment } from "@/lib/issuer";
+import { isSanctioned } from "@/lib/ofac";
 import { TxError } from "@/lib/stellar";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -17,6 +18,10 @@ export async function POST(req: Request) {
     if (!body.sessionId || !UUID.test(body.sessionId)) throw new IssueError("Invalid Didit session.", 400);
     if (!body.address || !StrKey.isValidEd25519PublicKey(body.address)) throw new IssueError("Invalid Stellar address.", 400);
     const commitment = parseCommitment(body.commitment);
+    const sanctioned = await isSanctioned(body.address).catch(() => {
+      throw new IssueError("The sanctions list is unavailable right now. Try again shortly.", 503);
+    });
+    if (sanctioned) throw new IssueError("This wallet is on OFAC's sanctions list.", 403, true);
     const decision = await getDecision(body.sessionId);
     if (!decision) throw new IssueError("This verification no longer exists. Start a new one.", 410);
     const residence = residenceFromDecision(decision, body.address);

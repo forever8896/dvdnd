@@ -45,12 +45,15 @@ export function InvestModal({ listing, onClose, onInvested }: { listing: Listing
   const regD = acceptsAccredited(e) && !(acceptsResidents(e) && isEligible(eligibleUntil));
   // What this investor already has in escrow, and whether a verifier attested them.
   const { data: standing } = useAsync(async () => {
-    const [existing, attested, cert] = await Promise.all([
+    const [existing, attested, cert, screen] = await Promise.all([
       contribution(listing.raise.id, investor.publicKey),
       regD ? isEligibleFor(listing.raise.id, investor.publicKey, 1n) : Promise.resolve(true),
       regD ? selfCertification(investor.publicKey) : Promise.resolve(null),
+      // OFAC wallet screening; if the list can't be checked, don't let the investment through.
+      fetch(`/api/screen?address=${investor.publicKey}`).then((r) => r.json()).catch(() => ({ error: "unavailable" })),
     ]);
-    return { existing: fromUnits(existing), attested, entity: Boolean(cert?.entity) };
+    const blocked = screen.sanctioned ? "This wallet is on OFAC's sanctions list." : screen.error ? "Sanctions screening is unavailable right now. Try again shortly." : null;
+    return { existing: fromUnits(existing), attested, entity: Boolean(cert?.entity), blocked };
   }, [listing.raise.id, investor.publicKey, regD]);
 
   const value = Number(amount);
@@ -182,6 +185,7 @@ export function InvestModal({ listing, onClose, onInvested }: { listing: Listing
           </div>
         ))}
       </div>
+      {standing?.blocked && <Toast kind="error" title="Can't invest from this wallet">{standing.blocked}</Toast>}
       {tooMuch && <AddMoney signer={investor} suggested={Math.ceil(value - available + 1)} onDone={refresh} />}
       <p className="small">
         Funds are held in escrow and refunded in full if the minimum isn&apos;t reached by {deadline}. Expected
@@ -198,7 +202,7 @@ export function InvestModal({ listing, onClose, onInvested }: { listing: Listing
         </span>
       </label>
       <div style={{ display: "flex", gap: 8 }}>
-        <button className="btn btn-primary btn-sm" style={{ flex: 1 }} disabled={!agreed || !(value > 0) || tooMuch || overMax || belowMin || !standing} onClick={() => setStep("confirm")}>
+        <button className="btn btn-primary btn-sm" style={{ flex: 1 }} disabled={!agreed || !(value > 0) || tooMuch || overMax || belowMin || !standing || Boolean(standing.blocked)} onClick={() => setStep("confirm")}>
           Continue
         </button>
         <button className="btn btn-secondary btn-sm" onClick={onClose}>
