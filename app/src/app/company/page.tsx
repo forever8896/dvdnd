@@ -543,9 +543,14 @@ function DividendSummary({ token, yearly }: { token: string; yearly: number }) {
           </div>
         </div>
       )}
-      <Link href="/company/dividend" className="btn btn-green btn-wide" style={{ alignSelf: "flex-start" }}>
-        Pay dividend
-      </Link>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <Link href="/company/dividend" className="btn btn-green btn-wide">
+          Pay dividend
+        </Link>
+        <Link href="/company/compliance" className="btn btn-secondary btn-wide">
+          Compliance
+        </Link>
+      </div>
     </section>
   );
 }

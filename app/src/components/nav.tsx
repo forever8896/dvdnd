@@ -17,6 +17,7 @@ const COMPANY_LINKS = [
   { href: "/company", label: "Dashboard" },
   { href: "/company/raise", label: "Raise" },
   { href: "/company/dividend", label: "Pay dividend" },
+  { href: "/company/compliance", label: "Compliance" },
 ];
 
 export function Nav() {
