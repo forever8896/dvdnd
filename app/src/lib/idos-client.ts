@@ -54,9 +54,34 @@ export async function hasProfile(address: string) {
   return (await client()).addressHasProfile(address);
 }
 
-/** Logs the EVM wallet in to idOS (it signs idOS's login message). */
-export async function logIn(wallet: EvmWallet): Promise<idOSClientLoggedIn> {
-  const withSigner = await (await client()).withUserSigner(wallet.signer);
+const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
+
+/**
+ * Logs the EVM wallet in to idOS (it signs idOS's login message). The wallet
+ * must still be on the account that holds the idOS identity, and every
+ * signature is checked against it before it reaches idOS: with two wallet
+ * extensions installed, or after an account switch, a different account can
+ * end up signing, which idOS only reports as "verify signature failed".
+ */
+export async function logIn(identity: string): Promise<idOSClientLoggedIn> {
+  const { verifyMessage } = await import("ethers");
+  const wallet = await connectEthereum();
+  if (wallet.address.toLowerCase() !== identity.toLowerCase()) {
+    throw new Error(`Your Ethereum wallet is now on ${short(wallet.address)}. Switch it back to ${short(identity)}, the account you used for the idOS check, and try again.`);
+  }
+  const signer = wallet.signer;
+  const sign = signer.signMessage.bind(signer);
+  signer.signMessage = async (message) => {
+    const signature = await sign(message);
+    const signedBy = verifyMessage(message, signature);
+    if (signedBy.toLowerCase() !== identity.toLowerCase()) {
+      throw new Error(
+        `The signature came from ${short(signedBy)}, not ${short(identity)}. If you have more than one Ethereum wallet extension (e.g. MetaMask and Rabby, Phantom or Coinbase), turn off all but one, or switch the wallet to ${short(identity)}, then try again.`,
+      );
+    }
+    return signature;
+  };
+  const withSigner = await (await client()).withUserSigner(signer);
   return withSigner.logIn();
 }
 

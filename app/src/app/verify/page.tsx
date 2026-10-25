@@ -105,7 +105,7 @@ export default function Verify() {
     try {
       setKycLink(null);
       setStep("sharing");
-      const user = await logIn(evm);
+      const user = await logIn(evm.address);
       await shareKycCredential(user);
       await issueAndProve(investor, (commitment) =>
         fetch("/api/idos/credential", {
