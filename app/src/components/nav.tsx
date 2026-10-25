@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { isEligible, useWallet } from "@/lib/wallet";
+import { Logo } from "./brand";
 import { EligibilityPill, fmt } from "./ui";
 
 const INVESTOR_LINKS = [
@@ -28,8 +29,9 @@ export function Nav() {
 
   return (
     <header className="nav">
-      <Link href="/" className="nav-brand">
-        dvdnd{companyView && <span className="muted" style={{ fontWeight: 600 }}> for companies</span>}
+      <Link href="/" className="nav-brand" aria-label="dvdnd home">
+        <Logo height={22} />
+        {companyView && <span className="nav-brand-sub">for companies</span>}
       </Link>
       <nav className="nav-links" aria-label="Main">
         {links.map((l) => (

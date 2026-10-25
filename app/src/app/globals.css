@@ -203,9 +203,21 @@ p {
   border-bottom: 2px solid var(--line);
 }
 .nav-brand {
-  font: 800 17px var(--font-sans);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   color: var(--text);
   text-decoration: none;
+  flex: none;
+}
+.nav-brand:hover {
+  color: var(--text);
+}
+.nav-brand-sub {
+  font: 600 13px var(--font-sans);
+  color: var(--muted);
+  padding-left: 10px;
+  border-left: 1px solid var(--line);
 }
 .nav-links {
   display: flex;
