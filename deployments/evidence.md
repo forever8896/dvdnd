@@ -123,3 +123,12 @@ Old demo companies suspended by the 2-of-3 council (two council signatures, mast
 - company 10: https://stellar.expert/explorer/testnet/tx/7b3d56351153fc40d0a062df6e94740719b6c3fcdb9f81f7fd256533a5cd897e
 Compliance action recorded with a reason (Andes compliance account freezes a holder, shown in the console's audit log):
 - https://stellar.expert/explorer/testnet/tx/8fa64eebe1bcf36e0ffaf521f56b828ea48a77025836174121d2e18c3c081244
+
+## Timelock and secondary trading (2026-10-25)
+Timelock `CCHX6UXEPIXLRALJIK2JZWCQ3OLQER7HYOGFVYYYSOP2UJERLEEEGCGZ` (proposer: council, delay 10 minutes on testnet) is now admin of the registry and the offering.
+The first timelock (`CBWDBHPVZ435XL4UVUIXO4PFUEA7S4XENSKVUDI7XSXA2C3DZOBQWHWC`) had call ids that included the execution time, so normal schedules failed; the council
+scheduled the hand-over on it with a pre-declared footprint, and it executed after the delay:
+- registry admin → new timelock: https://stellar.expert/explorer/testnet/tx/95dca7f8209998b9983f39570dd818f65e3f53249591d86824e4ce65285f9d58
+- offering admin → new timelock: https://stellar.expert/explorer/testnet/tx/2b1cb6a7990291d6319bf8db6b7a4e3385d483362c8cc44b9afcb12c72053e28
+Kestrel Coffee Roasters (raise 7, Reg S, no lock-up beyond the deadline): eve and finn invested 300 each, claimed into their wallets,
+and traded on the SDEX through the app: 20 KESTREL at 1.10 USDC from eve to finn.
