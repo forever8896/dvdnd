@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { AddMoney } from "@/components/add-money";
 import { fmt, TxLink } from "@/components/ui";
-import { NETWORK } from "@/lib/config";
+import { IS_TESTNET, NETWORK } from "@/lib/config";
 import { useAsync } from "@/lib/hooks";
 import { horizon } from "@/lib/stellar";
 import { useWallet } from "@/lib/wallet";
@@ -50,14 +50,14 @@ export default function WalletPage() {
           <div className="num" style={{ fontSize: 34, marginTop: 6 }}>
             {fmt(b?.usdc ?? 0, 2)}
           </div>
-          <div className="small">{b?.usdc === null ? "No USDC trustline yet; adding money creates it" : "Circle USDC on Stellar testnet"}</div>
+          <div className="small">{b?.usdc === null ? "No USDC trustline yet; adding money creates it" : `Circle USDC on Stellar ${NETWORK.name}`}</div>
         </div>
         <div style={{ padding: 16 }}>
           <div className="label">XLM</div>
           <div className="num" style={{ fontSize: 34, marginTop: 6 }}>
             {fmt(b?.xlm ?? 0, 2)}
           </div>
-          <div className="small">Test XLM from Friendbot, pays network fees</div>
+          <div className="small">{IS_TESTNET ? "Test XLM from Friendbot, pays network fees" : "Pays network fees"}</div>
         </div>
         <div style={{ padding: 16, minWidth: 0 }}>
           <div className="label">Address</div>
@@ -74,8 +74,8 @@ export default function WalletPage() {
         <section style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           <h2 className="h2">Add money</h2>
           <p className="muted">
-            In production you&apos;d deposit from your bank through a Stellar anchor (MoneyGram or a regional partner).
-            On testnet, swap test XLM for Circle&apos;s testnet USDC on Stellar&apos;s DEX.
+            Swap XLM for Circle&apos;s USDC on Stellar&apos;s DEX with a path payment. Bank deposits through a Stellar
+            anchor (MoneyGram or a regional partner) are coming.
           </p>
           <AddMoney
             signer={investor}

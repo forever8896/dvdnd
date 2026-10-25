@@ -7,7 +7,8 @@
 source "$(dirname "$0")/common.sh"
 
 for k in council council-1 council-2 council-3; do
-  stellar keys address "$k" >/dev/null 2>&1 || stellar keys generate "$k" --network "$NETWORK" --fund >/dev/null
+  # On mainnet, fund "council" with a few XLM before running this.
+  stellar keys address "$k" >/dev/null 2>&1 || stellar keys generate "$k" --network "$NETWORK" $FUND >/dev/null
 done
 
 stellar tx new set-options --network "$NETWORK" --source-account council --signer "$(addr council-1)" --signer-weight 1 >/dev/null

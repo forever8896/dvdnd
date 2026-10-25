@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Archivo, JetBrains_Mono } from "next/font/google";
+import { ConfigNotice } from "@/components/config-notice";
 import { Nav } from "@/components/nav";
 import { WalletProvider } from "@/lib/wallet";
 import "./globals.css";
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" className={`${archivo.variable} ${jetbrains.variable}`}>
       <body>
         <WalletProvider>
+          <ConfigNotice />
           <Nav />
           {children}
         </WalletProvider>

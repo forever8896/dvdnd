@@ -3,7 +3,7 @@
 // address hashing and the Soroban byte encodings.
 
 import { Address, hash as sha256, scValToNative, xdr } from "@stellar/stellar-sdk";
-import { CONTRACTS, PLATFORM_SCOPE } from "./config";
+import { CONTRACTS, IS_TESTNET, NETWORK, PLATFORM_SCOPE } from "./config";
 import { server } from "./stellar";
 
 export const TREE_DEPTH = 16;
@@ -11,12 +11,11 @@ export const FR_MODULUS = 218882428718392752222464057452572750885483644004160343
 /** ISO 3166-1 numeric codes the circuit rejects: US and sanctioned countries. */
 export const BLOCKED_COUNTRIES = [840, 408, 364, 192, 760];
 
-/** Ledger shortly before the gate's first credential; event scans start here. */
-const GATE_FROM_LEDGER = 5_380_900;
+
 
 /** Leaves added by the testnet scripts (deployments/leaves.txt), in case their
  *  events have aged out of the RPC's retention window. */
-const SEED_LEAVES = [
+const SEED_LEAVES = !IS_TESTNET ? [] : [
   2920813559804466193731226775655382869245818185320923264349000061924371847621n,
   1805349285631615644189923436174968803622949138974697833619066379894756603756n,
   1499241073423087378472867032534468444348954377796449146218886510146892296430n,
@@ -80,7 +79,7 @@ export async function fetchLeaves(): Promise<bigint[]> {
   const latest = await server.getLatestLedger();
   // RPC keeps about a week of events; start no earlier than it allows.
   const retentionFloor = latest.sequence - 120_000;
-  let startLedger = Math.max(GATE_FROM_LEDGER, retentionFloor);
+  let startLedger = Math.max(NETWORK.gateFromLedger, retentionFloor);
   const byIndex = new Map<number, bigint>(SEED_LEAVES.map((l, i) => [i, l]));
   let cursor: string | undefined;
   for (let page = 0; page < 50; page++) {

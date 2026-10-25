@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Toast } from "@/components/ui";
 import { eligibleUntil } from "@/lib/chain";
+import { IS_TESTNET } from "@/lib/config";
 import { isUserCancel, walletError } from "@/lib/kit";
 import type { Signer } from "@/lib/stellar";
 import { isEligible, useWallet, type Role } from "@/lib/wallet";
@@ -51,8 +52,9 @@ export default function SignIn() {
       <div>
         <h1 className="h1">Sign in to dvdnd</h1>
         <p className="muted" style={{ marginTop: 6, maxWidth: 680 }}>
-          Connect a Stellar wallet such as Freighter, xBull or Lobstr, set to Testnet. Or use a demo wallet created in
-          this browser, with nothing to install.
+          {IS_TESTNET
+            ? "Connect a Stellar wallet such as Freighter, xBull or Lobstr, set to Testnet. Or use a demo wallet created in this browser, with nothing to install."
+            : "Connect a Stellar wallet such as Freighter, xBull or Lobstr."}
         </p>
       </div>
       <div className="grid-cells" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))" }}>
@@ -83,6 +85,7 @@ export default function SignIn() {
                   <button className="btn btn-primary btn-block" onClick={() => go(p.role, "connect")} disabled={busy !== null}>
                     {mine && busy?.how === "connect" ? "Waiting for your wallet…" : "Connect a Stellar wallet"}
                   </button>
+                  {IS_TESTNET && <>
                   <button className="btn btn-secondary btn-block" onClick={() => go(p.role, "demo")} disabled={busy !== null}>
                     {mine && busy?.how === "demo" ? "Creating demo wallet…" : "Use a testnet demo wallet"}
                   </button>
@@ -109,6 +112,7 @@ export default function SignIn() {
                       Restore a demo wallet from its secret key
                     </button>
                   )}
+                  </>}
                 </>
               )}
             </div>

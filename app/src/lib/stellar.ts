@@ -17,7 +17,9 @@ import {
 } from "@stellar/stellar-sdk";
 import { NETWORK, USDC_ISSUER } from "./config";
 
-export const server = new rpc.Server(NETWORK.rpcUrl);
+// Without an RPC URL (e.g. mainnet before configuration) calls fail with a
+// clear host name instead of crashing at import; the config banner explains.
+export const server = new rpc.Server(NETWORK.rpcUrl || "https://rpc-url-not-configured.invalid");
 export const horizon = new Horizon.Server(NETWORK.horizonUrl);
 export const USDC = new Asset("USDC", USDC_ISSUER);
 
@@ -124,8 +126,9 @@ async function submit(tx: Transaction): Promise<TxResult> {
   throw new TxError("Timed out waiting for confirmation.", sent.hash);
 }
 
-/** Funds a new testnet account with 10,000 XLM. */
+/** Funds a new testnet account with 10,000 XLM. Not available on mainnet. */
 export async function friendbot(publicKey: string) {
+  if (!NETWORK.friendbotUrl) throw new TxError("This account has no XLM yet. Fund it with a few XLM first.");
   const res = await fetch(`${NETWORK.friendbotUrl}?addr=${encodeURIComponent(publicKey)}`);
   if (!res.ok && res.status !== 400) throw new TxError("Friendbot could not fund the account.");
 }
@@ -171,7 +174,7 @@ export async function quoteUsdcInXlm(usdc: number): Promise<number | null> {
 /** Buys exactly `usdc` USDC with XLM, adding the USDC trustline first if needed. */
 export async function buyUsdc(signer: Signer, usdc: number): Promise<TxResult> {
   const quote = await quoteUsdcInXlm(usdc);
-  if (quote === null) throw new TxError("No XLM→USDC liquidity on the testnet DEX right now.");
+  if (quote === null) throw new TxError("No XLM→USDC liquidity on the DEX right now.");
   const { usdc: current } = await balances(signer.publicKey);
   const list = [
     ...(current === null ? [ops.trustUsdc()] : []),

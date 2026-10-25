@@ -48,7 +48,7 @@ describe.skipIf(!process.env.LIVE)("company flow on testnet", () => {
     expect((await getCompany(reg.id)).status).toBe(CompanyStatus.Active);
 
     const steps: string[] = [];
-    const { token } = await issueShareToken(assetCode(name), (s) => steps.push(s));
+    const { token } = await issueShareToken(assetCode(name), (s) => steps.push(s), owner);
     const raise = await openRaise(owner, {
       companyId: reg.id,
       token,

@@ -2,7 +2,7 @@
 // company share token, read live from the contracts. Wallets and explorers
 // find it through each token issuer's home_domain.
 
-import { CONTRACTS, NETWORK, SITE_DOMAIN, USDC_ISSUER } from "@/lib/config";
+import { CONTRACTS, IS_TESTNET, NETWORK, SITE_DOMAIN, USDC_ISSUER } from "@/lib/config";
 import { countryName, fromUnits, listListings, parseProfile, RaiseState } from "@/lib/chain";
 import { read } from "@/lib/stellar";
 
@@ -24,11 +24,11 @@ export async function GET() {
         "[[CURRENCIES]]",
         `code=${q(code!)}`,
         `issuer=${q(issuer!)}`,
-        `status="test"`,
+        `status=${q(IS_TESTNET ? "test" : "live")}`,
         `display_decimals=2`,
         `name=${q(l.company.name.slice(0, 20))}`,
         `desc=${q(`Profit-share token of ${l.company.name} (${countryName(l.company.country)}, ${profile.sector}). Holders who lock for a full period receive ${l.company.payout_bps / 100}% of the company's net profit in USDC.`)}`,
-        `conditions=${q("Testnet demonstration. Only wallets that have proven residence outside the United States can hold this token (Regulation S). dvdnd can freeze holdings for compliance. Supply equals what was sold in the raise and cannot be increased.")}`,
+        `conditions=${q((IS_TESTNET ? "Testnet demonstration. " : "") + "Only wallets that have proven residence outside the United States can hold this token (Regulation S). dvdnd can freeze holdings for compliance. Supply equals what was sold in the raise and cannot be increased.")}`,
         sold !== null ? `fixed_number=${sold}` : `is_unlimited=false`,
         `is_asset_anchored=false`,
         "",
@@ -43,10 +43,10 @@ export async function GET() {
     "[DOCUMENTATION]",
     `ORG_NAME="dvdnd"`,
     `ORG_URL=${q(`https://${SITE_DOMAIN}`)}`,
-    `ORG_DESCRIPTION=${q("Tokenized private equity on Stellar: profitable businesses raise USDC at a fixed price and pay USDC dividends to holders who lock their tokens. Testnet demonstration.")}`,
+    `ORG_DESCRIPTION=${q("Tokenized private equity on Stellar: profitable businesses raise USDC at a fixed price and pay USDC dividends to holders who lock their tokens." + (IS_TESTNET ? " Testnet demonstration." : ""))}`,
     `ORG_GITHUB="forever8896/dvdnd"`,
     "",
-    "# Contracts (testnet)",
+    `# Contracts (${NETWORK.name})`,
     `# registry ${CONTRACTS.registry}`,
     `# gate     ${CONTRACTS.gate}`,
     `# offering ${CONTRACTS.offering}`,

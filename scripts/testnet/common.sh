@@ -1,16 +1,23 @@
 #!/usr/bin/env bash
-# Shared settings for the testnet scripts. Contract IDs are written to
-# deployments/testnet.env by deploy.sh and read back here.
+# Shared settings for the deployment scripts. STELLAR_NETWORK=testnet (default)
+# or mainnet. Contract IDs are written to deployments/<network>.env by
+# deploy.sh and read back here. On mainnet nothing is funded by Friendbot:
+# identities must already hold XLM.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-NETWORK=testnet
-NETWORK_HORIZON=https://horizon-testnet.stellar.org
+NETWORK=${STELLAR_NETWORK:-testnet}
+case "$NETWORK" in
+  testnet) NETWORK_HORIZON=https://horizon-testnet.stellar.org
+           USDC_ISSUER=GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5 ;; # Circle testnet USDC
+  mainnet) NETWORK_HORIZON=https://horizon.stellar.org
+           USDC_ISSUER=GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN ;; # Circle mainnet USDC
+  *) echo "STELLAR_NETWORK must be testnet or mainnet" >&2; exit 1 ;;
+esac
+FUND=$([ "$NETWORK" = testnet ] && echo "--fund" || true)
 WASM_DIR="$ROOT/contracts/target/wasm32v1-none/release"
-DEPLOYMENTS="$ROOT/deployments/testnet.env"
+DEPLOYMENTS="$ROOT/deployments/$NETWORK.env"
 
-# Circle's testnet USDC.
-USDC_ISSUER=GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5
 USDC_ASSET="USDC:$USDC_ISSUER"
 
 ADMIN=admin

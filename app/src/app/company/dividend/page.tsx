@@ -122,7 +122,7 @@ export default function PayDividend() {
                 <input id="periodProfit" inputMode="decimal" value={profit ?? String(periodProfit)} onChange={(e) => setProfit(e.target.value)} />
                 <span className="input-suffix">USD</span>
               </span>
-              <span className="small">From your report for the period. Testnet demo scale.</span>
+              <span className="small">From your report for the period.</span>
             </label>
             {usdc < due && <AddMoney signer={me} suggested={Math.ceil(due - usdc + 1)} onDone={refresh} />}
           </div>

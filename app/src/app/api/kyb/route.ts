@@ -17,7 +17,7 @@
 
 import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
-import { CONTRACTS } from "@/lib/config";
+import { CONTRACTS, IS_TESTNET } from "@/lib/config";
 import { CompanyStatus, countryCode, getCompany, parseProfile, sc } from "@/lib/chain";
 import { checkDomain, normalizeDomain } from "@/lib/dns";
 import { checkLei, type LeiRecord } from "@/lib/gleif";
@@ -58,6 +58,9 @@ export async function POST(req: Request) {
     } catch (e) {
       return NextResponse.json({ error: e instanceof Error ? e.message : "GLEIF lookup failed." }, { status: 502 });
     }
+  } else if (!IS_TESTNET) {
+    // On mainnet the registry check must be real: an LEI matched against GLEIF.
+    return NextResponse.json({ error: "Register the company with its LEI to verify it on mainnet." }, { status: 422 });
   } else if (!registryNumber?.trim()) {
     return NextResponse.json({ error: "Enter the registry number." }, { status: 400 });
   }

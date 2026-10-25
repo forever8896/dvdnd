@@ -82,11 +82,13 @@ export type IssueProgress = (step: string, tx?: TxResult) => void;
  * Contract, and the SAC admin handed to the offering contract so only verified
  * investors can hold it and supply is fixed by code.
  */
-export async function issueShareToken(code: string, progress: IssueProgress) {
+export async function issueShareToken(code: string, progress: IssueProgress, owner: Signer) {
   const issuer = Keypair.random();
   const issuerSigner = keypairSigner(issuer);
   progress("Creating the token issuer account");
-  await friendbot(issuer.publicKey());
+  if (NETWORK.friendbotUrl) await friendbot(issuer.publicKey());
+  // On mainnet the company funds its issuer: enough for the reserve and fees.
+  else progress("Issuer account funded", await classic(owner, [Operation.createAccount({ destination: issuer.publicKey(), startingBalance: "5" })]));
 
   progress("Setting compliance flags");
   const flags = await classic(issuerSigner, [

@@ -52,7 +52,7 @@ export default function RaiseSetup() {
     setLog([]);
     const push = (step: string, tx?: TxResult) => setLog((l) => [...l, { step, tx }]);
     try {
-      const { token, issuerSecret } = await issueShareToken(assetCode(company.name), push);
+      const { token, issuerSecret } = await issueShareToken(assetCode(company.name), push, me!);
       try {
         localStorage.setItem(`dvdnd.issuer.${token}`, issuerSecret);
       } catch {

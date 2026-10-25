@@ -2,6 +2,7 @@
 
 import { Check, Lock, ShieldCheck, Shield } from "./icons";
 import { countryCode } from "@/lib/chain";
+import { NETWORK } from "@/lib/config";
 
 export type RaiseStatus = "Open" | "Funded" | "Refunding" | "Trading";
 
@@ -133,7 +134,7 @@ export function Stat({
   );
 }
 
-const EXPLORER = "https://stellar.expert/explorer/testnet/tx/";
+const EXPLORER = `${NETWORK.explorer}/tx/`;
 
 export function TxLink({ hash }: { hash: string }) {
   const short = hash.length > 12 ? `${hash.slice(0, 4)}…${hash.slice(-4)}` : hash;

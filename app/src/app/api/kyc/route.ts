@@ -9,12 +9,15 @@
 // verified residence (e.g. by signing it) instead of trusting the declaration.
 
 import { NextResponse } from "next/server";
-import { CONTRACTS } from "@/lib/config";
+import { CONTRACTS, IS_TESTNET } from "@/lib/config";
 import { sc } from "@/lib/chain";
 import { invoke, Keypair, keypairSigner, TxError } from "@/lib/stellar";
 import { BLOCKED_COUNTRIES, FR_MODULUS } from "@/lib/zk";
 
 export async function POST(req: Request) {
+  if (!IS_TESTNET) {
+    return NextResponse.json({ error: "The mock residence check runs only on testnet; connect a KYC provider." }, { status: 503 });
+  }
   const secret = process.env.DVDND_ADMIN_SECRET;
   if (!secret) return NextResponse.json({ error: "KYC issuer is not configured." }, { status: 500 });
 

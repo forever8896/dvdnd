@@ -12,6 +12,7 @@ import {
   targetYield,
   type Listing,
 } from "@/lib/chain";
+import { IS_TESTNET } from "@/lib/config";
 import { useAsync } from "@/lib/hooks";
 
 type Tab = "raises" | "trading";
@@ -80,9 +81,11 @@ export default function Discover() {
         </div>
       )}
 
-      <p className="small">
-        Testnet demo. Amounts are real testnet USDC; company profits are scaled to the size of the demo raises.
-      </p>
+      {IS_TESTNET && (
+        <p className="small">
+          Testnet demo. Amounts are real testnet USDC; company profits are scaled to the size of the demo raises.
+        </p>
+      )}
     </main>
   );
 }

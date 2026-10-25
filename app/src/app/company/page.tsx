@@ -19,6 +19,7 @@ import {
   type Company,
 } from "@/lib/chain";
 import { agreementText, findMyCompany, myListings, register, sha256, signAgreement } from "@/lib/company";
+import { IS_TESTNET } from "@/lib/config";
 import { useAsync } from "@/lib/hooks";
 import { useWallet } from "@/lib/wallet";
 
@@ -142,7 +143,7 @@ function DetailsStep({ onDone }: { onDone: () => Promise<void> }) {
       <TextField id="city" label="City" value={f.city} onChange={set("city")} />
       <TextField id="website" label="Website" value={f.website} onChange={set("website")} hint="You'll prove you control this domain with a DNS record." />
       <TextField id="lei" label="LEI (optional)" value={f.lei} onChange={set("lei")} mono hint="Legal Entity Identifier. With one, we verify the company against the GLEIF registry." />
-      <TextField id="netProfit" label="Last year's net profit (USD)" value={f.netProfit} onChange={set("netProfit")} mono hint="Testnet demo: use a figure at the scale of your test raise." />
+      <TextField id="netProfit" label="Last year's net profit (USD)" value={f.netProfit} onChange={set("netProfit")} mono hint={IS_TESTNET ? "Testnet demo: use a figure at the scale of your test raise." : "From your latest audited accounts."} />
       <label className="field" style={{ gridColumn: "1 / -1" }}>
         <span>About the business</span>
         <span className="input-wrap">

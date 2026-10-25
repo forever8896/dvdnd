@@ -95,7 +95,7 @@ export function InvestModal({ listing, onClose, onInvested }: { listing: Listing
           <ReceiptRow label="Tokens on success">{fmt(tokens)}</ReceiptRow>
           <ReceiptRow label="Network fee">under 0.01 XLM</ReceiptRow>
         </div>
-        <p className="small">Signed by your testnet wallet in this browser. Nothing is sent until you confirm.</p>
+        <p className="small">Signed with {investor.label}. Nothing is sent until you confirm.</p>
         {step === "sending" ? (
           <Toast kind="pending" title={`Sending ${fmt(value, 2)} USDC to escrow`}>
             Waiting for Stellar confirmation, about 5 seconds.

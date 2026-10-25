@@ -5,7 +5,7 @@
 // transaction is approved there.
 
 import { TransactionBuilder, type Transaction } from "@stellar/stellar-sdk";
-import { NETWORK } from "./config";
+import { IS_TESTNET, NETWORK } from "./config";
 import type { Signer } from "./stellar";
 
 const HIDDEN_WALLETS = new Set(["metamask"]);
@@ -26,7 +26,7 @@ export function getKit(): Promise<Kit> {
         // MetaMask's Stellar connector needs multichain scopes that current MetaMask
         // releases reject ("Requested scopes are not supported"), so it is left out.
         modules: defaultModules({ filterBy: (m) => !HIDDEN_WALLETS.has(m.productId) }),
-        network: Networks.TESTNET,
+        network: IS_TESTNET ? Networks.TESTNET : Networks.PUBLIC,
       });
       return StellarWalletsKit;
     })();
@@ -60,8 +60,8 @@ export async function connectExternal(): Promise<ExternalWallet> {
   }
 }
 
-/** Network the external wallet is on, so we can ask the user to switch to testnet. */
-export async function externalNetworkIsTestnet(): Promise<boolean> {
+/** Whether the external wallet is on the app's network, so we can ask the user to switch. */
+export async function externalNetworkMatches(): Promise<boolean> {
   try {
     const { networkPassphrase } = await (await getKit()).getNetwork();
     return networkPassphrase === NETWORK.passphrase;

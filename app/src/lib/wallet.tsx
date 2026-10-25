@@ -11,7 +11,8 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { eligibleUntil } from "./chain";
-import { connectExternal, disconnectExternal, externalNetworkIsTestnet, externalSigner, type ExternalWallet } from "./kit";
+import { IS_TESTNET, NETWORK } from "./config";
+import { connectExternal, disconnectExternal, externalNetworkMatches, externalSigner, type ExternalWallet } from "./kit";
 import { accountExists, balances, friendbot, Keypair, keypairSigner, type Balances, type Signer } from "./stellar";
 
 export type Role = "investor" | "company";
@@ -66,7 +67,9 @@ function toSigner(s: Stored | null): Signer | null {
 }
 
 async function ensureFunded(publicKey: string) {
-  if (!(await accountExists(publicKey))) await friendbot(publicKey);
+  if (await accountExists(publicKey)) return;
+  if (!NETWORK.friendbotUrl) throw new Error("This wallet has no XLM yet. Send it a few XLM to activate it on Stellar.");
+  await friendbot(publicKey);
 }
 
 export function WalletProvider({ children }: { children: React.ReactNode }) {
@@ -109,6 +112,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 
   const create = useCallback(
     async (role: Role) => {
+      if (!IS_TESTNET) throw new Error("Demo wallets exist only on testnet. Connect a Stellar wallet.");
       const existing = load(role);
       const value: Stored = existing?.kind === "demo" ? existing : { kind: "demo", secret: Keypair.random().secret() };
       const s = toSigner(value)!;
@@ -122,8 +126,9 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   const connect = useCallback(
     async (role: Role) => {
       const w = await connectExternal();
-      if (!(await externalNetworkIsTestnet())) {
-        throw new Error(`${w.walletName} is not on Stellar testnet. Switch it to Testnet and try again.`);
+      if (!(await externalNetworkMatches())) {
+        const net = IS_TESTNET ? "Testnet" : "Mainnet (Public)";
+        throw new Error(`${w.walletName} is not on Stellar ${net}. Switch it to ${net} and try again.`);
       }
       await ensureFunded(w.address);
       const value: Stored = { kind: "external", ...w };
