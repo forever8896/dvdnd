@@ -1,14 +1,22 @@
 "use client";
 
-// Built-in testnet wallet: a keypair kept in this browser and funded by
-// Friendbot, so the whole flow is clickable without installing anything.
-// Investors and companies get separate accounts, matching the split sign-in.
+// Wallets per role (investor / company). Each role is either:
+//  - an external wallet (Freighter, xBull, Lobstr, ...) through Stellar
+//    Wallets Kit: we store only its address and which wallet to reconnect,
+//    and every transaction is approved in the wallet; or
+//  - a testnet demo wallet: a keypair kept in this browser's localStorage,
+//    funded by Friendbot, so judges can click through with nothing to
+//    install. It is only as safe as this browser profile, so it can be
+//    exported and imported, and must never hold real funds.
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { accountExists, balances, friendbot, Keypair, keypairSigner, type Balances, type Signer } from "./stellar";
 import { eligibleUntil } from "./chain";
+import { connectExternal, disconnectExternal, externalNetworkIsTestnet, externalSigner, type ExternalWallet } from "./kit";
+import { accountExists, balances, friendbot, Keypair, keypairSigner, type Balances, type Signer } from "./stellar";
 
 export type Role = "investor" | "company";
+
+type Stored = { kind: "demo"; secret: string } | ({ kind: "external" } & ExternalWallet);
 
 type WalletState = {
   ready: boolean;
@@ -16,7 +24,14 @@ type WalletState = {
   balances: Record<Role, Balances | null>;
   /** Unix seconds until which the investor is eligible (0 = not verified). */
   eligibleUntil: number;
+  /** Creates (or reuses) a testnet demo wallet in this browser. */
   create: (role: Role) => Promise<Signer>;
+  /** Connects an external wallet through the wallet picker. */
+  connect: (role: Role) => Promise<Signer>;
+  /** Replaces the role's wallet with a demo wallet from a secret key. */
+  importSecret: (role: Role, secret: string) => Promise<Signer>;
+  /** The demo wallet's secret key, for backup. Null for external wallets. */
+  exportSecret: (role: Role) => string | null;
   refresh: () => Promise<void>;
   forget: (role: Role) => void;
 };
@@ -24,75 +39,128 @@ type WalletState = {
 const WalletContext = createContext<WalletState | null>(null);
 const storageKey = (role: Role) => `dvdnd.wallet.${role}`;
 
-function loadKeypair(role: Role): Keypair | null {
+function load(role: Role): Stored | null {
   try {
-    const secret = localStorage.getItem(storageKey(role));
-    return secret ? Keypair.fromSecret(secret) : null;
+    const raw = localStorage.getItem(storageKey(role));
+    if (!raw) return null;
+    // Older versions stored the bare secret key.
+    if (raw.startsWith("S")) return { kind: "demo", secret: raw };
+    return JSON.parse(raw) as Stored;
   } catch {
     return null;
   }
 }
 
+function save(role: Role, value: Stored | null) {
+  try {
+    if (value) localStorage.setItem(storageKey(role), JSON.stringify(value));
+    else localStorage.removeItem(storageKey(role));
+  } catch {
+    /* private window: the wallet lives for this session only */
+  }
+}
+
+function toSigner(s: Stored | null): Signer | null {
+  if (!s) return null;
+  return s.kind === "demo" ? keypairSigner(Keypair.fromSecret(s.secret)) : externalSigner(s);
+}
+
+async function ensureFunded(publicKey: string) {
+  if (!(await accountExists(publicKey))) await friendbot(publicKey);
+}
+
 export function WalletProvider({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
-  const [keys, setKeys] = useState<Record<Role, Keypair | null>>({ investor: null, company: null });
+  const [stored, setStored] = useState<Record<Role, Stored | null>>({ investor: null, company: null });
   const [bals, setBals] = useState<Record<Role, Balances | null>>({ investor: null, company: null });
   const [eligible, setEligible] = useState(0);
 
   useEffect(() => {
-    setKeys({ investor: loadKeypair("investor"), company: loadKeypair("company") });
+    setStored({ investor: load("investor"), company: load("company") });
     setReady(true);
   }, []);
 
-  const signer = useMemo(
-    () => ({
-      investor: keys.investor ? keypairSigner(keys.investor) : null,
-      company: keys.company ? keypairSigner(keys.company) : null,
-    }),
-    [keys],
-  );
+  const signer = useMemo(() => ({ investor: toSigner(stored.investor), company: toSigner(stored.company) }), [stored]);
 
   const refresh = useCallback(async () => {
     const [inv, com] = await Promise.all([
-      keys.investor ? balances(keys.investor.publicKey()) : null,
-      keys.company ? balances(keys.company.publicKey()) : null,
+      signer.investor ? balances(signer.investor.publicKey) : null,
+      signer.company ? balances(signer.company.publicKey) : null,
     ]);
     setBals({ investor: inv, company: com });
-    if (keys.investor) {
+    if (signer.investor) {
       try {
-        setEligible(await eligibleUntil(keys.investor.publicKey()));
+        setEligible(await eligibleUntil(signer.investor.publicKey));
       } catch {
         setEligible(0);
       }
-    }
-  }, [keys]);
+    } else setEligible(0);
+  }, [signer]);
 
   useEffect(() => {
     if (ready) void refresh();
   }, [ready, refresh]);
 
-  const create = useCallback(async (role: Role) => {
-    const kp = loadKeypair(role) ?? Keypair.random();
-    if (!(await accountExists(kp.publicKey()))) await friendbot(kp.publicKey());
-    try {
-      localStorage.setItem(storageKey(role), kp.secret());
-    } catch {
-      /* private window: the wallet lives for this session only */
-    }
-    setKeys((k) => ({ ...k, [role]: kp }));
-    return keypairSigner(kp);
+  const set = useCallback((role: Role, value: Stored | null) => {
+    save(role, value);
+    setStored((s) => ({ ...s, [role]: value }));
+    if (!value) setBals((b) => ({ ...b, [role]: null }));
   }, []);
 
-  const forget = useCallback((role: Role) => {
-    try {
-      localStorage.removeItem(storageKey(role));
-    } catch {
-      /* ignore */
-    }
-    setKeys((k) => ({ ...k, [role]: null }));
-    setBals((b) => ({ ...b, [role]: null }));
-    if (role === "investor") setEligible(0);
-  }, []);
+  const create = useCallback(
+    async (role: Role) => {
+      const existing = load(role);
+      const value: Stored = existing?.kind === "demo" ? existing : { kind: "demo", secret: Keypair.random().secret() };
+      const s = toSigner(value)!;
+      await ensureFunded(s.publicKey);
+      set(role, value);
+      return s;
+    },
+    [set],
+  );
+
+  const connect = useCallback(
+    async (role: Role) => {
+      const w = await connectExternal();
+      if (!(await externalNetworkIsTestnet())) {
+        throw new Error(`${w.walletName} is not on Stellar testnet. Switch it to Testnet and try again.`);
+      }
+      await ensureFunded(w.address);
+      const value: Stored = { kind: "external", ...w };
+      set(role, value);
+      return toSigner(value)!;
+    },
+    [set],
+  );
+
+  const importSecret = useCallback(
+    async (role: Role, secret: string) => {
+      let kp: Keypair;
+      try {
+        kp = Keypair.fromSecret(secret.trim());
+      } catch {
+        throw new Error("That isn't a valid Stellar secret key (it starts with S and has 56 characters).");
+      }
+      await ensureFunded(kp.publicKey());
+      const value: Stored = { kind: "demo", secret: kp.secret() };
+      set(role, value);
+      return toSigner(value)!;
+    },
+    [set],
+  );
+
+  const exportSecret = useCallback((role: Role) => {
+    const s = stored[role];
+    return s?.kind === "demo" ? s.secret : null;
+  }, [stored]);
+
+  const forget = useCallback(
+    (role: Role) => {
+      if (stored[role]?.kind === "external") void disconnectExternal();
+      set(role, null);
+    },
+    [set, stored],
+  );
 
   const value: WalletState = {
     ready,
@@ -100,6 +168,9 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     balances: bals,
     eligibleUntil: eligible,
     create,
+    connect,
+    importSecret,
+    exportSecret,
     refresh,
     forget,
   };

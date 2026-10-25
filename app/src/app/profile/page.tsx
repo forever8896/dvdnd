@@ -71,27 +71,76 @@ export default function Profile() {
       </section>
 
       <section style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        <h2 className="h2">Testnet wallets</h2>
-        {(["investor", "company"] as Role[]).map((role) => {
-          const s = signer[role];
-          return (
-            <div key={role} style={{ display: "flex", gap: 12, alignItems: "center", padding: "10px 0", borderBottom: "1px solid var(--hair)", flexWrap: "wrap" }}>
-              <span className="label" style={{ width: 90 }}>
-                {role}
-              </span>
-              <span className="mono small" style={{ flex: 1, minWidth: 0, overflowWrap: "anywhere", color: "var(--text)" }}>
-                {s ? s.publicKey : "Not created"}
-              </span>
-              {s && (
-                <button className="btn btn-secondary btn-sm" onClick={() => signOut(role)}>
-                  Sign out and forget
-                </button>
-              )}
-            </div>
-          );
-        })}
-        <p className="small">Forgetting a wallet removes its key from this browser. Testnet funds in it are lost.</p>
+        <h2 className="h2">Wallets</h2>
+        {(["investor", "company"] as Role[]).map((role) => (
+          <WalletRow key={role} role={role} onSignOut={() => signOut(role)} />
+        ))}
       </section>
     </main>
+  );
+}
+
+function WalletRow({ role, onSignOut }: { role: Role; onSignOut: () => void }) {
+  const { signer, exportSecret } = useWallet();
+  const s = signer[role];
+  const [revealed, setRevealed] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  async function copy(text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* the key stays selectable */
+    }
+  }
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 10, padding: "12px 0", borderBottom: "1px solid var(--hair)" }}>
+      <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+        <span className="label" style={{ width: 90 }}>
+          {role}
+        </span>
+        {s ? (
+          <>
+            <span className={`pill ${s.kind === "external" ? "pill-green" : "pill-amber"}`}>{s.label}</span>
+            <span className="mono small" style={{ flex: 1, minWidth: 0, overflowWrap: "anywhere", color: "var(--text)" }}>
+              {s.publicKey}
+            </span>
+            <button className="btn btn-secondary btn-sm" onClick={onSignOut}>
+              {s.kind === "external" ? "Disconnect" : "Sign out and forget"}
+            </button>
+          </>
+        ) : (
+          <span className="small">Not signed in</span>
+        )}
+      </div>
+      {s?.kind === "demo" && (
+        <div style={{ background: "var(--amber-soft)", padding: 12, fontSize: 13, display: "flex", flexDirection: "column", gap: 8 }}>
+          <span>
+            This demo wallet&apos;s key lives only in this browser. Clearing site data or switching device loses it, along
+            with its eligibility and holdings. Back up the secret key to restore it, and never send real funds to it.
+          </span>
+          {revealed ? (
+            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+              <span className="mono" style={{ overflowWrap: "anywhere", userSelect: "all", background: "var(--bg)", padding: "4px 6px", flex: 1, minWidth: 0 }}>
+                {revealed}
+              </span>
+              <button className="btn btn-secondary btn-sm" onClick={() => copy(revealed)}>
+                {copied ? "Copied" : "Copy"}
+              </button>
+              <button className="btn btn-secondary btn-sm" onClick={() => setRevealed(null)}>
+                Hide
+              </button>
+            </div>
+          ) : (
+            <button className="btn btn-secondary btn-sm" style={{ alignSelf: "flex-start" }} onClick={() => setRevealed(exportSecret(role))}>
+              Show secret key for backup
+            </button>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

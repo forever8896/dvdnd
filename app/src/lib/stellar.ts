@@ -24,12 +24,17 @@ export const USDC = new Asset("USDC", USDC_ISSUER);
 /** Something that can sign a transaction for one account. */
 export type Signer = {
   publicKey: string;
+  /** "demo": a keypair in this browser. "external": a wallet like Freighter that approves each transaction. */
+  kind: "demo" | "external";
+  label: string;
   sign: (tx: Transaction) => Promise<Transaction>;
 };
 
 export function keypairSigner(kp: Keypair): Signer {
   return {
     publicKey: kp.publicKey(),
+    kind: "demo",
+    label: "Testnet demo wallet",
     sign: async (tx) => {
       tx.sign(kp);
       return tx;
