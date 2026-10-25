@@ -32,3 +32,16 @@ Ana locks 600 tokens and Ben 200, then the company pays an 80 USDC dividend: Ana
 - Company pays 80 USDC dividend: https://stellar.expert/explorer/testnet/tx/0064f36c79171c3f4caf5c3b6f6a89c8dbfead43d1b9baabaca6cb91cf840b61
 - investor-ana claims dividend: https://stellar.expert/explorer/testnet/tx/30fdc7220a0570f36d42ac9cb751a8ad138e60243ccde1ecb7c7473617d52bd0
 - investor-ben claims dividend: https://stellar.expert/explorer/testnet/tx/ef93afb2c71922d967be2cc1ab541f07d42302649f8373f827303c0b04813978
+
+## HARBOR lifecycle (2026-10-25)
+- investor-cara invests 600 USDC: https://stellar.expert/explorer/testnet/tx/5a3244c2fa9f8c536194af449ca6d31533a924dfddac1bb93ae465caecd6642a
+- investor-dan invests 400 USDC: https://stellar.expert/explorer/testnet/tx/0120d68fb5707daa275754b896ce4b707f0c63427fdf30de4a13977609e3055e
+- Raise finalized (company paid, 5% fee): https://stellar.expert/explorer/testnet/tx/c9dc06db166e66fa3ceedcdfafbdef5d90445ee6d0fe3e9be9526eb80c1720c0
+- investor-cara claims share tokens: https://stellar.expert/explorer/testnet/tx/a50591349098e363256a42da8b238d6330f5840ecf310520a1389f8228819569
+- investor-dan claims share tokens: https://stellar.expert/explorer/testnet/tx/46f0c9b45ad30951140e6c698f35126ace4e50ec0801ca89bdf816ebaee7e113
+- investor-cara locks all tokens: https://stellar.expert/explorer/testnet/tx/8b6c6e43ddb514da6b02f3803f175a8892c977247a4dc06b83aa9c01399ad096
+- investor-dan locks half: https://stellar.expert/explorer/testnet/tx/c5cd859132b3f99e955b5cbcf4e9c6b8e7bc558b838615e9eb38d9edb8ad14a7
+- First dividend period starts: https://stellar.expert/explorer/testnet/tx/fa9bd059bce7aa32fde884a10f32e3f35d70b51d845dbb717c9406ee758e4bac
+- Company pays 80 USDC dividend: https://stellar.expert/explorer/testnet/tx/9a2840c92a70eb422b92c5067f4a151b584929c2ea6517a40eaca60098b1d25b
+- investor-cara claims dividend: https://stellar.expert/explorer/testnet/tx/f4f7d7eb88cec77795b25db970be39e36cd8fcdb47c2c6f803b9397b4ccf1fc3
+- investor-dan claims dividend: https://stellar.expert/explorer/testnet/tx/ed4a58490ee21c1705f7b064c2cadd35a5b4494e6f0880a4a77b627f5245a209
