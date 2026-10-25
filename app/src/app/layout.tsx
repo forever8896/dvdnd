@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Archivo, JetBrains_Mono } from "next/font/google";
 import { ConfigNotice } from "@/components/config-notice";
+import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { WalletProvider } from "@/lib/wallet";
 import "./globals.css";
@@ -36,6 +37,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <ConfigNotice />
           <Nav />
           {children}
+          <Footer />
         </WalletProvider>
       </body>
     </html>

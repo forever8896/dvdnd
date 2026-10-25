@@ -28,7 +28,7 @@ Company (owner G-account)                         Investor (Stellar wallet: xBul
                                └─────────┘ ──► claim (USDC) ──► Investor
 ```
 
-Four Soroban contracts, one share token per company (a classic Stellar asset with its Stellar Asset Contract), and Circle USDC. Contract IDs are in the README and `deployments/testnet.env`; every demo transaction is in `deployments/evidence.md`.
+Five Soroban contracts (the four below plus `timelock`), one share token per company (a classic Stellar asset with its Stellar Asset Contract), and Circle USDC. Contract IDs are in the README and `deployments/testnet.env`; every demo transaction is in `deployments/evidence.md`.
 
 ## Assets
 
@@ -100,7 +100,7 @@ Four Soroban contracts, one share token per company (a classic Stellar asset wit
 
 ## Trust and limits
 - The profit-share agreement is enforced legally, off-chain. The chain records its hash and every payout.
-- The platform key can add credentials and verify companies; the council (2-of-3) holds registry and offering admin. A timelock on admin changes is still to come.
+- The platform key can add credentials and verify companies. Registry and offering admin belong to a `timelock` contract whose proposer is the council (2-of-3): every admin change is scheduled on-chain and can only execute after the delay (10 minutes on testnet).
 - The trusted setup has one phase-2 contributor so far; more independent contributions are needed before production.
 - Proof of address and name-based AML screening need Didit's paid workflow; on testnet residence can fall back to the ID document's country.
 - Eligibility lasts a year after proving, regardless of when the credential itself expires.

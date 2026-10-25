@@ -4,7 +4,7 @@
 
 dvdnd is tokenized private equity on Stellar. Profitable small and mid-sized businesses raise USDC at a fixed price by selling a share of their future profits. Investors who lock their tokens for a full period receive that period's dividends in USDC, pro-rata. Each raise runs under a securities exemption: **Reg S** (investors prove with a zero-knowledge proof that they live outside the US), **Reg D 506(c)** (verified accredited investors, US residents included), or both side by side. The Stellar protocol itself then limits holding the token to eligible investors.
 
-**Live demo (Stellar testnet): https://dvdnd.vercel.app**
+**Live demo (Stellar testnet): https://dvdnd.vercel.app** · [Docs](https://dvdnd.vercel.app/docs) · [Simulation](https://dvdnd.vercel.app/simulation)
 
 Built for HackMeridian · Genesis track · Stellar Unlocked.
 
@@ -65,7 +65,7 @@ dvdnd aims to be open compliance software, not a broker (draft strategy, not leg
 
 | Path | Contents |
 |---|---|
-| [`contracts/`](contracts/) | Soroban contracts: `registry`, `gate`, `offering`, `vault` (Rust, soroban-sdk 28) |
+| [`contracts/`](contracts/) | Soroban contracts: `registry`, `gate`, `offering`, `vault`, `timelock` (Rust, soroban-sdk 28) |
 | [`circuits/`](circuits/) | Circom residence circuit, trusted-setup scripts and browser/Node prover |
 | [`scripts/testnet/`](scripts/testnet/) | Deploy and end-to-end demo scripts |
 | [`deployments/`](deployments/) | Testnet contract IDs and [transaction evidence](deployments/evidence.md) |
@@ -83,6 +83,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for how the pieces fit together.
 | gate | [`CBPU52XUHU4UQ3MUBOXITFNHQMOON3SDEWN2IVKPGRCZSQTRTCLGDB7N`](https://stellar.expert/explorer/testnet/contract/CBPU52XUHU4UQ3MUBOXITFNHQMOON3SDEWN2IVKPGRCZSQTRTCLGDB7N) |
 | offering | [`CCJCRABWLOEOXVDRHSJXLS5HDOCUCZWY2X2N27NUP24H62N6DKYISX5P`](https://stellar.expert/explorer/testnet/contract/CCJCRABWLOEOXVDRHSJXLS5HDOCUCZWY2X2N27NUP24H62N6DKYISX5P) |
 | vault | [`CDU5CGRWVSMFKQWRNJLP5XAKHQAF624QTLUNCONHJ4GQHOZOVAQROHKM`](https://stellar.expert/explorer/testnet/contract/CDU5CGRWVSMFKQWRNJLP5XAKHQAF624QTLUNCONHJ4GQHOZOVAQROHKM) |
+| timelock | [`CCHX6UXEPIXLRALJIK2JZWCQ3OLQER7HYOGFVYYYSOP2UJERLEEEGCGZ`](https://stellar.expert/explorer/testnet/contract/CCHX6UXEPIXLRALJIK2JZWCQ3OLQER7HYOGFVYYYSOP2UJERLEEEGCGZ) |
 | USDC (Circle testnet) | [`CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA`](https://stellar.expert/explorer/testnet/contract/CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA) |
 
 A complete cycle ran on testnet: ZK eligibility, raise, flat listing fee, token claims straight into the vault under lock-up, and an 80 USDC dividend split 60/40 by locked amount. The lock-up was checked on-chain: the frozen wallet can't unlock or move tokens. Every transaction link is in [deployments/evidence.md](deployments/evidence.md).
