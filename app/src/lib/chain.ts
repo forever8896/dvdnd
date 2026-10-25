@@ -286,3 +286,36 @@ export const initials = (name: string) =>
     .slice(0, 2)
     .map((w) => w[0]!.toUpperCase())
     .join("");
+
+// ── readable contract errors ──────────────────────────────────────────
+const CONTRACT_ERRORS: Record<string, Record<number, string>> = {
+  offering: {
+    1: "This company isn't active on dvdnd.",
+    3: "Those raise terms aren't valid.",
+    5: "This raise is no longer open.",
+    6: "Verify your residence before investing.",
+    7: "That would take the raise over its maximum.",
+    8: "This raise can't close yet: it isn't full and the deadline hasn't passed.",
+    9: "There's nothing to claim for this wallet.",
+    10: "This raise isn't in the right state for that.",
+  },
+  vault: {
+    1: "Enter an amount above zero.",
+    2: "You don't have that many tokens locked.",
+    3: "No tokens are locked for a full period yet, so there's no one to pay.",
+    4: "A dividend period is already running.",
+  },
+  gate: {
+    3: "The credential tree changed; please try again.",
+    4: "Your clock is off; the proof's timestamp was rejected.",
+    5: "This credential has already been used by another wallet.",
+    6: "The proof didn't verify.",
+  },
+};
+
+/** A sentence for the person, from an error thrown by a contract call. */
+export function errorText(e: unknown, contract: keyof typeof CONTRACT_ERRORS): string {
+  const msg = e instanceof Error ? e.message : String(e);
+  const code = msg.match(/error (\d+)\)/)?.[1];
+  return (code && CONTRACT_ERRORS[contract]?.[Number(code)]) || msg;
+}

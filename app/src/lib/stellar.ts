@@ -151,6 +151,32 @@ export async function balances(publicKey: string): Promise<Balances> {
   }
 }
 
+/** XLM needed to buy exactly `usdc` USDC on the DEX right now (best path), or null if none. */
+export async function quoteUsdcInXlm(usdc: number): Promise<number | null> {
+  const res = await horizon.strictReceivePaths([Asset.native()], USDC, usdc.toFixed(7)).call();
+  const best = res.records.map((r) => Number(r.source_amount)).sort((a, b) => a - b)[0];
+  return best ?? null;
+}
+
+/** Buys exactly `usdc` USDC with XLM, adding the USDC trustline first if needed. */
+export async function buyUsdc(signer: Signer, usdc: number): Promise<TxResult> {
+  const quote = await quoteUsdcInXlm(usdc);
+  if (quote === null) throw new TxError("No XLM→USDC liquidity on the testnet DEX right now.");
+  const { usdc: current } = await balances(signer.publicKey);
+  const list = [
+    ...(current === null ? [ops.trustUsdc()] : []),
+    Operation.pathPaymentStrictReceive({
+      sendAsset: Asset.native(),
+      sendMax: (quote * 1.02).toFixed(7), // 2% slippage allowance
+      destination: signer.publicKey,
+      destAsset: USDC,
+      destAmount: usdc.toFixed(7),
+      path: [],
+    }),
+  ];
+  return classic(signer, list);
+}
+
 export const ops = {
   trustUsdc: () => Operation.changeTrust({ asset: USDC }),
   /** Swap XLM for at least `minUsdc` USDC through the DEX. */

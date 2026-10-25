@@ -1,14 +1,15 @@
-// Full eligibility flow against testnet and the running dev server.
-// Opt-in: LIVE=1 APP_URL=http://localhost:3100 pnpm vitest run eligibility.live
+// Investor flow against testnet and the running dev server: eligibility,
+// add money and invest.
+// Opt-in: LIVE=1 APP_URL=http://localhost:3100 pnpm vitest run investor-flow.live
 import { describe, expect, it } from "vitest";
-import { eligibleUntil, gate } from "./chain";
-import { friendbot, Keypair, keypairSigner } from "./stellar";
+import { contribution, eligibleUntil, gate, offering, toUnits } from "./chain";
+import { balances, buyUsdc, friendbot, Keypair, keypairSigner } from "./stellar";
 import { credentialLeaf, fetchLeaves, proveResidence, randomSecret } from "./zk";
 
 const APP_URL = process.env.APP_URL ?? "http://localhost:3100";
 const ARTIFACTS = { wasm: "public/zk/residence.wasm", zkey: "public/zk/residence_final.zkey" };
 
-describe.skipIf(!process.env.LIVE)("eligibility on testnet", () => {
+describe.skipIf(!process.env.LIVE)("investor flow on testnet", () => {
   it("issues a credential, proves residence and registers on-chain", async () => {
     const kp = Keypair.random();
     await friendbot(kp.publicKey());
@@ -32,7 +33,15 @@ describe.skipIf(!process.env.LIVE)("eligibility on testnet", () => {
     const tx = await gate.verifyAndRegister(signer, proof);
     console.log("credential", body.hash, "verified", tx.hash);
     expect(await eligibleUntil(kp.publicKey())).toBeGreaterThan(Date.now() / 1000);
-  }, 120_000);
+
+    // Add money (XLM -> USDC path payment) and invest in the open raise.
+    const raiseId = Number(process.env.RAISE_ID ?? 3);
+    const buy = await buyUsdc(signer, 150);
+    expect((await balances(kp.publicKey())).usdc).toBeGreaterThanOrEqual(150);
+    const inv = await offering.invest(signer, raiseId, toUnits(100));
+    console.log("bought", buy.hash, "invested", inv.hash);
+    expect(await contribution(raiseId, kp.publicKey())).toBe(toUnits(100));
+  }, 180_000);
 
   it("refuses US residents at the issuer", async () => {
     const res = await fetch(`${APP_URL}/api/kyc`, {

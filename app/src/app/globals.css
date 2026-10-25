@@ -583,3 +583,9 @@ p {
     animation: none !important;
   }
 }
+
+@media (max-width: 900px) {
+  .raise-layout {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
