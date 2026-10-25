@@ -12,6 +12,7 @@
     "@stellar/stellar-sdk": "17.3.0",
     "buffer": "6.0.3",
     "circomlibjs": "0.1.7",
+    "framer-motion": "12.43.0",
     "next": "15.5.28",
     "react": "19.1.0",
     "react-dom": "19.1.0",
