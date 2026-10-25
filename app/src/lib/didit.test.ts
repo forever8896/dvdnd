@@ -41,6 +41,17 @@ describe("residence from a Didit decision", () => {
     expect(() => residenceFromDecision(d, ADDRESS, false)).toThrow(/no verified residential address/);
   });
 
+  it("treats a US document or US nationality as US residence", () => {
+    const usPassport = decision({ id_verifications: [{ status: "Approved", issuing_state: "USA", document_number: "P1" }] });
+    expect(residenceFromDecision(usPassport, ADDRESS, false)).toMatchObject({ country: 840, basis: "US document" });
+    // Even with a non-US proof of address.
+    const abroad = decision({
+      id_verifications: [{ status: "Approved", issuing_state: "DEU", nationality: "USA", document_number: "R1" }],
+      poa_verifications: [{ status: "Approved", poa_parsed_address: { country: "PT" } }],
+    });
+    expect(residenceFromDecision(abroad, ADDRESS, false)).toMatchObject({ country: 840 });
+  });
+
   it("refuses unapproved, foreign or sanctioned verifications", () => {
     expect(() => residenceFromDecision(decision({ status: "In Review" }), ADDRESS)).toThrow(/still reviewing/);
     expect(() => residenceFromDecision(decision({ status: "Declined" }), ADDRESS)).toThrow(/didn't approve/);

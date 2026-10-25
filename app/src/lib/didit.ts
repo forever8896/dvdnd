@@ -46,6 +46,7 @@ type Address = { country?: string | null; category?: string | null; is_verified?
 type IdVerification = {
   status?: string;
   issuing_state?: string | null;
+  nationality?: string | null;
   document_number?: string | null;
   parsed_address?: Address | null;
 };
@@ -64,18 +65,21 @@ export async function getDecision(sessionId: string) {
 }
 
 const approved = (s?: string | null) => (s ?? "").toLowerCase() === "approved";
+const isUs = (c?: string | null) => ["US", "USA"].includes((c ?? "").trim().toUpperCase());
 
 export type DiditResidence = {
   country: number;
-  basis: "proof of address" | "address on ID" | "ID document";
+  basis: "proof of address" | "address on ID" | "ID document" | "US document";
   /** Stable id of the ID document, so one document gets one credential. */
   documentId: string;
 };
 
 /**
- * The verified residence from an approved decision for `address`: an approved
- * proof of address first, then a verified residential address on the ID, and
- * on testnet only the document's issuing country.
+ * The verified residence from an approved decision for `address`. Anyone with
+ * a US-issued ID or US nationality is treated as a US resident (a deliberately
+ * conservative stand-in: it can only exclude, never admit). Otherwise: an
+ * approved proof of address first, then a verified residential address on the
+ * ID, and on testnet only the document's issuing country.
  */
 export function residenceFromDecision(d: Decision, address: string, testnet = IS_TESTNET): DiditResidence {
   if (!approved(d.status)) {
@@ -89,6 +93,7 @@ export function residenceFromDecision(d: Decision, address: string, testnet = IS
   const id = (d.id_verifications ?? []).find((v) => approved(v.status));
   if (!id) throw new IssueError("Didit didn't verify an ID document.", 422);
   const documentId = `${id.issuing_state ?? ""}:${id.document_number ?? d.session_id}`;
+  if ([id.issuing_state, id.nationality].some(isUs)) return { country: 840, basis: "US document", documentId };
 
   const poa = (d.poa_verifications ?? []).find((v) => approved(v.status) && v.poa_parsed_address?.country);
   if (poa) return { country: countryCode(poa.poa_parsed_address!.country), basis: "proof of address", documentId };
