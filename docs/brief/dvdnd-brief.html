@@ -252,7 +252,7 @@ html { scroll-behavior: smooth; }
             <tr><td>Check the company against the GLEIF LEI registry</td><td><span class="pill ok">Built, real</span></td><td>Active, issued, same country, matching legal name</td></tr>
             <tr><td>Director / national registry match</td><td><span class="pill mid">Testnet stand-in</span></td><td>Self-declared and recorded as evidence; needs Companies House or OpenCorporates</td></tr>
             <tr><td>Profit-share agreement signed, hash on-chain</td><td><span class="pill ok">Built, real</span></td><td>SHA-256 of the agreement in the registry</td></tr>
-            <tr><td>Agreement document anyone can verify against the hash</td><td><span class="pill todo">Not started</span></td><td></td></tr>
+            <tr><td>Agreement document anyone can verify against the hash</td><td><span class="pill ok">Built, real</span></td><td>The raise page rebuilds the signed text from on-chain fields and checks its sha256 in the browser; download included</td></tr>
             <tr><td>Share token issued with compliance flags, admin handed to the escrow</td><td><span class="pill ok">Built, real</span></td><td>AUTH_REQUIRED, REVOCABLE, CLAWBACK; supply fixed by code</td></tr>
             <tr class="status-group"><th colspan="3">Raise</th></tr>
             <tr><td>Fixed-price, all-or-nothing escrow with min, max and deadline</td><td><span class="pill ok">Built, real</span></td><td>Offering contract</td></tr>
@@ -265,8 +265,8 @@ html { scroll-behavior: smooth; }
             <tr><td>Issuer builds the credential from the verified country</td><td><span class="pill ok">Built, real</span></td><td>Circuit v2: the investor only sends Poseidon(secret); the issuer adds the leaf from the KYC result</td></tr>
             <tr><td>506(c) accreditation: signed statement plus $200k minimum ($1M for entities), or a verifier's attestation</td><td><span class="pill mid">Testnet stand-in</span></td><td>Contract rules are real; the verifier is a testnet stand-in</td></tr>
             <tr><td>Accreditation verification service</td><td><span class="pill ext">Needs vendor or legal</span></td><td>VerifyInvestor, Parallel Markets or similar</td></tr>
-            <tr><td>Sanctions screening of investor addresses</td><td><span class="pill todo">Not started</span></td><td>OFAC's published crypto addresses</td></tr>
-            <tr><td>Credential tree survives RPC event retention</td><td><span class="pill mid">Testnet stand-in</span></td><td>Events plus a bundled seed; needs an on-chain view or indexer</td></tr>
+            <tr><td>Sanctions screening of investor addresses</td><td><span class="pill ok">Built, real</span></td><td>Wallets checked against OFAC's SDN crypto addresses (daily, fails closed). Name screening needs Didit's paid AML</td></tr>
+            <tr><td>Credential tree survives RPC event retention</td><td><span class="pill ok">Built, real</span></td><td>Falls back to Horizon's full history of add_credential calls, checked against the gate's count and root</td></tr>
             <tr class="status-group"><th colspan="3">Holding and trading</th></tr>
             <tr><td>Only eligible wallets can hold the token, on every venue</td><td><span class="pill ok">Built, real</span></td><td>Enforced by Stellar's authorization flags, per the raise's exemption</td></tr>
             <tr><td>Lock-up enforced on-chain</td><td><span class="pill ok">Built, real</span></td><td>Claimed tokens go into the dividend vault and the wallet is frozen until the date; checked on testnet</td></tr>
@@ -289,7 +289,7 @@ html { scroll-behavior: smooth; }
             <tr><td>Clawback with a recorded reason</td><td><span class="pill ok">Built, real</span></td><td>Burns from the holder's wallet; reason emitted as an on-chain event</td></tr>
             <tr><td>Admin powers behind a multisig</td><td><span class="pill ok">Built, real</span></td><td>Council account, 2 of 3 signers, master key disabled; it sets the listing fee and has no power over holders</td></tr>
             <tr><td>Timelock on admin changes</td><td><span class="pill todo">Not started</span></td><td></td></tr>
-            <tr><td>Compliance console with audit log</td><td><span class="pill prog">In progress</span></td><td>Contract actions and events exist; a console for each company's compliance account is next</td></tr>
+            <tr><td>Compliance console with audit log</td><td><span class="pill ok">Built, real</span></td><td>Per raise: holders from Horizon, freeze/unfreeze/clawback with reasons, audit log, hand-over to a transfer agent</td></tr>
             <tr><td>stellar.toml (SEP-1) for dvdnd and its assets</td><td><span class="pill ok">Built, real</span></td><td>Generated from the chain at <a href="https://dvdnd.vercel.app/.well-known/stellar.toml">/.well-known/stellar.toml</a>; issuers point to it</td></tr>
             <tr><td>Contract and ZK circuit audit</td><td><span class="pill ext">Needs vendor or legal</span></td><td>Veridise, Certora, Runtime Verification, OtterSec, Halborn</td></tr>
             <tr><td>Multi-party trusted setup ceremony</td><td><span class="pill prog">In progress</span></td><td>Phase 1: PSE Perpetual Powers of Tau (80 contributors). Phase 2: scripted ceremony with a Stellar-ledger beacon, one contributor so far; key live on the testnet gate</td></tr>
