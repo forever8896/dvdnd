@@ -1,0 +1,20 @@
+{
+  "name": "residence-circuits",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "bash scripts/build.sh",
+    "setup": "bash scripts/setup.sh",
+    "fixture": "node scripts/make-fixture.mjs",
+    "prove": "node scripts/prove.mjs",
+    "copy-to-app": "bash scripts/copy-to-app.sh",
+    "all": "bash scripts/build.sh && bash scripts/setup.sh && node scripts/make-fixture.mjs"
+  },
+  "devDependencies": {
+    "@stellar/stellar-sdk": "^17.3.0",
+    "circomlib": "^2.0.5",
+    "circomlibjs": "^0.1.7",
+    "snarkjs": "^0.7.6"
+  }
+}

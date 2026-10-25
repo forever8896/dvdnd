@@ -1,0 +1,3 @@
+allowBuilds:
+  # native addon only used by circomlibjs blake/pedersen paths; pure-JS fallback is fine
+  blake-hash: false

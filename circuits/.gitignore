@@ -1,0 +1,7 @@
+node_modules/
+# large / regenerable build artifacts
+build/*.ptau
+build/*.r1cs
+build/*.sym
+build/residence_js/
+# committed: the zkey and wasm match the verifying key deployed on testnet
