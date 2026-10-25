@@ -6,7 +6,8 @@ Circuit: `residence.circom`, r1cs blake2b `7017df6ccd56a41fa273ea37a4acc7af…`
 
 PSE Perpetual Powers of Tau, contribution 0080 with beacon, truncated to 2^13:
 [`ppot_0080_13.ptau`](https://pse-trusted-setup-ppot.s3.eu-central-1.amazonaws.com/pot28_0080/ppot_0080_13.ptau), blake2b in `ceremony/ptau.b2`.
-Check it with `snarkjs powersoftau verify build/ppot_0080_13.ptau`.
+Verified locally with `snarkjs powersoftau verify` on 2026-10-25 ("Powers of Tau Ok!"; the beacon
+matches the Ethereum randao value PSE published).
 
 ## Phase 2
 
