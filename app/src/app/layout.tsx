@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Archivo, JetBrains_Mono } from "next/font/google";
 import { Nav } from "@/components/nav";
+import { WalletProvider } from "@/lib/wallet";
 import "./globals.css";
 
 const archivo = Archivo({
@@ -23,10 +24,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-      <body className={`${archivo.variable} ${jetbrains.variable}`}>
-        <Nav />
-        {children}
+    <html lang="en" className={`${archivo.variable} ${jetbrains.variable}`}>
+      <body>
+        <WalletProvider>
+          <Nav />
+          {children}
+        </WalletProvider>
       </body>
     </html>
   );

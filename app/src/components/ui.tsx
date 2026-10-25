@@ -1,6 +1,7 @@
 // Shared building blocks from the dvdnd foundations sheet.
 
 import { Check, Lock, ShieldCheck, Shield } from "./icons";
+import { countryCode } from "@/lib/chain";
 
 export type RaiseStatus = "Open" | "Funded" | "Refunding" | "Trading";
 
@@ -20,7 +21,7 @@ export function StatusPill({ status }: { status: RaiseStatus }) {
   );
 }
 
-export function EligibilityPill({ state }: { state: "verified" | "expired" | "ineligible" }) {
+export function EligibilityPill({ state }: { state: "verified" | "unverified" | "expired" | "ineligible" }) {
   if (state === "verified")
     return (
       <span className="pill pill-green">
@@ -28,10 +29,15 @@ export function EligibilityPill({ state }: { state: "verified" | "expired" | "in
         Verified
       </span>
     );
+  const look = {
+    unverified: ["pill-amber", "Verify to invest"],
+    expired: ["pill-amber", "Expired"],
+    ineligible: ["pill-red", "Not eligible"],
+  }[state];
   return (
-    <span className={`pill ${state === "expired" ? "pill-amber" : "pill-red"}`}>
+    <span className={`pill ${look[0]}`}>
       <Shield size={11} />
-      {state === "expired" ? "Expired" : "Not eligible"}
+      {look[1]}
     </span>
   );
 }
@@ -221,4 +227,12 @@ export function compact(n: number) {
   if (n >= 1_000_000) return `${+(n / 1_000_000).toFixed(2)}M`;
   if (n >= 1_000) return `${+(n / 1_000).toFixed(1)}k`;
   return String(n);
+}
+
+export function CountryChip({ n }: { n: number }) {
+  return (
+    <span className="mono" style={{ fontSize: 10, fontWeight: 500, border: "1px solid var(--line)", padding: "1px 4px" }}>
+      {countryCode(n)}
+    </span>
+  );
 }

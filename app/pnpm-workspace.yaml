@@ -1,3 +1,4 @@
 allowBuilds:
+  blake-hash: false
   sharp: true
   unrs-resolver: true
