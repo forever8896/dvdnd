@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { AddMoney } from "@/components/add-money";
+import { AnchorTransfer } from "@/components/anchor-transfer";
 import { fmt, TxLink } from "@/components/ui";
 import { IS_TESTNET, NETWORK } from "@/lib/config";
 import { useAsync } from "@/lib/hooks";
@@ -72,11 +73,20 @@ export default function WalletPage() {
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 32 }}>
         <section style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <h2 className="h2">Add money</h2>
+          <h2 className="h2">Bank transfer</h2>
           <p className="muted">
-            Swap XLM for Circle&apos;s USDC on Stellar&apos;s DEX with a path payment. Bank deposits through a Stellar
-            anchor (MoneyGram or a regional partner) are coming.
+            Deposit from or withdraw to a bank account through a Stellar anchor (SEP-24). The anchor handles the bank
+            side in its own window and settles in USDC on Stellar.{IS_TESTNET && " Testnet uses SDF's test anchor, so no real money moves."}
           </p>
+          <AnchorTransfer
+            signer={investor}
+            onDone={() => {
+              void refresh();
+              void reload();
+            }}
+          />
+          <h2 className="h2" style={{ marginTop: 12 }}>Swap XLM for USDC</h2>
+          <p className="muted">Or swap XLM for Circle&apos;s USDC on Stellar&apos;s DEX with a path payment.</p>
           <AddMoney
             signer={investor}
             onDone={() => {

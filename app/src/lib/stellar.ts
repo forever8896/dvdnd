@@ -8,6 +8,7 @@ import {
   Contract,
   Horizon,
   Keypair,
+  Memo,
   Operation,
   rpc,
   scValToNative,
@@ -98,10 +99,10 @@ export async function sorobanOp(signer: Signer, op: xdr.Operation): Promise<TxRe
   return submit(await signer.sign(prepared));
 }
 
-/** Builds, signs and submits classic operations for `signer`. */
-export async function classic(signer: Signer, ops: xdr.Operation[]): Promise<TxResult> {
+/** Builds, signs and submits classic operations for `signer`, with an optional memo. */
+export async function classic(signer: Signer, ops: xdr.Operation[], memo?: Memo): Promise<TxResult> {
   const account = await server.getAccount(signer.publicKey);
-  const builder = new TransactionBuilder(account, { fee: BASE_FEE, networkPassphrase: NETWORK.passphrase });
+  const builder = new TransactionBuilder(account, { fee: BASE_FEE, networkPassphrase: NETWORK.passphrase, memo });
   ops.forEach((op) => builder.addOperation(op));
   const tx = builder.setTimeout(60).build();
   return submit(await signer.sign(tx));
