@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Runs a full raise -> tokens -> lock -> dividend -> claim cycle for one company
+# Runs a full raise -> tokens (locked up in the vault) -> dividend -> claim cycle for one company
 # and appends every transaction link to deployments/evidence.md.
 #
 # Usage: scripts/testnet/demo-lifecycle.sh <CODE> <owner-identity> <investorA> <usdcA> <investorB> <usdcB> <dividend-usdc>
@@ -26,11 +26,10 @@ step() {
 [ "$SKIP" -eq 0 ] && echo -e "\n## $CODE lifecycle ($(date -u +%F))" >> "$EVIDENCE"
 step "$A invests $AMT_A USDC" "$OFFERING" "$A" -- invest --raise_id "$RAISE" --investor "$(addr "$A")" --amount "$((AMT_A * U))"
 step "$B invests $AMT_B USDC" "$OFFERING" "$B" -- invest --raise_id "$RAISE" --investor "$(addr "$B")" --amount "$((AMT_B * U))"
-step "Raise finalized (company paid, 5% fee)" "$OFFERING" "$OWNER" -- finalize --raise_id "$RAISE"
-step "$A claims share tokens" "$OFFERING" "$A" -- claim_tokens --raise_id "$RAISE" --investor "$(addr "$A")"
-step "$B claims share tokens" "$OFFERING" "$B" -- claim_tokens --raise_id "$RAISE" --investor "$(addr "$B")"
-step "$A locks all tokens" "$VAULT" "$A" -- lock --token "$SHARE" --holder "$(addr "$A")" --amount "$((AMT_A * U))"
-step "$B locks half" "$VAULT" "$B" -- lock --token "$SHARE" --holder "$(addr "$B")" --amount "$((AMT_B * U / 2))"
+step "Raise finalized (company paid in full; flat fee was paid at open)" "$OFFERING" "$OWNER" -- finalize --raise_id "$RAISE"
+# Claimed during lock-up: tokens go straight into the dividend vault and the wallet is frozen.
+step "$A claims share tokens (locked in the vault during lock-up)" "$OFFERING" "$A" -- claim_tokens --raise_id "$RAISE" --investor "$(addr "$A")"
+step "$B claims share tokens (locked in the vault during lock-up)" "$OFFERING" "$B" -- claim_tokens --raise_id "$RAISE" --investor "$(addr "$B")"
 step "First dividend period starts" "$VAULT" "$OWNER" -- start_period --token "$SHARE"
 step "Company pays $DIVIDEND USDC dividend" "$VAULT" "$OWNER" -- distribute --token "$SHARE" --from "$(addr "$OWNER")" --amount "$((DIVIDEND * U))"
 step "$A claims dividend" "$VAULT" "$A" -- claim --token "$SHARE" --holder "$(addr "$A")"

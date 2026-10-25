@@ -69,3 +69,21 @@ Keys from the ceremony in `circuits/ceremony/TRANSCRIPT.md` (PSE Perpetual Power
 - vera's v2 proof verified on-chain: https://stellar.expert/explorer/testnet/tx/727eeabf8aa40fa8c80b3c5c1ec8f34b45100670bc2cab03376968511aa0f614
 - App issuer from a commitment (live test), credential: https://stellar.expert/explorer/testnet/tx/390e4abc721c1f0950c6285c7de23980ac0fb71abca6136429ba1bdb3623b4c5
 - Its proof verified: https://stellar.expert/explorer/testnet/tx/c468ba58aa94765a466e4958d33f95fd20f92c97277790f90c7d1d646079c896
+
+## ANDES lifecycle (2026-10-25)
+- investor-eve invests 600 USDC: https://stellar.expert/explorer/testnet/tx/09af9eb0126bbf1e265b4a347f75b49548ef8caed523e601d0a8c00679488302
+- investor-finn invests 400 USDC: https://stellar.expert/explorer/testnet/tx/33d286a8428ae9093b8292dd85f4f7c8d85b10219c67f76568b4c447629868ce
+- Raise finalized (company paid in full; flat fee was paid at open): https://stellar.expert/explorer/testnet/tx/f116698688773a3b0ec1ca55fed39d3e71e85389790eb67824d1d231f9f58ae7
+- investor-eve claims share tokens (locked in the vault during lock-up): https://stellar.expert/explorer/testnet/tx/a61bb1374268451b74a156150f3a3b8c5441ea2341bdff043c3e202e24c9cc45
+- investor-finn claims share tokens (locked in the vault during lock-up): https://stellar.expert/explorer/testnet/tx/98b9372e3ca516e83b59045a33ba38108be02f3ea364885c143310fc27cb1cd4
+- First dividend period starts: https://stellar.expert/explorer/testnet/tx/aff670e709b1375a9ac4a4a21e3d0a77107426ba0815dcb272e93e462bc746e6
+- Company pays 80 USDC dividend: https://stellar.expert/explorer/testnet/tx/c6eb359863c2772ad0aed6d653ef739def24148b655a7a59db2ba7ed44df6680
+- investor-eve claims dividend: https://stellar.expert/explorer/testnet/tx/8ffaaa4c023774a65684cdf9081bad6e8a6b1dc88ca939f30d30edcf269de68b
+- investor-finn claims dividend: https://stellar.expert/explorer/testnet/tx/486040c2dc2c9f7f6ad212b4ae3a909235c818d0cb41ee6bd30a8108bdf1e25b
+
+## Offering with per-raise exemptions (2026-10-25)
+New offering contract `CCBMO6FN53CBZILJ6PBU4DODLRYK27RQH5ESWVDPMNPVH5VILUZV4E5C` (flat listing fee of 10 USDC at open, per-raise terms and compliance).
+Raises: 1 Northline (Reg S, open), 2 Harbor & Hearth (Reg D 506(c), one-year lock-up, open), 3 Andes (Reg S, full cycle above).
+Lock-up check after the ANDES cycle (simulated calls, nothing sent): investor-eve's ANDES trustline is deauthorized with a wallet
+balance of 0 and 600 tokens active in the vault; `vault.unlock` fails with the token's BalanceDeauthorizedError (#11) and
+`offering.release` fails with LockedUp (#14) until the lock-up date.

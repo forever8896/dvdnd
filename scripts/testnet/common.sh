@@ -22,7 +22,8 @@ USDC_ASSET="USDC:$USDC_ISSUER"
 
 ADMIN=admin
 TREASURY=treasury
-FEE_BPS=500
+# Flat fee per raise in USDC, paid by the company when it opens a raise.
+LISTING_FEE=10
 
 [ -f "$DEPLOYMENTS" ] && source "$DEPLOYMENTS"
 

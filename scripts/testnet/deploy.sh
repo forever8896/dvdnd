@@ -4,22 +4,25 @@
 #
 # Roles: the platform key ($ADMIN) verifies companies and issues credentials;
 # the council multisig (scripts/testnet/council.sh) is registry admin and
-# offering admin + compliance. REUSE_GATE=1 / REUSE_VAULT=1 keep the gate and
-# vault already recorded in deployments/testnet.env.
+# offering admin (it sets the flat listing fee). Compliance belongs to each
+# raise. REUSE_REGISTRY=1 / REUSE_GATE=1 / REUSE_VAULT=1 keep the contracts
+# already recorded in deployments/testnet.env.
 source "$(dirname "$0")/common.sh"
 
 (cd "$ROOT/contracts" && stellar contract build >/dev/null)
 
 USDC_SAC=$(asset_contract "$USDC_ASSET" "$ADMIN")
 save_var USDC_SAC "$USDC_SAC"
-# The treasury receives the 5% fee in USDC.
+# The treasury receives the flat listing fee in USDC.
 stellar tx new change-trust --network "$NETWORK" --source-account "$TREASURY" --line "$USDC_ASSET" >/dev/null
 
 [ -n "${COUNCIL:-}" ] || { echo "Run scripts/testnet/council.sh first" >&2; exit 1; }
 
-REGISTRY=$(stellar contract deploy --network "$NETWORK" --source-account "$ADMIN" \
-  --wasm "$WASM_DIR/registry.wasm" --alias registry -- --admin "$COUNCIL" --verifier "$(addr "$ADMIN")")
-save_var REGISTRY "$REGISTRY"
+if [ -z "${REUSE_REGISTRY:-}" ]; then
+  REGISTRY=$(stellar contract deploy --network "$NETWORK" --source-account "$ADMIN" \
+    --wasm "$WASM_DIR/registry.wasm" --alias registry -- --admin "$COUNCIL" --verifier "$(addr "$ADMIN")")
+  save_var REGISTRY "$REGISTRY"
+fi
 
 if [ -z "${REUSE_VAULT:-}" ]; then
   VAULT=$(stellar contract deploy --network "$NETWORK" --source-account "$ADMIN" \
@@ -36,8 +39,8 @@ fi
 
 OFFERING=$(stellar contract deploy --network "$NETWORK" --source-account "$ADMIN" \
   --wasm "$WASM_DIR/offering.wasm" --alias offering -- \
-  --admin "$COUNCIL" --compliance "$COUNCIL" --gate "$GATE" --registry "$REGISTRY" --vault "$VAULT" \
-  --usdc "$USDC_SAC" --treasury "$(addr "$TREASURY")" --fee_bps "$FEE_BPS")
+  --admin "$COUNCIL" --gate "$GATE" --registry "$REGISTRY" --vault "$VAULT" \
+  --usdc "$USDC_SAC" --treasury "$(addr "$TREASURY")" --listing_fee "$((LISTING_FEE * 10000000))")
 save_var OFFERING "$OFFERING"
 
 echo "Deployed:"

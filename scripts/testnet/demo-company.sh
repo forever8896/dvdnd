@@ -7,6 +7,10 @@
 #          "<name>" <country-numeric> <payout-bps> <min-usdc> <max-usdc> <duration-seconds>
 # Optional: PROFILE_JSON='{"sector":…,"city":…,"description":…,"netProfit":…}' stores the
 # profile on-chain as a data: URI, which the app reads.
+# Raise terms (env): EXEMPTION=regs|506c (default regs), LOCKUP_SECS after the
+# deadline (default 0; 506c needs at least a year), MIN_TICKET and MAX_HOLDERS
+# (default 0 and 500), COMPLIANCE identity (default the owner), VERIFIER identity
+# (506c accreditation verifier, optional). The owner pays the flat listing fee.
 source "$(dirname "$0")/common.sh"
 
 CODE=$1 OWNER=$2 ISSUER=$3 NAME=$4 COUNTRY=$5 PAYOUT_BPS=$6 MIN=$7 MAX=$8 DURATION_SECS=$9
@@ -38,14 +42,24 @@ invoke "$REGISTRY" "$OWNER" -- sign_agreement --id "$COMPANY_ID" \
   --agreement_hash "$AGREEMENT_HASH" --payout_bps "$PAYOUT_BPS" --period_secs "$YEAR" >/dev/null
 echo "Company $COMPANY_ID registered, verified, agreement $AGREEMENT_HASH"
 
-# The owner receives the raise and pays dividends in USDC.
-stellar tx new change-trust --network "$NETWORK" --source-account "$OWNER" --line "$USDC_ASSET" >/dev/null
+# The owner receives the raise, pays the listing fee and pays dividends in USDC.
+fund_usdc "$OWNER" 400
 
-# 4. Open the raise.
+# 4. Open the raise under its exemption.
 DEADLINE=$(( $(date +%s) + DURATION_SECS ))
+case "${EXEMPTION:-regs}" in
+  regs) EX=0 ;;
+  506c) EX=1 ;;
+  *) echo "EXEMPTION must be regs or 506c" >&2; exit 1 ;;
+esac
+VERIFIER_JSON=$([ -n "${VERIFIER:-}" ] && echo "\"$(addr "$VERIFIER")\"" || echo null)
+TERMS=$(printf '{"exemption":%s,"min_ticket":"%s","max_holders":%s,"lockup_until":%s,"compliance":"%s","verifier":%s}' \
+  "$EX" "$(( ${MIN_TICKET:-0} * 10000000 ))" "${MAX_HOLDERS:-500}" "$(( DEADLINE + ${LOCKUP_SECS:-0} ))" \
+  "$(addr "${COMPLIANCE:-$OWNER}")" "$VERIFIER_JSON")
 RAISE_ID=$(invoke "$OFFERING" "$OWNER" -- open_raise --company_id "$COMPANY_ID" --token "$SHARE_SAC" \
-  --price "$PRICE" --min_raise "$((MIN * 10000000))" --max_raise "$((MAX * 10000000))" --deadline "$DEADLINE")
-echo "Raise $RAISE_ID open until $(date -d @"$DEADLINE")"
+  --price "$PRICE" --min_raise "$((MIN * 10000000))" --max_raise "$((MAX * 10000000))" --deadline "$DEADLINE" \
+  --terms "$TERMS")
+echo "Raise $RAISE_ID (${EXEMPTION:-regs}) open until $(date -d @"$DEADLINE"), lock-up until $(date -d @"$(( DEADLINE + ${LOCKUP_SECS:-0} ))")"
 
 save_var "SHARE_${CODE}" "$SHARE_SAC"
 save_var "COMPANY_${CODE}" "$COMPANY_ID"
