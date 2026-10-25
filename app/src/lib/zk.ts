@@ -1,6 +1,7 @@
 // Browser side of the residence proof. Mirrors circuits/scripts/lib.mjs and
 // the gate contract: Poseidon credential leaves, the incremental Merkle tree,
-// address hashing and the Soroban byte encodings.
+// address hashing and the Soroban byte encodings. The leaf commits to
+// Poseidon(secret), so the issuer builds it without seeing the secret.
 
 import { Address, hash as sha256, scValToNative, xdr } from "@stellar/stellar-sdk";
 import { CONTRACTS, IS_TESTNET, NETWORK, PLATFORM_SCOPE } from "./config";
@@ -43,8 +44,18 @@ export function randomSecret() {
   return bytesToBigInt(b) % FR_MODULUS;
 }
 
+/** What the investor gives the issuer: Poseidon(secret). The secret itself stays here. */
+export async function secretCommitment(secret: bigint) {
+  return (await getPoseidon())([secret]);
+}
+
+/** The leaf the issuer adds: Poseidon(country, expiry, commitment), from the country it verified. */
+export async function leafFromCommitment(country: number, expiry: number, commitment: bigint) {
+  return (await getPoseidon())([BigInt(country), BigInt(expiry), commitment]);
+}
+
 export async function credentialLeaf(country: number, expiry: number, secret: bigint) {
-  return (await getPoseidon())([BigInt(country), BigInt(expiry), secret]);
+  return leafFromCommitment(country, expiry, await secretCommitment(secret));
 }
 
 /** Same as the gate: Poseidon(hi, lo) of sha256(XDR(ScVal::Address)). */

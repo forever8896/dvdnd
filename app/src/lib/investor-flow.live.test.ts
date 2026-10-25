@@ -4,7 +4,7 @@
 import { describe, expect, it } from "vitest";
 import { contribution, eligibleUntil, gate, offering, toUnits } from "./chain";
 import { balances, buyUsdc, friendbot, Keypair, keypairSigner } from "./stellar";
-import { credentialLeaf, fetchLeaves, proveResidence, randomSecret } from "./zk";
+import { credentialLeaf, fetchLeaves, proveResidence, randomSecret, secretCommitment } from "./zk";
 
 const APP_URL = process.env.APP_URL ?? "http://localhost:3100";
 const ARTIFACTS = { wasm: "public/zk/residence.wasm", zkey: "public/zk/residence_final.zkey" };
@@ -15,27 +15,29 @@ describe.skipIf(!process.env.LIVE)("investor flow on testnet", () => {
     await friendbot(kp.publicKey());
     const signer = keypairSigner(kp);
 
+    // The issuer only gets Poseidon(secret) and builds the leaf from the country it accepted.
     const secret = randomSecret();
-    const expiry = Math.floor(Date.now() / 1000) + 365 * 86400;
-    const leaf = await credentialLeaf(620, expiry, secret);
     const res = await fetch(`${APP_URL}/api/kyc`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ leaf: leaf.toString(), country: 620, fullName: "Test Investor" }),
+      body: JSON.stringify({ commitment: (await secretCommitment(secret)).toString(), country: 620, fullName: "Test Investor" }),
     });
     const body = await res.json();
     expect(res.status, JSON.stringify(body)).toBe(200);
+    expect(body.country).toBe(620);
+    const leaf = await credentialLeaf(620, body.expiry, secret);
+    expect(body.leaf).toBe(leaf.toString());
 
     const leaves = await fetchLeaves();
     expect(leaves[body.index]).toBe(leaf);
-    const cred = { country: 620, expiry, secret: secret.toString(), leaf: leaf.toString(), index: body.index };
+    const cred = { country: 620, expiry: body.expiry, secret: secret.toString(), leaf: leaf.toString(), index: body.index };
     const proof = await proveResidence(cred, kp.publicKey(), leaves, Math.floor(Date.now() / 1000), ARTIFACTS);
     const tx = await gate.verifyAndRegister(signer, proof);
     console.log("credential", body.hash, "verified", tx.hash);
     expect(await eligibleUntil(kp.publicKey())).toBeGreaterThan(Date.now() / 1000);
 
     // Add money (XLM -> USDC path payment) and invest in the open raise.
-    const raiseId = Number(process.env.RAISE_ID ?? 3);
+    const raiseId = Number(process.env.RAISE_ID ?? 1);
     const buy = await buyUsdc(signer, 150);
     expect((await balances(kp.publicKey())).usdc).toBeGreaterThanOrEqual(150);
     const inv = await offering.invest(signer, raiseId, toUnits(100));
@@ -47,7 +49,7 @@ describe.skipIf(!process.env.LIVE)("investor flow on testnet", () => {
     const res = await fetch(`${APP_URL}/api/kyc`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ leaf: "123", country: 840, fullName: "US Person" }),
+      body: JSON.stringify({ commitment: "123", country: 840, fullName: "US Person" }),
     });
     expect(res.status).toBe(403);
   });
