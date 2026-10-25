@@ -4,8 +4,8 @@
 // Poseidon(secret), so the issuer builds it without seeing the secret.
 
 import { Address, hash as sha256, scValToNative, xdr } from "@stellar/stellar-sdk";
-import { CONTRACTS, IS_TESTNET, NETWORK, PLATFORM_SCOPE } from "./config";
-import { server } from "./stellar";
+import { CONTRACTS, NETWORK, PLATFORM_SCOPE } from "./config";
+import { read, server } from "./stellar";
 
 export const TREE_DEPTH = 16;
 export const FR_MODULUS = 21888242871839275222246405745257275088548364400416034343698204186575808495617n;
@@ -13,15 +13,6 @@ export const FR_MODULUS = 218882428718392752222464057452572750885483644004160343
 export const BLOCKED_COUNTRIES = [840, 408, 364, 192, 760];
 
 
-
-/** Leaves added by the testnet scripts (deployments/leaves.txt), in case their
- *  events have aged out of the RPC's retention window. */
-const SEED_LEAVES = !IS_TESTNET ? [] : [
-  2920813559804466193731226775655382869245818185320923264349000061924371847621n,
-  1805349285631615644189923436174968803622949138974697833619066379894756603756n,
-  1499241073423087378472867032534468444348954377796449146218886510146892296430n,
-  3870723909550316124661668125930901585586464390898142280372167990308355596900n,
-];
 
 type Hasher = (inputs: bigint[]) => bigint;
 let poseidon: Hasher | null = null;
@@ -85,19 +76,19 @@ export async function merklePath(leaves: bigint[], index: number) {
   return { path_elements, path_indices, root: level[0] ?? zeros[TREE_DEPTH]! };
 }
 
-/** All credential leaves, by index, from the gate's `credential` events. */
-export async function fetchLeaves(): Promise<bigint[]> {
+/** Leaves from the gate's `credential` events, or null if the RPC no longer holds them all. */
+async function leavesFromEvents(): Promise<bigint[] | null> {
   const latest = await server.getLatestLedger();
-  // RPC keeps about a week of events; start no earlier than it allows.
+  // RPC keeps about a week of events; if the gate is older, events alone can't rebuild the tree.
   const retentionFloor = latest.sequence - 120_000;
-  let startLedger = Math.max(NETWORK.gateFromLedger, retentionFloor);
-  const byIndex = new Map<number, bigint>(SEED_LEAVES.map((l, i) => [i, l]));
+  if (NETWORK.gateFromLedger < retentionFloor) return null;
+  const byIndex = new Map<number, bigint>();
   let cursor: string | undefined;
   for (let page = 0; page < 50; page++) {
     const res = await server.getEvents(
       cursor
         ? { cursor, filters: [{ type: "contract", contractIds: [CONTRACTS.gate] }], limit: 200 }
-        : { startLedger, filters: [{ type: "contract", contractIds: [CONTRACTS.gate] }], limit: 200 },
+        : { startLedger: NETWORK.gateFromLedger, filters: [{ type: "contract", contractIds: [CONTRACTS.gate] }], limit: 200 },
     );
     for (const e of res.events) {
       const topics = e.topic.map((t) => scValToNative(t as xdr.ScVal));
@@ -108,11 +99,47 @@ export async function fetchLeaves(): Promise<bigint[]> {
     }
     if (res.events.length < 200) break;
     cursor = res.cursor;
-    startLedger = 0;
   }
   const leaves: bigint[] = [];
   for (let i = 0; byIndex.has(i); i++) leaves.push(byIndex.get(i)!);
   return leaves;
+}
+
+/**
+ * Leaves from Horizon's history of the gate admin's `add_credential` calls,
+ * in ledger order. Horizon keeps full history on testnet (unlike the RPC's
+ * week of events); production would run its own indexer.
+ */
+export async function leavesFromHistory(): Promise<bigint[]> {
+  const admin = await read<string>(CONTRACTS.gate, "admin");
+  const leaves: bigint[] = [];
+  let url: string | null = `${NETWORK.horizonUrl}/accounts/${admin}/operations?order=asc&limit=200`;
+  for (let page = 0; url && page < 500; page++) {
+    const body = (await (await fetch(url)).json()) as {
+      _embedded?: { records: { type: string; transaction_successful?: boolean; parameters?: { value: string }[] }[] };
+      _links?: { next?: { href: string } };
+    };
+    const records = body._embedded?.records ?? [];
+    for (const op of records) {
+      if (op.type !== "invoke_host_function" || op.transaction_successful === false || !op.parameters) continue;
+      const [contract, fn, leaf] = op.parameters.map((p) => scValToNative(xdr.ScVal.fromXDR(p.value, "base64")));
+      if (contract === CONTRACTS.gate && fn === "add_credential" && leaf !== undefined) leaves.push(BigInt(leaf as bigint));
+    }
+    url = records.length === 200 ? (body._links?.next?.href ?? null) : null;
+  }
+  return leaves;
+}
+
+/** All credential leaves in index order, checked against the gate's own count. */
+export async function fetchLeaves(): Promise<bigint[]> {
+  const count = Number(await read<number>(CONTRACTS.gate, "next_index"));
+  const fromEvents = await leavesFromEvents().catch(() => null);
+  if (fromEvents && fromEvents.length === count) return fromEvents;
+  const fromHistory = await leavesFromHistory();
+  if (fromHistory.length !== count) {
+    throw new Error(`Couldn't rebuild the credential tree (found ${fromHistory.length} of ${count} credentials).`);
+  }
+  return fromHistory;
 }
 
 /** A credential the investor keeps in this browser. Never sent anywhere. */
