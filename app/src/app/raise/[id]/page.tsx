@@ -502,6 +502,12 @@ function RaisePanel({ l, onChange }: { l: Listing; onChange: () => void }) {
         </button>
       )}
 
+      {r.state === RaiseState.Succeeded && !lockedUp(r) && (
+        <Link href={`/trade/${r.id}`} className="btn btn-primary btn-block">
+          Trade on the order book
+        </Link>
+      )}
+
       {r.state === RaiseState.Succeeded && myUsdc === 0 && (
         <p className="small">
           This raise closed with {fmt(fromUnits(r.raised))} USDC raised.{" "}

@@ -150,6 +150,11 @@ export default function PortfolioPage() {
                           <td className="r num">{fmt(total * price, 2)}</td>
                           <td className="r num green">{(targetYield(h.listing) * 100).toFixed(1)}%</td>
                           <td className="r" style={{ whiteSpace: "nowrap" }}>
+                            {!lockedUp(h.listing.raise) && !h.frozen && (
+                              <Link href={`/trade/${h.listing.raise.id}`} className="btn btn-secondary btn-sm">
+                                Trade
+                              </Link>
+                            )}{" "}
                             {h.frozen && !lockedUp(h.listing.raise) && (
                               <button
                                 className="btn btn-primary btn-sm"
