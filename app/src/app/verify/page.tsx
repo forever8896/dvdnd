@@ -105,8 +105,15 @@ export default function Verify() {
     try {
       setKycLink(null);
       setStep("sharing");
-      const user = await logIn(evm.address);
-      await shareKycCredential(user);
+      const step = async <T,>(label: string, fn: () => Promise<T>) => {
+        try {
+          return await fn();
+        } catch (e) {
+          throw new Error(`${label}: ${e instanceof Error ? e.message : String(e)}`);
+        }
+      };
+      const user = await step("Signing in to idOS", () => logIn(evm.address));
+      await step("Sharing your idOS credential", () => shareKycCredential(user));
       await issueAndProve(investor, (commitment) =>
         fetch("/api/idos/credential", {
           method: "POST",
