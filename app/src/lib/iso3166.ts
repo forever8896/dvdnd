@@ -1,5 +1,5 @@
 // ISO 3166-1 alpha-2 → [alpha-3, numeric, name], generated from Debian's
-// iso-codes package. Used to read country codes from KYC credentials.
+// iso-codes package (common names, a few shortened). Used to read country codes from KYC credentials.
 
 export const ISO_3166: Record<string, [string, number, string]> = {
   AD: ["AND", 20, "Andorra"],
@@ -29,7 +29,7 @@ export const ISO_3166: Record<string, [string, number, string]> = {
   BJ: ["BEN", 204, "Benin"],
   BL: ["BLM", 652, "Saint Barthélemy"],
   BM: ["BMU", 60, "Bermuda"],
-  BN: ["BRN", 96, "Brunei Darussalam"],
+  BN: ["BRN", 96, "Brunei"],
   BO: ["BOL", 68, "Bolivia"],
   BQ: ["BES", 535, "Bonaire, Sint Eustatius and Saba"],
   BR: ["BRA", 76, "Brazil"],
@@ -41,9 +41,9 @@ export const ISO_3166: Record<string, [string, number, string]> = {
   BZ: ["BLZ", 84, "Belize"],
   CA: ["CAN", 124, "Canada"],
   CC: ["CCK", 166, "Cocos (Keeling) Islands"],
-  CD: ["COD", 180, "Congo, The Democratic Republic of the"],
+  CD: ["COD", 180, "DR Congo"],
   CF: ["CAF", 140, "Central African Republic"],
-  CG: ["COG", 178, "Congo"],
+  CG: ["COG", 178, "Republic of the Congo"],
   CH: ["CHE", 756, "Switzerland"],
   CI: ["CIV", 384, "Côte d'Ivoire"],
   CK: ["COK", 184, "Cook Islands"],
@@ -74,7 +74,7 @@ export const ISO_3166: Record<string, [string, number, string]> = {
   FI: ["FIN", 246, "Finland"],
   FJ: ["FJI", 242, "Fiji"],
   FK: ["FLK", 238, "Falkland Islands (Malvinas)"],
-  FM: ["FSM", 583, "Micronesia, Federated States of"],
+  FM: ["FSM", 583, "Micronesia"],
   FO: ["FRO", 234, "Faroe Islands"],
   FR: ["FRA", 250, "France"],
   GA: ["GAB", 266, "Gabon"],
@@ -184,7 +184,7 @@ export const ISO_3166: Record<string, [string, number, string]> = {
   PM: ["SPM", 666, "Saint Pierre and Miquelon"],
   PN: ["PCN", 612, "Pitcairn"],
   PR: ["PRI", 630, "Puerto Rico"],
-  PS: ["PSE", 275, "Palestine, State of"],
+  PS: ["PSE", 275, "Palestine"],
   PT: ["PRT", 620, "Portugal"],
   PW: ["PLW", 585, "Palau"],
   PY: ["PRY", 600, "Paraguay"],
@@ -192,7 +192,7 @@ export const ISO_3166: Record<string, [string, number, string]> = {
   RE: ["REU", 638, "Réunion"],
   RO: ["ROU", 642, "Romania"],
   RS: ["SRB", 688, "Serbia"],
-  RU: ["RUS", 643, "Russian Federation"],
+  RU: ["RUS", 643, "Russia"],
   RW: ["RWA", 646, "Rwanda"],
   SA: ["SAU", 682, "Saudi Arabia"],
   SB: ["SLB", 90, "Solomon Islands"],
@@ -237,7 +237,7 @@ export const ISO_3166: Record<string, [string, number, string]> = {
   US: ["USA", 840, "United States"],
   UY: ["URY", 858, "Uruguay"],
   UZ: ["UZB", 860, "Uzbekistan"],
-  VA: ["VAT", 336, "Holy See (Vatican City State)"],
+  VA: ["VAT", 336, "Vatican City"],
   VC: ["VCT", 670, "Saint Vincent and the Grenadines"],
   VE: ["VEN", 862, "Venezuela"],
   VG: ["VGB", 92, "Virgin Islands, British"],

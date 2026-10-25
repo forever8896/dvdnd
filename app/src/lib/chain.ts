@@ -4,6 +4,7 @@ import { Address, nativeToScVal, xdr } from "@stellar/stellar-sdk";
 import { Buffer } from "buffer";
 import { CONTRACTS, UNIT } from "./config";
 import { invoke, read, type Signer } from "./stellar";
+import { ISO_3166 } from "./iso3166";
 
 // ── ScVal helpers ─────────────────────────────────────────────────────
 export const sc = {
@@ -264,20 +265,15 @@ export function displayStatus(r: Raise, now = Date.now() / 1000): DisplayStatus 
   return r.raised >= r.min_raise ? "Funded" : "Open";
 }
 
-export const ISO_COUNTRIES: Record<number, { name: string; cc: string }> = {
-  620: { name: "Portugal", cc: "PT" },
-  152: { name: "Chile", cc: "CL" },
-  233: { name: "Estonia", cc: "EE" },
-  404: { name: "Kenya", cc: "KE" },
-  250: { name: "France", cc: "FR" },
-  276: { name: "Germany", cc: "DE" },
-  724: { name: "Spain", cc: "ES" },
-  484: { name: "Mexico", cc: "MX" },
-  76: { name: "Brazil", cc: "BR" },
-  566: { name: "Nigeria", cc: "NG" },
-  826: { name: "United Kingdom", cc: "GB" },
-  840: { name: "United States", cc: "US" },
-};
+/** Every ISO 3166-1 country, keyed by its numeric code (what the circuit and contracts use). */
+export const ISO_COUNTRIES: Record<number, { name: string; cc: string }> = Object.fromEntries(
+  Object.entries(ISO_3166).map(([cc, [, numeric, name]]) => [numeric, { name, cc }]),
+);
+
+/** Countries for pickers, A to Z. */
+export const COUNTRY_OPTIONS = Object.entries(ISO_COUNTRIES)
+  .map(([code, c]) => ({ code: Number(code), ...c }))
+  .sort((a, b) => a.name.localeCompare(b.name));
 
 export const countryName = (n: number) => ISO_COUNTRIES[n]?.name ?? `Country ${n}`;
 export const countryCode = (n: number) => ISO_COUNTRIES[n]?.cc ?? "··";

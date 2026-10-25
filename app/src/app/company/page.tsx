@@ -11,7 +11,7 @@ import {
   dividendPool,
   errorText,
   fromUnits,
-  ISO_COUNTRIES,
+  COUNTRY_OPTIONS,
   offering,
   parseProfile,
   pool,
@@ -129,13 +129,11 @@ function DetailsStep({ onDone }: { onDone: () => Promise<void> }) {
         <span>Country of incorporation</span>
         <span className="input-wrap">
           <select id="country" value={f.country} onChange={(e) => set("country")(e.target.value)} style={{ flex: 1, font: "14px var(--font-sans)", background: "transparent", border: 0, padding: "9px 10px", color: "var(--text)" }}>
-            {Object.entries(ISO_COUNTRIES)
-              .filter(([c]) => c !== "840")
-              .map(([code, c]) => (
-                <option key={code} value={code}>
-                  {c.name}
-                </option>
-              ))}
+            {COUNTRY_OPTIONS.filter((c) => c.code !== 840).map((c) => (
+              <option key={c.code} value={c.code}>
+                {c.name}
+              </option>
+            ))}
           </select>
         </span>
       </label>

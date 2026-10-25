@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ShieldCheck } from "@/components/icons";
 import { EligibilityPill, Toast, TxLink } from "@/components/ui";
-import { countryName, gate, ISO_COUNTRIES } from "@/lib/chain";
+import { COUNTRY_OPTIONS, countryName, gate } from "@/lib/chain";
 import { IDOS_ENABLED, IS_TESTNET } from "@/lib/config";
 import { ENCLAVE_CONTAINER, hasProfile, logIn, shareKycCredential } from "@/lib/idos-client";
 import type { Signer } from "@/lib/stellar";
@@ -275,8 +275,8 @@ export default function Verify() {
                     onChange={(e) => setCountry(Number(e.target.value))}
                     style={{ flex: 1, font: "14px var(--font-sans)", background: "transparent", border: 0, padding: "9px 10px", color: "var(--text)" }}
                   >
-                    {Object.entries(ISO_COUNTRIES).map(([code, c]) => (
-                      <option key={code} value={code}>
+                    {COUNTRY_OPTIONS.map((c) => (
+                      <option key={c.code} value={c.code}>
                         {c.name}
                       </option>
                     ))}
