@@ -1,0 +1,13 @@
+{
+  "name": "dvdnd-film-globe",
+  "private": true,
+  "type": "module",
+  "description": "Renders the landing film's globe segment to frames (build-time tool, not part of the app).",
+  "scripts": {
+    "render": "node render.mjs"
+  },
+  "dependencies": {
+    "playwright-core": "1.47.2",
+    "three": "0.160.0"
+  }
+}
