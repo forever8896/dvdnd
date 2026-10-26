@@ -58,7 +58,7 @@ export default function DocsHome() {
           </ul>
         }
       />
-      <Clip name="invest" caption="An eligible investor commits 100 USDC to Northline Fitness. Add money swaps test XLM for USDC on Stellar's DEX; the USDC then waits in escrow." />
+      <Clip name="lifecycle" caption="The whole lifecycle on testnet, using the demo switcher: Lumen Coffee Roasters opens a ten-minute raise, Ana and Chloé fill it, the company closes it and is paid, Ana's tokens go into the vault, the company pays a dividend and Ana claims it." />
       <Callout title="Everything here is live on testnet">
         The clips on these pages were recorded on the deployed app against Stellar testnet. Every transaction they show is
         on the explorer, and the full log of demo transactions is in{" "}

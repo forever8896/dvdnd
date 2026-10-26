@@ -20,6 +20,7 @@ export default function Investing() {
           { title: "Claim tokens or a refund", body: <><Fn>claim_tokens</Fn> mints exactly contribution ÷ price. It is the only way tokens are ever minted. During a lock-up they go straight into the dividend vault.</> },
         ]}
       />
+      <Clip name="life-close" caption="The raise is full, so the company closes it straight away and receives the money. The investor then claims tokens, which go into the dividend vault during the lock-up." />
       <Aspects
         chain={
           <ul>

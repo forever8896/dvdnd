@@ -60,7 +60,7 @@ log("company: Lumen Coffee Roasters");
     sector: "Coffee roasting",
     city: "Porto",
     description: "Speciality coffee roaster supplying cafés across northern Portugal, with a roastery bar in Porto. Profitable since 2019.",
-    netProfit: 2400,
+    netProfit: 400,
   });
   // The platform's verifier records the ownership check directly. A demo company has no real domain, so it
   // lists no website and the raise page shows no domain badge.
@@ -93,3 +93,6 @@ const env = readFileSync(file, "utf8").split("\n").filter((l) => !l.startsWith("
 writeFileSync(file, [...env.filter((l, i) => l || i < env.length - 1), line, ""].join("\n"));
 log(`saved ${personas.length} personas to app/${file} as DEMO_PERSONAS (restart the dev server to load them)`);
 for (const p of personas) log(`${p.id}: ${Keypair.fromSecret(p.secret).publicKey()}`);
+
+// snarkjs leaves worker threads running; exit once everything is saved.
+process.exit(0);

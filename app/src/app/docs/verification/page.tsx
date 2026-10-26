@@ -12,7 +12,7 @@ export default function Verification() {
         credential; their browser proves a fact about that credential with a zero-knowledge proof; and a Stellar contract
         verifies the proof.
       </p>
-      <Clip name="verify-start" caption="Signing in with a testnet demo wallet leads straight to the eligibility page. The identity check itself runs on Didit's own pages." />
+      <Clip name="verify-start" caption="Sign in as an investor, say where you live, and start the identity check. US residents are sent to the accredited route instead. The check itself runs on Didit's own pages." />
       <Steps
         items={[
           {

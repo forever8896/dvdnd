@@ -10,11 +10,12 @@ export default function Companies() {
         A company goes from sign-up to an open raise in three steps: register, prove it owns the business, and sign
         the profit-share agreement. Then it sets the terms of its raise and pays a flat listing fee.
       </p>
-      <Clip name="company-onboard" caption="A new company registers on Stellar, then gets the DNS record that proves it controls its domain." />
+      <Clip name="company-onboard" caption="A company types its name, picks itself from France's business register, and the details fill in: city, sector, founding year, headcount and filed accounts. It adds its website and registers on Stellar." />
       <Steps
         items={[
-          { title: "Register", body: <>Name, country, sector, website, last year&apos;s net profit and a description go into the <code>registry</code> contract. The status starts as Pending.</> },
-          { title: "Verify ownership", body: <>The company adds a TXT record <code>dvdnd-verify=&lt;id&gt;:&lt;owner&gt;</code> to its domain; dvdnd checks it over DNS-over-HTTPS. A company with an LEI is also matched against the GLEIF registry. The evidence hash is stored and the company becomes Verified.</> },
+          { title: "Find the company", body: <>A search across public business registers: France, Norway, Finland, Czechia, Denmark, the UK, and GLEIF worldwide. Picking the company fills in its details from the register, and any LEI from GLEIF.</> },
+          { title: "Register", body: <>Name, country, sector, website, last year&apos;s net profit, a description and the register entry go into the <code>registry</code> contract. The status starts as Pending.</> },
+          { title: "Verify ownership", body: <>The company adds a TXT record <code>dvdnd-verify=&lt;id&gt;:&lt;owner&gt;</code> to its domain; dvdnd checks it over DNS-over-HTTPS. The register entry is looked up again at the source (active, same name, same country), and an LEI is matched against GLEIF. The evidence hash is stored and the company becomes Verified.</> },
           { title: "Sign the agreement", body: <>The owner signs the profit-share agreement: the share of profit committed and the payout schedule. Its sha256 is recorded with <Fn>sign_agreement</Fn> and the company becomes Active.</> },
           { title: "Open the raise", body: <>Target yield, maximum, minimum, deadline, the exemption, lock-up, holder cap, minimum ticket and compliance account. Publishing issues the share token with its compliance flags, hands its admin to the offering contract and pays the listing fee.</> },
         ]}
