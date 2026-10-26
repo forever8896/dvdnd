@@ -58,6 +58,8 @@ export default function RaiseSetup() {
   const [acceptVerifier, setAcceptVerifier] = useState(true);
   const [log, setLog] = useState<{ step: string; tx?: TxResult }[]>([]);
   const [busy, setBusy] = useState(false);
+  // The issued share token, kept so a retry or the wallet approval doesn't issue a second one.
+  const [issued, setIssued] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   if (!me) return <Gate text="Sign in as a company first." href="/signin" cta="Sign in" />;
@@ -88,14 +90,25 @@ export default function RaiseSetup() {
   async function publish() {
     setBusy(true);
     setError(null);
-    setLog([]);
     const push = (step: string, tx?: TxResult) => setLog((l) => [...l, { step, tx }]);
     try {
-      const { token, issuerSecret } = await issueShareToken(assetCode(company.name), push, me!);
-      try {
-        localStorage.setItem(`dvdnd.issuer.${token}`, issuerSecret);
-      } catch {
-        /* the issuer key is only needed for classic admin actions */
+      let token = issued;
+      if (!token) {
+        setLog([]);
+        const res = await issueShareToken(assetCode(company.name), push, me!);
+        token = res.token;
+        setIssued(token);
+        try {
+          localStorage.setItem(`dvdnd.issuer.${token}`, res.issuerSecret);
+        } catch {
+          /* the issuer key is only needed for classic admin actions */
+        }
+        // External wallets approve in a popup, and browsers block popups that don't follow a click.
+        if (me!.kind === "external") {
+          push(`Share token ready. Approve the raise in ${me!.label}.`);
+          setBusy(false);
+          return;
+        }
       }
       push("Opening the raise");
       const deadline = Math.floor(Date.now() / 1000) + Math.round(Number(days) * unitSecs);
@@ -227,7 +240,7 @@ export default function RaiseSetup() {
           </p>
           {usdc < fee && <AddMoney signer={me} suggested={Math.ceil(fee - usdc + 1)} onDone={refresh} />}
           <button className="btn btn-primary btn-block" onClick={publish} disabled={!valid || busy}>
-            {busy ? "Publishing…" : "Issue token and open raise"}
+            {busy ? "Publishing…" : issued ? `Approve in ${me.label} and open raise` : "Issue token and open raise"}
           </button>
           {log.length > 0 && (
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
