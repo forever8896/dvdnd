@@ -272,7 +272,7 @@ function DetailsStep({ found, onBack, onDone }: { found: RegistryRecord | null; 
         </motion.label>
         <motion.label className="field" {...field(3)}>
           <span>Sector {tag("sector")}</span>
-          <span className="input-wrap"><input id="sector" value={f.sector} onChange={(e) => set("sector")(e.target.value)} placeholder="e.g. Bakery" /></span>
+          <span className="input-wrap"><input id="sector" value={f.sector} onChange={(e) => set("sector")(e.target.value)} placeholder="e.g. Automotive parts" /></span>
         </motion.label>
         <motion.label className="field" {...field(4)}>
           <span>City {tag("city")}</span>

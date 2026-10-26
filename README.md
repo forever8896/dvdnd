@@ -140,7 +140,7 @@ This creates fresh testnet personas and saves their keys to `app/.env.local` as 
 
 | Persona | Ready for |
 |---|---|
-| Lumen Coffee Roasters | Verified company with a signed agreement, ready to open a raise |
+| Corvo Precision Parts | Verified automotive-parts maker with a signed agreement, ready to open a raise |
 | Ana Ribeiro (Portugal), Chloé Wagner (Germany) | Eligible under Reg S, 1,500 USDC each |
 | Ben Carter (United States) | Verified accredited investor for 506(c) raises, 1,500 USDC |
 
