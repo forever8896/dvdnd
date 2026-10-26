@@ -313,6 +313,9 @@ function DetailsStep({ found, onBack, onDone }: { found: RegistryRecord | null; 
           <button type="button" className="btn btn-link" onClick={onBack} disabled={busy}>
             ← Search again
           </button>
+          {!busy && (!f.name.trim() || !f.website.trim()) && (
+            <span className="small">Add {!f.name.trim() ? "the company name" : "your website"} to continue.</span>
+          )}
         </motion.div>
         {error && <Toast kind="error" title="Registration failed">{error}</Toast>}
       </form>
