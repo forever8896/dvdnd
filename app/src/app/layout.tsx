@@ -22,7 +22,7 @@ const description =
   "Own a share of real, profitable businesses and get paid dividends in USDC. Tokenized private equity on Stellar.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(`https://${process.env.NEXT_PUBLIC_SITE_DOMAIN ?? "dvdnd.vercel.app"}`),
+  metadataBase: new URL(`https://${process.env.NEXT_PUBLIC_SITE_DOMAIN ?? "dvdnd.app"}`),
   title: { default: "dvdnd", template: "%s · dvdnd" },
   description,
   openGraph: { title: "dvdnd", description, siteName: "dvdnd", type: "website" },

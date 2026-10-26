@@ -5,7 +5,7 @@
 //   cd app && npx tsx --conditions=react-server --env-file=.env.local ../scripts/testnet/demo-personas.mts
 //
 // Personas:
-//   company  Lumen Coffee Roasters: registered, verified and agreement signed,
+//   company  Corvo Precision Parts: registered, verified and agreement signed,
 //            ready to open a raise (use minutes on testnet).
 //   ana      Portugal. Eligible under Reg S (credential + zero-knowledge proof).
 //   chloe    Germany. Eligible under Reg S.
@@ -52,14 +52,14 @@ async function regS(country: number, usdc: number) {
 
 const personas: Persona[] = [];
 
-log("company: Lumen Coffee Roasters");
+log("company: Corvo Precision Parts");
 {
   const { kp, s } = await wallet(400);
-  const name = "Lumen Coffee Roasters";
+  const name = "Corvo Precision Parts";
   const { id } = await register(s, name, 620, {
-    sector: "Coffee roasting",
-    city: "Porto",
-    description: "Speciality coffee roaster supplying cafés across northern Portugal, with a roastery bar in Porto. Profitable since 2019.",
+    sector: "Automotive parts",
+    city: "Braga",
+    description: "CNC-machined and stamped steel parts for tier-1 automotive suppliers in Portugal and Spain. Two plants in Braga, profitable since 2016.",
     netProfit: 400,
   });
   // The platform's verifier records the ownership check directly. A demo company has no real domain, so it

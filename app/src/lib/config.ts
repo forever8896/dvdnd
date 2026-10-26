@@ -56,7 +56,7 @@ export const NETWORK = {
 };
 
 /** Domain serving /.well-known/stellar.toml; set as each share-token issuer's home_domain. */
-export const SITE_DOMAIN = process.env.NEXT_PUBLIC_SITE_DOMAIN ?? "dvdnd.vercel.app";
+export const SITE_DOMAIN = process.env.NEXT_PUBLIC_SITE_DOMAIN ?? "dvdnd.app";
 
 export const CONTRACTS = {
   registry: process.env.NEXT_PUBLIC_REGISTRY || P.contracts.registry,

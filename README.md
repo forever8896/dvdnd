@@ -1,81 +1,143 @@
-# dvdnd
+<p align="center">
+  <img src="app/public/brand/dvdnd-wordmark.svg" alt="dvdnd" width="240">
+</p>
 
-**Own a share of real, profitable businesses. Get paid in dollars.**
+<h3 align="center">Own a share of real, profitable businesses. Get paid in dollars.</h3>
 
-dvdnd is tokenized private equity on Stellar. Profitable small and mid-sized businesses raise USDC at a fixed price by selling a share of their future profits. Investors who lock their tokens for a full period receive that period's dividends in USDC, pro-rata. Each raise runs under a securities exemption: **Reg S** (investors prove with a zero-knowledge proof that they live outside the US), **Reg D 506(c)** (verified accredited investors, US residents included), or both side by side. The Stellar protocol itself then limits holding the token to eligible investors.
+<p align="center">
+  Tokenized private equity on Stellar: fixed-price USDC raises, investors who prove eligibility without revealing who they are, and dividends paid from real profit.
+</p>
 
-**Live demo (Stellar testnet): https://dvdnd.vercel.app** · [Docs](https://dvdnd.vercel.app/docs)
+<p align="center">
+  <a href="https://dvdnd.app"><b>Live demo</b></a> ·
+  <a href="https://dvdnd.app/docs"><b>Docs</b></a> ·
+  <a href="https://www.dvdnd.app/clips/lifecycle.mp4"><b>Watch the 2-minute film</b></a> ·
+  <a href="deployments/evidence.md">On-chain evidence</a>
+</p>
 
-Built for HackMeridian · Genesis track · Stellar Unlocked.
+<p align="center">
+  <a href="https://www.dvdnd.app/clips/lifecycle.mp4"><img src="docs/readme/film.jpg" alt="The dvdnd lifecycle film: a company raises, investors prove eligibility and invest, profits come back as dividends" width="860"></a>
+</p>
 
-## The problem
+<p align="center"><sub>Built for HackMeridian · Genesis track · Stellar Unlocked. Running on Stellar testnet.</sub></p>
 
-Sophisticated capital keeps moving from public markets into private, cash-flowing businesses, but ordinary investors can't get in. Crypto's answer so far has been the memecoin launchpad:
-- About 1% of pump.fun tokens ever graduate (0.63% in Sep 2025, 1.89% lifetime to May 2026).
-- About 60% of active wallets lost money over six months.
-- Bonding curves let the first buyer pay up to 14.7× less than the last.
+## Why
 
-Real businesses, meanwhile, struggle to raise growth capital without giving up control or taking on debt.
+Capital keeps moving from public markets into private, cash-flowing businesses, but ordinary investors can't follow it. Crypto's answer so far has been the memecoin launchpad, where about 1% of tokens ever graduate and early buyers pay up to 14.7× less than later ones. Meanwhile established manufacturers and suppliers struggle to raise growth capital without giving up control or taking on debt.
 
-## How dvdnd works
+dvdnd connects the two: a company sells a share of its future profit at one fixed price, and only verified investors can ever hold it. Money reaches the company once, at the raise, and comes back to holders as USDC dividends. No bonding curve, no sniper advantage, no buyback. [How dvdnd works →](https://dvdnd.app/docs)
 
-1. **A company signs up.** It proves it owns the business (domain check, plus GLEIF when it has an LEI) and signs an agreement committing X% of yearly net profit to token holders. The agreement's hash is recorded on-chain.
-2. **The company opens a fixed-price raise** and pays a flat listing fee. It sets a price (for example 1.00 USDC per token, set from a target yield), a minimum, a maximum and a deadline, plus the raise's rules: exemption (Reg S, 506(c) or both), minimum investment, holder cap, lock-up date, and who holds the compliance role (the company or its transfer agent).
-3. **Eligible investors put USDC into escrow.**
-   - **Reg S:** identity checked once through Didit (ID document and live selfie), then a zero-knowledge proof of non-US residence verified on-chain.
-   - **506(c):** a signed accreditation statement on-chain (as a person or an entity), plus either a verifier's attestation or at least 200,000 USDC invested, 1,000,000 for an entity (the SEC staff's March 2025 route).
-   - **Both:** proven non-US residents invest under Reg S, everyone else (including US residents) as accredited investors.
-   - If the minimum is reached, the company receives everything raised and investors claim their tokens. If it isn't, everyone is refunded.
-4. **Lock-up, then trading between eligible holders.** Until the lock-up date, claimed tokens sit in the dividend vault, earning, and the holder's wallet is frozen. Afterwards, holders release them and trade only with other eligible holders, on Stellar's order book and through path payments.
-5. **Dividends.**
-   - Holders lock tokens in the vault.
-   - At the end of each period the company pays X% of its profit in USDC.
-   - Only tokens locked for the whole period share it, so locking right before a payout earns nothing.
+## How it works
 
-Money flows to the company once, at the raise, and back to holders as dividends from real profits. There is no bonding curve, no sniper advantage and no company buyback.
+### 1. Your profit, on the record
 
-## What's real
+A company finds itself in the public business registers (France, Norway, Finland, Czechia, Denmark, the UK, and GLEIF worldwide) and the details fill in. It proves it controls its domain with one DNS record and signs an agreement committing a share of its profit to token holders; the agreement's hash goes on-chain.
 
-- **Identity:** a hosted Didit check (ID document, liveness, face match) behind our own issuer, with only a Stellar wallet. The Didit session is deleted once the investor's proof is registered on Stellar.
-- **Privacy:** a Groth16 proof of non-US residence, verified on-chain with Stellar's BN254 and Poseidon host functions. Keys come from a recorded ceremony.
-- **Sanctions:** wallets screened against OFAC's published crypto addresses.
-- **Securities rules in the contract:** Reg S, Reg D 506(c) or both per raise; minimum ticket, holder cap and a lock-up enforced on-chain; per-raise compliance with recorded reasons and an audit log.
-- **Governance:** a 2-of-3 council multisig (master key disabled) holds the admin roles.
-- **Companies:** DNS and GLEIF ownership checks, and an agreement anyone can verify against its on-chain hash.
+<img src="docs/readme/onboard.gif" alt="A company finds itself in the French register and its details fill in" width="760">
 
-## Compliance model
+[Listing a company →](https://dvdnd.app/docs/companies)
 
-dvdnd aims to be open compliance software, not a broker (draft strategy, not legal advice):
-- **No transaction-based pay.** A flat listing fee per raise, never a share of what is raised (Securities Act §4(b)).
-- **No control over investor money.** Escrowed USDC can only go to the company on success or back to investors on failure.
-- **Gatekeeping per raise.** Each raise names its own compliance account, which alone can freeze, unfreeze or claw back, with a recorded reason.
-- **Rules in the contract:** exemption-specific eligibility, the Reg D one-year lock-up (Rule 144), and a holder cap under the §12(g) trigger.
+### 2. One price. All or nothing.
 
-## Why Stellar (Stellar Unlocked)
+The company opens a raise at a fixed price per token, with a minimum, a maximum and a deadline, under Reg S, Rule 506(c) or both. Investors' USDC waits in escrow: if the minimum is reached the company receives everything, otherwise everyone is refunded. dvdnd charges a flat listing fee, never a share of what is raised.
+
+<img src="docs/readme/invest.gif" alt="An investor commits 600 USDC to a raise" width="760">
+
+[Investing in a raise →](https://dvdnd.app/docs/investing)
+
+### 3. Prove where you live. Reveal nothing else.
+
+Investors pass one identity check with Didit. Their browser then builds a Groth16 zero-knowledge proof that they live outside the US, which a Soroban contract verifies with Stellar's BN254 and Poseidon host functions. Stellar learns that they're eligible, not who they are; the Didit session is deleted once the proof is on-chain. US residents take the accredited-investor route instead.
+
+<img src="docs/readme/prove.gif" alt="The browser generates a zero-knowledge proof and Stellar verifies it" width="760">
+
+[Proving eligibility →](https://dvdnd.app/docs/verification)
+
+### 4. Paid to the patient.
+
+During the lock-up, claimed tokens sit in the dividend vault, earning. At the end of each period the company pays its committed share of profit in USDC, split among tokens locked for the whole period, so locking just before a payout earns nothing.
+
+<img src="docs/readme/dividend.gif" alt="The company pays a dividend and the investor claims it" width="760">
+
+[Lock-up and dividends →](https://dvdnd.app/docs/dividends)
+
+### 5. A free market, among the eligible.
+
+After the lock-up, holders trade on Stellar's order book. Each share token is issued with `AUTH_REQUIRED`, `AUTH_REVOCABLE` and `AUTH_CLAWBACK_ENABLED`, so the protocol itself refuses a transfer to any wallet the offering hasn't authorized, on every venue.
+
+<img src="docs/readme/trade.jpg" alt="Trading share tokens on Stellar's order book" width="760">
+
+[Trading between holders →](https://dvdnd.app/docs/trading)
+
+### 6. Every action leaves a reason.
+
+Each raise names its own compliance account, the company or its transfer agent, which alone can freeze, unfreeze or claw back, always with a recorded reason in an audit log anyone can read.
+
+<img src="docs/readme/compliance.jpg" alt="The compliance page: holders, lock-up status and the audit log" width="760">
+
+[Compliance controls →](https://dvdnd.app/docs/compliance)
+
+## No cut. No custody. No gatekeeper.
+
+dvdnd is designed as compliance software rather than a broker (a draft strategy, not legal advice). It takes a flat fee per raise and no transaction-based pay. It never controls investor money: escrowed USDC can only go to the company on success or back to investors on failure. The rules live in the contract: exemption-specific eligibility, the Reg D one-year lock-up and a holder cap below the §12(g) trigger. [Legal model →](https://dvdnd.app/docs/legal)
+
+## Why Stellar
 
 | Protocol feature | How dvdnd uses it |
 |---|---|
-| **BN254 host functions** (CAP-74/80) | The `gate` contract verifies a Groth16 proof of non-US residence on-chain (`g1_msm` + `pairing_check`), about 30M CPU instructions. |
-| **Poseidon host function** (CAP-75) | The `gate` keeps the KYC credential Merkle tree on-chain and hashes the investor's address into the proof, matching circomlib's Poseidon. |
-| **Classic asset flags** | Each share token is issued with `AUTH_REQUIRED \| AUTH_REVOCABLE \| AUTH_CLAWBACK_ENABLED`, so the protocol rejects transfers to anyone not verified, on every venue. |
-| **Stellar Asset Contract** | The `offering` contract is the share token's SAC admin. It mints exactly what was sold, authorizes verified holders and can never mint again. |
-| **Path payments + DEX** | Investors pay with XLM and receive Circle USDC in one operation. Secondary trading runs on the order book. |
+| **BN254 host functions** (CAP-74/80) | The `gate` contract verifies a Groth16 proof of non-US residence on-chain (`g1_msm` + `pairing_check`). |
+| **Poseidon host function** (CAP-75) | The `gate` keeps the credential Merkle tree on-chain and binds the investor's address into the proof. |
+| **Classic asset flags** | Share tokens can only be held by wallets the offering authorized, on every venue. |
+| **Stellar Asset Contract** | The `offering` contract is the token's admin: it mints exactly what was sold and can never mint again. |
+| **Path payments + DEX** | Investors pay with XLM and receive USDC in one operation; secondary trading runs on the order book. |
 
-## Repository
+Five Soroban contracts (`registry`, `gate`, `offering`, `vault`, `timelock`) are administered by a 2-of-3 council multisig behind a timelock. [Contracts and governance →](https://dvdnd.app/docs/governance) · [Architecture](ARCHITECTURE.md)
 
-| Path | Contents |
-|---|---|
-| [`contracts/`](contracts/) | Soroban contracts: `registry`, `gate`, `offering`, `vault`, `timelock` (Rust, soroban-sdk 28) |
-| [`circuits/`](circuits/) | Circom residence circuit, trusted-setup scripts and browser/Node prover |
-| [`scripts/testnet/`](scripts/testnet/) | Deploy and end-to-end demo scripts |
-| [`deployments/`](deployments/) | Testnet contract IDs and [transaction evidence](deployments/evidence.md) |
-| [`app/`](app/) | Next.js web app: investor and company flows wired to the testnet contracts |
-| [`docs/`](docs/) | Design brief |
-| [`research_notes/`](research_notes/), [`reports/`](reports/) | Research behind the design |
+## Try it
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for how the pieces fit together.
+Open **[dvdnd.app](https://dvdnd.app)**. On testnet, the **Demo** menu switches in one click between a ready company (Corvo Precision Parts, an automotive-parts maker) and verified investors in Portugal, Germany and the US, and raises can run in minutes, so a full raise, lock-up and dividend fit in one sitting. You can also connect your own Stellar wallet (xBull, Freighter, Lobstr…) and go through the real identity check.
 
-## Testnet deployment
+<details>
+<summary><b>Run it locally</b></summary>
+
+Requirements: Rust 1.84+ with the `wasm32v1-none` target, [Stellar CLI](https://developers.stellar.org/docs/tools/cli) 28+, Node 20+, pnpm, and circom 2.2 (only to rebuild the circuit).
+
+```sh
+cd contracts && cargo test && stellar contract build      # contracts
+cd ../circuits && pnpm install && pnpm fixture            # circuit: sample proof, verified off-chain
+cd ../app && cp .env.example .env.local && pnpm install && pnpm dev
+```
+
+In `app/.env.local`, set `DVDND_ADMIN_SECRET` (the testnet platform key: `stellar keys show admin`) and, for the identity check, `DIDIT_API_KEY`, `DIDIT_WORKFLOW_ID` and `NEXT_PUBLIC_DIDIT_ENABLED=1`. Contract IDs and endpoints default to testnet (`app/src/lib/config.ts`).
+
+Fresh demo personas, saved to `app/.env.local` as `DEMO_PERSONAS` (run before each demo for a clean slate):
+
+```sh
+cd app && npx tsx --conditions=react-server --env-file=.env.local ../scripts/testnet/demo-personas.mts
+```
+
+Live tests against testnet, with the app running: `LIVE=1 APP_URL=http://localhost:3000 pnpm vitest run` in `app/`.
+</details>
+
+<details>
+<summary><b>Deploy the contracts and run the scripted demo</b></summary>
+
+```sh
+for k in admin treasury company-andes issuer-andes investor-ana investor-ben; do
+  stellar keys generate $k --network testnet --fund
+done
+scripts/testnet/council.sh                                  # 2-of-3 council
+scripts/testnet/deploy.sh                                   # deploy the contracts
+scripts/testnet/demo-company.sh ANDES company-andes issuer-andes \
+  "Andes Components" 152 5000 300 1000 259200               # issue token, verify, sign, open a Reg S raise
+scripts/testnet/demo-investor.sh investor-ana 620 800       # Portugal: credential, ZK proof, USDC
+scripts/testnet/demo-investor.sh investor-ben 276 600       # Germany
+scripts/testnet/demo-lifecycle.sh ANDES company-andes investor-ana 600 investor-ben 400 80
+```
+</details>
+
+<details>
+<summary><b>Testnet contracts</b></summary>
 
 | Contract | ID |
 |---|---|
@@ -86,97 +148,22 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for how the pieces fit together.
 | timelock | [`CCHX6UXEPIXLRALJIK2JZWCQ3OLQER7HYOGFVYYYSOP2UJERLEEEGCGZ`](https://stellar.expert/explorer/testnet/contract/CCHX6UXEPIXLRALJIK2JZWCQ3OLQER7HYOGFVYYYSOP2UJERLEEEGCGZ) |
 | USDC (Circle testnet) | [`CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA`](https://stellar.expert/explorer/testnet/contract/CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA) |
 
-A complete cycle ran on testnet: ZK eligibility, raise, flat listing fee, token claims straight into the vault under lock-up, and an 80 USDC dividend split 60/40 by locked amount. The lock-up was checked on-chain: the frozen wallet can't unlock or move tokens. Every transaction link is in [deployments/evidence.md](deployments/evidence.md).
+Every transaction of a complete testnet cycle (ZK eligibility, raise, listing fee, claims into the vault under lock-up, a dividend split by locked amount) is linked in [deployments/evidence.md](deployments/evidence.md).
+</details>
 
-## Setup
+## Repository
 
-Requirements: Rust 1.84+ with the `wasm32v1-none` target, [Stellar CLI](https://developers.stellar.org/docs/tools/cli) 28+, Node 20+, pnpm, and circom 2.2 (only to rebuild the circuit).
-
-```sh
-# Contracts: tests and wasm
-cd contracts
-cargo test
-stellar contract build
-
-# Circuit dependencies and prover
-cd ../circuits
-pnpm install
-pnpm fixture            # build a sample proof and verify it off-chain
-
-# Web app
-cd ../app
-pnpm install
-pnpm dev
-```
-
-## Run the demo on testnet
-
-```sh
-# Funded testnet identities
-for k in admin treasury company-andes issuer-andes company-harbor issuer-harbor investor-ana investor-ben; do
-  stellar keys generate $k --network testnet --fund
-done
-
-scripts/testnet/council.sh                                   # 2-of-3 council (registry and offering admin)
-scripts/testnet/deploy.sh                                    # deploy all four contracts
-scripts/testnet/demo-company.sh ANDES company-andes issuer-andes \
-  "Andes Craft Brewing" 152 5000 300 1000 259200             # issue token, verify, sign, open a Reg S raise
-EXEMPTION=506c LOCKUP_SECS=31536000 VERIFIER=admin \
-  scripts/testnet/demo-company.sh HARBOR company-harbor issuer-harbor \
-  "Harbor & Hearth Bakeries" 620 5000 1000 5000 604800      # a 506(c) raise with a one-year lock-up
-scripts/testnet/demo-investor.sh investor-ana 620 800       # Portugal: credential, ZK proof, USDC
-scripts/testnet/demo-investor.sh investor-ben 276 600       # Germany
-scripts/testnet/demo-lifecycle.sh ANDES company-andes investor-ana 600 investor-ben 400 80
-```
-
-### Run a live demo with personas
-
-```sh
-cd app
-npx tsx --conditions=react-server --env-file=.env.local ../scripts/testnet/demo-personas.mts
-```
-
-This creates fresh testnet personas and saves their keys to `app/.env.local` as `DEMO_PERSONAS`. Set the same variable on the deployment and restart. Run it again before each demo for a clean slate.
-
-| Persona | Ready for |
+| Path | Contents |
 |---|---|
-| Lumen Coffee Roasters | Verified company with a signed agreement, ready to open a raise |
-| Ana Ribeiro (Portugal), Chloé Wagner (Germany) | Eligible under Reg S, 1,500 USDC each |
-| Ben Carter (United States) | Verified accredited investor for 506(c) raises, 1,500 USDC |
-
-The **Demo** menu in the nav (testnet only) switches between them in one click. On testnet the raise form can count durations in minutes, so a raise, its lock-up, a dividend and a trade fit in one demo: open a Reg S raise for 10 minutes with a 5-minute lock-up; once it's full the company can close it straight away.
-
-### Click through it in the app
-
-Open https://dvdnd.vercel.app, or run it locally:
-
-```sh
-cd app
-cp .env.example .env.local   # then set DVDND_ADMIN_SECRET=$(stellar keys show admin) and the Didit keys
-pnpm install && pnpm dev                                           # http://localhost:3000
-```
-
-1. **Investor (Reg S):** Sign in → I'm an investor → verify residence (Didit identity check with only the Stellar wallet; then a real Groth16 proof generated in the browser and verified on-chain) → Discover → open a raise → Invest (Add money swaps test XLM for Circle testnet USDC).
-   **Investor (506(c)):** open the Harbor & Hearth raise → sign the accreditation statement → get verified by the testnet verifier → Invest.
-2. **Company:** Sign in → I'm raising for my company → register → verify ownership → sign the agreement → Set up raise (issues the share token with compliance flags and opens the raise).
-3. **Close and pay:** once a raise is full or past its deadline, anyone can close it → investors claim tokens in Portfolio (during lock-up they go straight into the dividend vault) → the company starts the first period and pays a dividend → investors claim USDC.
-4. **Compliance:** Company → Compliance lists every holder (active or frozen, wallet and vault balances); the raise's compliance account can freeze, unfreeze or claw back with a reason, and every action shows in the audit log.
-5. **Agreement:** any raise page → Agreement shows the exact signed text and checks its hash against the one on Stellar.
-
-| Variable | Where | Purpose |
-|---|---|---|
-| `DVDND_ADMIN_SECRET` | server only (`app/.env.local`) | Testnet platform key: issues credential leaves after an identity check and verifies companies in the registry. |
-| `DIDIT_API_KEY`, `DIDIT_WORKFLOW_ID` | server only | Didit identity check (API key and a published KYC workflow). |
-| `NEXT_PUBLIC_DIDIT_ENABLED` | public | `1` to offer the Didit check on the verify page. |
-| `NEXT_PUBLIC_REGISTRY`, `NEXT_PUBLIC_GATE`, `NEXT_PUBLIC_OFFERING`, `NEXT_PUBLIC_VAULT`, `NEXT_PUBLIC_USDC_SAC` | optional | Override the testnet contract IDs (defaults in `app/src/lib/config.ts`). |
-| `NEXT_PUBLIC_RPC_URL`, `NEXT_PUBLIC_HORIZON_URL` | optional | Override the testnet RPC / Horizon endpoints. |
-
-Live tests against testnet (with the app running): `LIVE=1 APP_URL=http://localhost:3000 pnpm vitest run` in `app/`.
+| [`contracts/`](contracts/) | Soroban contracts in Rust (soroban-sdk 28) |
+| [`circuits/`](circuits/) | Circom residence circuit, trusted-setup ceremony and prover |
+| [`app/`](app/) | Next.js app: investor and company flows, docs, wired to the testnet contracts |
+| [`scripts/testnet/`](scripts/testnet/) | Deploy, demo and persona scripts |
+| [`deployments/`](deployments/) | Contract IDs and transaction evidence |
+| [`research_notes/`](research_notes/), [`reports/`](reports/) | The research behind the design |
 
 ## Built during HackMeridian
 
-Everything in this repository was built during the event, starting 25 October 2026: research, contracts, circuit, scripts and app. No prior code was reused. The circuit's trusted setup uses the public PSE Powers of Tau and a recorded phase-2 ceremony (circuits/ceremony/TRANSCRIPT.md) with one contributor so far; more independent contributors are needed before production.
+Everything here was built during the event, starting 25 October 2026: research, contracts, circuit, scripts and app. No prior code was reused. The circuit's trusted setup uses the public PSE Powers of Tau and a recorded phase-2 ceremony ([transcript](circuits/ceremony/TRANSCRIPT.md)) with one contributor so far; more independent contributors are needed before production.
 
-## License
-
-MIT
+MIT licensed.
