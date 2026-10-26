@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>dvdnd · Pitch deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=block" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3f2f2; --surface: #eae9e9; --text: #201e1d; --muted: #605d5d; --faint: #9b9797;
+    --line: rgba(32,30,29,.4); --hair: rgba(32,30,29,.14);
+    --ink: #161514; --paper: #f3f2f2; --dmuted: #b3afae; --dfaint: #7d7979;
+    --accent: oklch(0.46 0.1 250); --accent-l: oklch(0.74 0.1 250); --accent-t: oklch(0.8 0.09 250);
+    --green: oklch(0.5 0.13 150); --green-l: oklch(0.76 0.13 150); --red: #ec3013;
+    --wm: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzOTY2IDEwNDYiIHdpZHRoPSIzOTY2IiBoZWlnaHQ9IjEwNDYiPjxwYXRoIGZpbGw9IiMyMDFlMWQiIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTSA2MDMgMTIuNyBDIDYwMi4xIDEzLjAsNjAxLjEgMTMuNyw2MDAuNyAxNC40IEMgNjAwLjIgMTUuMCw2MDAuMCA4Ni4yLDYwMC4yIDE3Mi43IEMgNjAwLjQgMjkyLjgsNjAwLjIgMzMwLjEsNTk5LjMgMzMxLjAgQyA1OTguNCAzMzEuOSw1OTcuMiAzMzEuNiw1OTQuMyAzMjkuMyBDIDU4MC44IDMxOS4xLDU1Ny45IDMwNS45LDU0MC41IDI5OC41IEMgNTE5LjMgMjg5LjQsNDk1LjMgMjgxLjYsNDczLjUgMjc2LjYgQyA0MzIuMCAyNjcuMSwzNzMuNSAyNjUuNywzMzEuNSAyNzMuMCBDIDMxOS41IDI3NS4xLDI5Ny4yIDI4MC4zLDI4OS41IDI4Mi44IEMgMjg3LjggMjgzLjMsMjg0LjQgMjg0LjMsMjgyIDI4NS4wIEMgMjc3LjQgMjg2LjMsMjczLjMgMjg3LjgsMjYwIDI5My4yIEMgMjA3LjIgMzE0LjMsMTU1LjYgMzQ5LjcsMTE3LjQgMzkxLjAgQyAxMTMuNiAzOTUuMSwxMDguNiA0MDAuNSwxMDYuNCA0MDMuMCBDIDEwNC4yIDQwNS40LDk2LjkgNDE0LjcsOTAuMyA0MjMuNSBDIDgwLjEgNDM3LjEsNzYuNiA0NDIuMSw2OS45IDQ1MyBDIDUxLjQgNDgyLjcsMzQuNSA1MjEuNCwyNS42IDU1NCBDIDIwLjQgNTczLjMsMTUuNiA1OTcuMiwxNC41IDYwOS41IEMgMTQuMiA2MTIuOCwxMy42IDYxOC42LDEzLjAgNjIyLjUgQyAxMS40IDYzMy42LDExLjcgNjc3LjMsMTMuNSA2OTEuOCBDIDE2LjAgNzEzLjEsMTguNyA3MjguNywyMi41IDc0NC4yIEMgMjUuMyA3NTUuMywyNy4yIDc2Mi41LDI4LjEgNzY1LjEgQyAyOC43IDc2Ni42LDI5LjUgNzY5LjMsMzAuMCA3NzEuMSBDIDMxLjIgNzc1LjcsMzYuNSA3OTAuMyw0MC42IDgwMC41IEMgNDUuOCA4MTMuMCw1MC41IDgyMi45LDU1LjcgODMxLjggQyA1OC4wIDgzNS44LDYwIDgzOS4zLDYwIDgzOS41IEMgNjAgODQwLjIsNjUuOSA4NDkuOSw3My44IDg2MiBDIDEwNC44IDkwOS41LDE0NC43IDk0OC4zLDE5MyA5NzcuNiBDIDIwNi45IDk4Ni4yLDIzNi4wIDEwMDEuMiwyNDUuMSAxMDA0LjUgQyAyODMuMCAxMDE4LjUsMzEwLjggMTAyNS42LDM0MS44IDEwMjkuNCBDIDM2MC41IDEwMzEuNyw0MDUuMCAxMDMxLjUsNDI1IDEwMjkuMCBDIDQ0OS4zIDEwMjUuOSw0NzAuMiAxMDIxLjcsNDgyIDEwMTcuNSBDIDQ4OS44IDEwMTQuNyw0OTIuNiAxMDEzLjcsNDk1LjUgMTAxMi45IEMgNTA2LjcgMTAwOS45LDUzNy40IDk5NS44LDU1NSA5ODUuOCBDIDU2OC4xIDk3OC4yLDU3Ni45IDk3Mi41LDU4Ny4yIDk2NC44IEMgNTk1LjIgOTU4LjgsNTk5LjEgOTU2LjQsNTk5LjYgOTU3LjIgQyA2MDAuMCA5NTcuOSw2MDAuNCA5NzAuMyw2MDAuNSA5ODQuOCBDIDYwMC42IDk5OS4zLDYwMS4xIDEwMTEuNSw2MDEuNiAxMDEyLjAgQyA2MDIuMiAxMDEyLjYsNjQ0LjggMTAxMi45LDcwNi41IDEwMTIuNyBMIDgxMC41IDEwMTIuNSA4MTAuNyA1MTMuNiBDIDgxMC45IDE0NS42LDgxMC43IDE0LjMsODA5LjggMTMuMyBDIDgwOC45IDEyLjIsNzkxLjMgMTIuMCw3MDYuNiAxMi4wIEMgNjUwLjQgMTIuMSw2MDMuOCAxMi40LDYwMyAxMi43IE0gMjE2MSAxMi45IEwgMjE1NC41IDEzLjUgMjE1NC4yIDE3MS45IEMgMjE1NC4wIDI3My40LDIxNTMuNiAzMzAuNywyMTUzLjAgMzMxLjMgQyAyMTUyLjMgMzMyLjAsMjE1MC4yIDMzMS4xLDIxNDYuNyAzMjguNyBDIDIxNDEuMiAzMjUuMCwyMTI5LjUgMzE3LjgsMjEyNyAzMTYuNiBDIDIxMjYuMSAzMTYuMiwyMTIyLjggMzE0LjMsMjExOS41IDMxMi40IEMgMjA5OC4zIDMwMC4wLDIwNjcuMyAyODcuOSwyMDM2LjUgMjgwLjAgQyAxOTgxLjAgMjY1LjgsMTkxOS42IDI2NC42LDE4NjMgMjc2LjYgQyAxODQ0LjkgMjgwLjQsMTgyMi40IDI4Ny4zLDE4MDYuNSAyOTQuMCBDIDE4MDUuNCAyOTQuNSwxODAxLjUgMjk2LjEsMTc5OCAyOTcuNSBDIDE3ODcuMiAzMDEuOSwxNzY5LjkgMzEwLjQsMTc2MS42IDMxNS4zIEMgMTc1Ny4zIDMxNy45LDE3NTMuNiAzMjAsMTc1My40IDMyMCBDIDE3NTMuMSAzMjAsMTc0Ny45IDMyMy4zLDE3MzUgMzMxLjggQyAxNzI5LjggMzM1LjIsMTcyMS44IDM0MS4yLDE3MDcuNiAzNTIuMyBDIDE2NzYuNSAzNzYuNiwxNjM5LjEgNDE4LjIsMTYyMC4zIDQ0OS41IEMgMTYwOS4zIDQ2Ny42LDE1OTUuMCA0OTUuMCwxNTkxLjUgNTA0LjUgQyAxNTkwLjUgNTA3LjIsMTU4OS4xIDUxMC44LDE1ODguNCA1MTIuNSBDIDE1ODMuNCA1MjQuMSwxNTc2LjYgNTQ0LjEsMTU3NS4wIDU1MS41IEMgMTU3NC41IDU1My43LDE1NzMuMiA1NTkuMSwxNTcyLjEgNTYzLjYgQyAxNTcwLjAgNTcxLjQsMTU2Ny43IDU4Mi4zLDE1NjUuOSA1OTIuNSBDIDE1NjUuNCA1OTUuMiwxNTY0LjUgNTk5LjcsMTU2NC4wIDYwMi41IEMgMTU2MS42IDYxNC43LDE1NTkuNyA2NDcuNiwxNTYwLjMgNjY0LjQgQyAxNTYxLjUgNjkzLjgsMTU2NC43IDcyMy4zLDE1NjcuOCA3MzMuNSBDIDE1NjguMyA3MzUuMSwxNTY5LjUgNzQwLjEsMTU3MC41IDc0NC41IEMgMTU3MS40IDc0OC45LDE1NzMuNSA3NTcuMiwxNTc1LjEgNzYzIEMgMTU3Ny44IDc3Mi43LDE1NzkuNCA3NzcuMywxNTg3LjAgNzk3LjAgQyAxNTg4LjYgODAxLjIsMTU5MCA4MDUuMCwxNTkwIDgwNS40IEMgMTU5MCA4MDYuOCwxNjA0LjYgODM2LjEsMTYxMC40IDg0Ni40IEMgMTYzNy4yIDg5My41LDE2NzQuMCA5MzMuNiwxNzIwLjggOTY2LjUgQyAxNzM1LjcgOTc2LjksMTc2My44IDk5Mi42LDE3ODMuMiAxMDAxLjMgQyAxNzkzLjkgMTAwNi4xLDE4MDMuNyAxMDA5LjksMTgxMy41IDEwMTMuMCBDIDE4MTkgMTAxNC43LDE4MjUuMCAxMDE2LjcsMTgyNyAxMDE3LjQgQyAxODYxLjYgMTAyOS44LDE5MjAuMiAxMDM2LjIsMTk2Mi41IDEwMzIuMSBDIDE5NzguOSAxMDMwLjUsMjAwNy42IDEwMjUuOCwyMDE4IDEwMjMuMCBDIDIwMjUuMSAxMDIxLjEsMjA0Mi4xIDEwMTUuOSwyMDQ2IDEwMTQuNSBDIDIwNzIuNyAxMDA0LjYsMjA5Ny4xIDk5My4zLDIxMTUgOTgyLjMgQyAyMTMyLjUgOTcxLjUsMjEzNS4yIDk2OS44LDIxNDMuMyA5NjMuNyBDIDIxNDcuNyA5NjAuNSwyMTUxLjggOTU4LjEsMjE1Mi42IDk1OC40IEMgMjE1My42IDk1OC44LDIxNTQuMCA5NjQuMywyMTU0LjIgOTg1LjcgTCAyMTU0LjUgMTAxMi41IDIyNTguNSAxMDEyLjUgTCAyMzYyLjUgMTAxMi41IDIzNjIuNyA1MTMuNSBDIDIzNjIuOSA0NS4yLDIzNjIuOSAxNC40LDIzNjEuMyAxMy4yIEMgMjM1OS41IDExLjksMjE3NS4zIDExLjYsMjE2MSAxMi45IE0gMzc0Ny4zIDEzLjQgQyAzNzQ1LjUgMTQuNywzNzQ1LjQgMTkuMywzNzQ1LjIgMTczLjQgQyAzNzQ0LjkgMzAzLjgsMzc0NC43IDMzMiwzNzQzLjYgMzMyIEMgMzc0Mi44IDMzMiwzNzQwLjQgMzMwLjYsMzczOC4xIDMyOC45IEMgMzczNS43IDMyNy4yLDM3MzIuMSAzMjQuOSwzNzI5LjggMzIzLjcgQyAzNzI3LjYgMzIyLjQsMzcyNS4xIDMyMS4wLDM3MjQuMSAzMjAuNSBDIDM3MDcuMyAzMTAuNiwzNjk0LjQgMzAzLjgsMzY4NS41IDMwMC4wIEMgMzY4Mi43IDI5OC44LDM2NzkuNiAyOTcuNCwzNjc4LjUgMjk3LjAgQyAzNjU2LjYgMjg3LjQsMzYzMC4yIDI3OS44LDM1OTcuNSAyNzMuNiBDIDM1NTEuNSAyNjQuOCwzNDg3LjkgMjY3LjMsMzQ0MyAyNzkuNiBDIDM0MjYuMiAyODQuMiwzNDE0LjkgMjg3LjksMzQwNi4zIDI5MS42IEMgMzQwNC42IDI5Mi4zLDM0MDIuNSAyOTMsMzQwMS43IDI5MyBDIDM0MDEuMCAyOTMsMzM5OS45IDI5My4zLDMzOTkuNCAyOTMuOCBDIDMzOTguOSAyOTQuMiwzMzk2LjIgMjk1LjQsMzM5My41IDI5Ni40IEMgMzM4NC43IDI5OS42LDMzNjguNiAzMDcuMiwzMzU5LjUgMzEyLjUgQyAzMzU2LjIgMzE0LjQsMzM1Mi44IDMxNi4zLDMzNTIgMzE2LjYgQyAzMzUwLjMgMzE3LjQsMzMzOS4zIDMyNC4xLDMzMjkuMSAzMzAuNSBDIDMzMjUuNiAzMzIuNywzMzE4LjkgMzM3LjQsMzMxNC4yIDM0MSBDIDMzMDkuNSAzNDQuNSwzMzAzLjggMzQ4LjgsMzMwMS42IDM1MC40IEMgMzI4NS4yIDM2Mi4wLDMyNTYuOCAzOTAuOSwzMjM2LjMgNDE2LjUgQyAzMjE3LjAgNDQwLjUsMzE5NC4zIDQ3OS40LDMxODIuNSA1MDguNSBDIDMxODAuNSA1MTMuNCwzMTc4LjIgNTE4LjksMzE3Ny40IDUyMC42IEMgMzE3My4wIDUzMC4xLDMxNjQuNCA1NjAuMywzMTYwLjEgNTgxLjUgQyAzMTQ4LjEgNjM5LjksMzE1MS42IDcwNy4zLDMxNjkuNyA3NjguNSBDIDMxNzEuNSA3NzQuNywzMTc5LjYgNzk3LjMsMzE4MS41IDgwMS42IEMgMzE4Mi4zIDgwMy4zLDMxODMgODA1LjAsMzE4MyA4MDUuMyBDIDMxODMgODA2LjIsMzE5NS42IDgzMS45LDMxOTkuNCA4MzguOCBDIDMyMDEuNCA4NDIuMywzMjA0LjUgODQ3LjgsMzIwNi41IDg1MS4xIEMgMzIwOC40IDg1NC40LDMyMTAgODU3LjIsMzIxMCA4NTcuNCBDIDMyMTAgODU4LjAsMzIyMi43IDg3Ni43LDMyMjguNCA4ODQuNSBDIDMyNDcuOCA5MTAuNywzMjcxLjggOTM0LjcsMzMwMi45IDk1OC44IEMgMzMyMy4xIDk3NC41LDMzNjYuOSA5OTguOSwzMzkxLjUgMTAwOC4yIEMgMzQwNy4wIDEwMTQuMSwzNDA5LjIgMTAxNC44LDM0MjcgMTAxOS45IEMgMzQzMS4xIDEwMjEuMSwzNDM2LjUgMTAyMi43LDM0MzkgMTAyMy41IEMgMzQ0MS40IDEwMjQuMywzNDQ0LjMgMTAyNS4wLDM0NDUuNCAxMDI1LjAgQyAzNDQ2LjUgMTAyNS4wLDM0NTAuMSAxMDI1LjYsMzQ1My40IDEwMjYuNCBDIDM0ODIuNSAxMDMzLjIsMzUyMS40IDEwMzUuNiwzNTUzIDEwMzIuNCBDIDM1NzEuNSAxMDMwLjYsMzYwMC4zIDEwMjUuOSwzNjExIDEwMjMuMCBDIDM2MjAuMCAxMDIwLjYsMzYyNi41IDEwMTguNywzNjMwIDEwMTcuNSBDIDM2MzEuOSAxMDE2LjgsMzYzNS45IDEwMTUuNSwzNjM5IDEwMTQuNiBDIDM2NTYuMyAxMDA5LjIsMzY4NS4xIDk5NS43LDM3MDEuNSA5ODUuMiBDIDM3MDIuNiA5ODQuNSwzNzA0LjEgOTgzLjYsMzcwNSA5ODMuMyBDIDM3MDkuNyA5ODEuMSwzNzM4LjMgOTYwLjYsMzc0MC45IDk1Ny41IEMgMzc0MS42IDk1Ni43LDM3NDMuMCA5NTYsMzc0NC4xIDk1NiBDIDM3NDUuOCA5NTYsMzc0NS45IDk1Ny40LDM3NDYuMiA5ODQuMiBMIDM3NDYuNSAxMDEyLjUgMzg1MCAxMDEyLjUgTCAzOTUzLjUgMTAxMi41IDM5NTMuNSA1MTIuNSBMIDM5NTMuNSAxMi41IDM4NTEuMyAxMi4yIEMgMzc2NS45IDEyLjEsMzc0OC45IDEyLjMsMzc0Ny4zIDEzLjQgTSA4MzEuMiAyNzYuNSBDIDgyOS44IDI3Ny41LDgzMC40IDI3OS43LDgzNi45IDI5Ni4wIEMgODQwLjggMzA2LjEsODQ1LjcgMzE5LjEsODQ3LjYgMzI0LjkgQyA4NDkuNiAzMzAuNyw4NTIuOSAzNDAuMiw4NTUuMSAzNDYgQyA4NTcuMyAzNTEuNyw4NjEuMSAzNjEuOSw4NjMuNSAzNjguNSBDIDg2OS4xIDM4NC4xLDg3Mi4yIDM5Mi4zLDg4MS40IDQxNi41IEMgODk1LjkgNDU0LjYsOTA3LjEgNDg0LjksOTE2LjAgNTEwLjUgQyA5MTguMSA1MTYuNSw5MjIuOCA1MjkuMCw5MjYuNCA1MzguMiBDIDkzMC4wIDU0Ny40LDkzMyA1NTUuMiw5MzMgNTU1LjUgQyA5MzMgNTU1LjksOTM2LjcgNTY2LjMsOTQxLjMgNTc4LjggQyA5NDYuMCA1OTEuMiw5NTIuMiA2MDguNCw5NTUuMyA2MTcgQyA5NTguMyA2MjUuNSw5NjIuNiA2MzcuMiw5NjQuOCA2NDMgQyA5NjkuNSA2NTUuMSw5ODUuOSA2OTkuNyw5OTAuMCA3MTEuNSBDIDk5My42IDcyMS42LDEwMjIuOSA4MDAuOCwxMDI0LjAgODAzLjUgQyAxMDI0LjggODA1LjIsMTAyNi4yIDgwOS4wLDEwMjguOSA4MTcgQyAxMDI5LjQgODE4LjMsMTAzMC43IDgyMS43LDEwMzEuOCA4MjQuNSBDIDEwMzMuNiA4MjkuMSwxMDM2LjggODM3LjYsMTA0NC4xIDg1Ny41IEMgMTA0NS43IDg2MS45LDEwNDcuNyA4NjcuMCwxMDQ4LjQgODY5IEMgMTA0OS4xIDg3MC45LDEwNTAuNCA4NzQuMywxMDUxLjIgODc2LjUgQyAxMDUyLjEgODc4LjcsMTA1My40IDg4Mi4zLDEwNTQuMiA4ODQuNSBDIDEwNTUuMSA4ODYuNywxMDU2LjQgODkwLjMsMTA1Ny4yIDg5Mi41IEMgMTA1OC4xIDg5NC43LDEwNTkuNCA4OTguMywxMDYwLjIgOTAwLjUgQyAxMDYxLjEgOTAyLjcsMTA2Mi41IDkwNi40LDEwNjMuMyA5MDguNyBDIDEwNjUuMSA5MTMuNCwxMDY3LjIgOTE4LjksMTA2OS4zIDkyNC43IEMgMTA3MC4xIDkyNi44LDEwNzIuMSA5MzEuOCwxMDczLjcgOTM2IEMgMTA3NS40IDk0MC4xLDEwNzguMiA5NDcuMywxMDc5LjkgOTUyIEMgMTA4MS43IDk1Ni42LDEwODMuNyA5NjIuMCwxMDg0LjQgOTY0IEMgMTA4Ni4xIDk2OC4xLDEwOTQuNSA5ODkuOCwxMDk2LjYgOTk1LjUgQyAxMTAwLjEgMTAwNC41LDExMDAuOCAxMDA2LjYsMTEwMS40IDEwMDkuMiBDIDExMDEuOCAxMDEwLjksMTEwMi44IDEwMTIuMSwxMTA0LjIgMTAxMi41IEMgMTEwNS40IDEwMTIuOCwxMTU4LjYgMTAxMi45LDEyMjIuMyAxMDEyLjcgTCAxMzM4LjIgMTAxMi41IDEzNDEuNiAxMDAzLjUgQyAxMzQzLjQgOTk4LjUsMTM0Ni43IDk5MC4yLDEzNDguOSA5ODUgQyAxMzUxLjEgOTc5LjcsMTM1Ny4yIDk2NC40LDEzNjIuNSA5NTEgQyAxMzY3LjcgOTM3LjUsMTM3My44IDkyMi4yLDEzNzYuMCA5MTcgQyAxMzc4LjEgOTExLjcsMTM4MS45IDkwMi41LDEzODQuMyA4OTYuNSBDIDEzODYuNyA4OTAuNCwxMzkyLjEgODc2LjcsMTM5Ni40IDg2NiBDIDE0MDAuNyA4NTUuMiwxNDA2LjIgODQxLjUsMTQwOC42IDgzNS41IEMgMTQxMS4xIDgyOS40LDE0MTUuOCA4MTcuNSwxNDE5LjEgODA5IEMgMTQyMi40IDgwMC40LDE0MjYuNiA3ODkuOSwxNDI4LjQgNzg1LjUgQyAxNDMxLjggNzc3LjMsMTQ0MC40IDc1NS42LDE0NTAuOSA3MjguNSBDIDE0NTQuMSA3MjAuMiwxNDYwLjAgNzA1LjQsMTQ2My45IDY5NS41IEMgMTQ2Ny45IDY4NS42LDE0NzMuOCA2NzAuNSwxNDc3LjAgNjYyIEMgMTQ4My4wIDY0NS44LDE0ODcuNCA2MzQuOSwxNDg5LjAgNjMxLjUgQyAxNDg5LjUgNjMwLjQsMTQ5My41IDYyMC4wLDE0OTcuOCA2MDguNSBDIDE1MDIuMiA1OTYuOSwxNTA2LjcgNTg1LjIsMTUwNy45IDU4Mi41IEMgMTUwOS4xIDU3OS43LDE1MTMuNSA1NjguNSwxNTE3LjYgNTU3LjUgQyAxNTI0LjkgNTM4LjEsMTU0MS4xIDQ5Ni41LDE1NDMuMCA0OTIuNSBDIDE1NDMuNSA0OTEuNCwxNTQ2LjEgNDg0LjYsMTU0OC44IDQ3Ny41IEMgMTU1MS41IDQ3MC4zLDE1NTUuMiA0NjAuOSwxNTU3LjAgNDU2LjUgQyAxNTU4LjcgNDUyLjEsMTU2Mi4yIDQ0My4zLDE1NjQuNiA0MzcgQyAxNTcyLjAgNDE4LjAsMTU3Mi4yIDQxNy42LDE1NzMuNiA0MTQuMyBDIDE1NzQuMyA0MTIuNiwxNTc1IDQxMC44LDE1NzUgNDEwLjMgQyAxNTc1IDQwOS41LDE1NzkuNCAzOTguMiwxNTgyLjAgMzkyLjUgQyAxNTgzLjIgMzg5LjcsMTU4Ni4xIDM4Mi4yLDE1ODkuOSAzNzIgQyAxNTkxLjcgMzY3LjMsMTU5My43IDM2MS44LDE1OTQuNSAzNTkuNyBDIDE1OTUuMyAzNTcuNiwxNTk2LjcgMzU0LjAsMTU5Ny42IDM1MS43IEMgMTU5OC41IDM0OS40LDE1OTkuNiAzNDYuNiwxNjAwLjAgMzQ1LjUgQyAxNjAwLjUgMzQ0LjQsMTYwMi4zIDM0MC4xLDE2MDQuMCAzMzYgQyAxNjA1LjcgMzMxLjgsMTYwOC4wIDMyNS44LDE2MDkuMSAzMjIuNSBDIDE2MTAuMiAzMTkuMiwxNjExLjggMzE1LjAsMTYxMi41IDMxMy4zIEMgMTYxMy4zIDMxMS42LDE2MTQgMzA5LjcsMTYxNCAzMDkuMSBDIDE2MTQgMzA4LjUsMTYxNC42IDMwNi41LDE2MTUuNCAzMDQuNyBDIDE2MjEuMSAyOTEuMywxNjIzLjAgMjg2LjUsMTYyMy4wIDI4NS4xIEMgMTYyMy4wIDI4NC4yLDE2MjMuNyAyODIuNiwxNjI0LjUgMjgxLjUgQyAxNjI2LjMgMjc5LjEsMTYyNi40IDI3Ni4zLDE2MjQuNyAyNzUuNyBDIDE2MjIuNyAyNzQuOSwxNDQ3LjIgMjc1LjAsMTQyNiAyNzUuOCBMIDE0MDcuNSAyNzYuNSAxNDA1LjEgMjgxLjMgQyAxNDAzLjkgMjgzLjksMTQwMC44IDI5MS42LDEzOTguMyAyOTguMyBDIDEzOTUuOCAzMDUuMCwxMzkxLjkgMzE0LjcsMTM4OS43IDMyMCBDIDEzODcuNSAzMjUuMiwxMzgyLjQgMzM4LjIsMTM3OC40IDM0OSBDIDEzNzQuNCAzNTkuNywxMzY4LjggMzc0LjEsMTM2Ni4wIDM4MSBDIDEzNjMuMSAzODcuOCwxMzU4LjggMzk4LjcsMTM1Ni41IDQwNS4wIEMgMTM1NC4xIDQxMS40LDEzNDguMiA0MjYuNSwxMzQzLjUgNDM4LjUgQyAxMzM4LjcgNDUwLjYsMTMzMy41IDQ2NC4xLDEzMzEuOCA0NjguNSBDIDEzMzAuMiA0NzIuOSwxMzI4LjIgNDc4LjAsMTMyNy41IDQ4MCBDIDEzMjYuNyA0ODEuOSwxMzI0LjEgNDg4LjYsMTMyMS42IDQ5NSBDIDEzMTUuMiA1MTEuNCwxMzA2LjEgNTM0LjEsMTMwMy44IDUzOS41IEMgMTMwMy40IDU0MC42LDEzMDEuNCA1NDUuNywxMjk5LjUgNTUxIEMgMTI5Ny41IDU1Ni4yLDEyOTUuNSA1NjEuNCwxMjk1LjAgNTYyLjUgQyAxMjk0LjUgNTYzLjYsMTI5My4xIDU2Ni45LDEyOTEuOSA1NzAgQyAxMjkwLjcgNTczLjAsMTI4OS40IDU3Ni40LDEyODguOSA1NzcuNSBDIDEyODguNCA1NzguNiwxMjg2LjQgNTgzLjcsMTI4NC40IDU4OSBDIDEyNzguOSA2MDMuNiwxMjc4LjQgNjA0LjksMTI3NSA2MTMuNSBDIDEyNzMuMiA2MTcuOSwxMjcxLjIgNjIzLjAsMTI3MC41IDYyNSBDIDEyNjkuMiA2MjguMiwxMjYzLjggNjQxLjksMTI2MS45IDY0Ni41IEMgMTI2MS4wIDY0OC42LDEyNTcuNSA2NTcuNSwxMjU1LjQgNjYzIEMgMTI1NC43IDY2NC45LDEyNTIuMCA2NzEuOSwxMjQ5LjQgNjc4LjUgQyAxMjQ2LjkgNjg1LjEsMTI0NC4yIDY5Mi4xLDEyNDMuNCA2OTQuMiBDIDEyMzkuOSA3MDMuNSwxMjM4LjYgNzA2LjYsMTIzNy40IDcwOS41IEMgMTIzNi43IDcxMS4xLDEyMzUuNCA3MTQuNSwxMjM0LjQgNzE3IEMgMTIzMy41IDcxOS40LDEyMzIuMSA3MjIuOSwxMjMxLjMgNzI0LjcgQyAxMjMwLjYgNzI2LjUsMTIzMCA3MjguOSwxMjMwIDcyOS45IEMgMTIzMCA3MzEuMCwxMjI5LjYgNzMyLjAsMTIyOS4yIDczMi4zIEMgMTIyOC44IDczMi42LDEyMjcuMyA3MzYuMCwxMjI2LjAgNzM5LjkgQyAxMjI0LjYgNzQzLjgsMTIyMy4wIDc0NywxMjIyLjQgNzQ3IEMgMTIyMS43IDc0NywxMjIwLjUgNzQ0LjgsMTIxOS41IDc0Mi4yIEMgMTIxOC42IDczOS42LDEyMTcuNCA3MzYuNywxMjE2LjkgNzM1LjcgQyAxMjE2LjQgNzM0LjgsMTIxNS4wIDczMS4yLDEyMTMuOSA3MjcuNyBDIDEyMTIuNyA3MjQuMywxMjExLjQgNzIwLjYsMTIxMC45IDcxOS41IEMgMTIxMC40IDcxOC40LDEyMDguOSA3MTQuMSwxMjA3LjUgNzEwIEMgMTIwNi4yIDcwNS44LDEyMDQuMSA3MDAuMCwxMjAyLjkgNjk3IEMgMTIwMS43IDY5My45LDEyMDAuNCA2OTAuMSwxMTk5LjkgNjg4LjUgQyAxMTk5LjUgNjg2LjgsMTE5Ny40IDY4MSwxMTk1LjUgNjc1LjUgQyAxMTkzLjUgNjcwLDExOTEuNCA2NjQuMywxMTkxLjAgNjYzIEMgMTE5MC41IDY2MS42LDExODkuMSA2NTguMCwxMTg4IDY1NSBDIDExODYuOCA2NTEuOSwxMTg1LjQgNjQ4LjMsMTE4NSA2NDcgQyAxMTg0LjUgNjQ1LjYsMTE4My4xIDY0Mi4wLDExODIgNjM5IEMgMTE4MC44IDYzNS45LDExNzkuNCA2MzIuMywxMTc5LjAgNjMxIEMgMTE3OC42IDYyOS42LDExNzcuMSA2MjUuNSwxMTc1LjcgNjIyIEMgMTE3NC4zIDYxOC40LDExNzEuNyA2MTEuNiwxMTY5LjkgNjA3IEMgMTE2OC4yIDYwMi4zLDExNjUuNCA1OTUuMSwxMTYzLjcgNTkxIEMgMTE2Mi4xIDU4Ni44LDExNjAuMiA1ODEuOSwxMTU5LjUgNTgwIEMgMTE1Ny43IDU3NS4xLDExNTUuNSA1NjkuMywxMTUzLjUgNTY0IEMgMTE1Mi41IDU2MS41LDExNTEuMSA1NTcuOSwxMTUwLjQgNTU2IEMgMTE0Ny44IDU0OS4wLDExMzkuNyA1MjguMywxMTM2LjggNTIxIEMgMTEzMi42IDUxMC43LDExMzEuNiA1MDcuOSwxMTI3LjkgNDk3LjUgQyAxMTI2LjIgNDkyLjUsMTEyMi44IDQ4My41LDExMjAuMyA0NzcuNSBDIDExMTcuOCA0NzEuNCwxMTE1LjIgNDY0LjksMTExNC41IDQ2MyBDIDExMTMuNyA0NjEuMCwxMTExLjcgNDU1LjksMTExMCA0NTEuNSBDIDExMDguMiA0NDcuMSwxMTA2LjEgNDQxLjgsMTEwNS4zIDQzOS43IEMgMTEwMC44IDQyNy42LDEwOTkuMSA0MjMuMCwxMDkzLjUgNDA4LjUgQyAxMDg4LjEgMzk0LjcsMTA4Ni41IDM5MC40LDEwODQuNSAzODUuMiBDIDEwODIuOSAzODAuOSwxMDc5LjIgMzcxLjQsMTA3OC4wIDM2OC41IEMgMTA3Ny42IDM2Ny40LDEwNzYuNSAzNjQuNywxMDc1LjcgMzYyLjUgQyAxMDc0LjggMzYwLjMsMTA3Mi43IDM1NC45LDEwNzEgMzUwLjUgQyAxMDY3LjkgMzQzLjAsMTA2Ny4xIDM0MC43LDEwNjMuNiAzMzEuMiBDIDEwNjIuOCAzMjkuMSwxMDYwLjggMzI0LjEsMTA1OS4xIDMyMC4xIEMgMTA1Ny40IDMxNi4wLDEwNTYgMzEyLjMsMTA1NiAzMTEuNyBDIDEwNTYgMzExLjIsMTA1NS4zIDMwOS4zLDEwNTQuNiAzMDcuNiBDIDEwNTMuNCAzMDQuOCwxMDQ4LjEgMjkxLjEsMTA0NC40IDI4MS4wIEMgMTA0Mi4wIDI3NC40LDEwNDkuNyAyNzQuOCw5MzYuMSAyNzUuMSBDIDg1OS4zIDI3NS4zLDgzMi40IDI3NS42LDgzMS4yIDI3Ni41IE0gMjgzMSAyODQuNiBDIDI4MjkuMCAyODQuOCwyODIxLjYgMjg1LjQsMjgxNC41IDI4Ni4wIEMgMjc4OS4yIDI4OC4wLDI3NTYuOCAyOTYuMCwyNzMyLjUgMzA2LjAgQyAyNzE4LjAgMzEyLjAsMjcxNC40IDMxMy44LDI2OTYgMzI0LjggQyAyNjgwLjcgMzMzLjksMjY2MS44IDM0OC4xLDI2NDguOSAzNjAuMyBDIDI2NDUuMyAzNjMuNywyNjM5LjYgMzY5LjEsMjYzNi4yIDM3Mi4zIEMgMjYzMi44IDM3NS41LDI2MjkuNSAzNzcuOCwyNjI5LjAgMzc3LjUgQyAyNjI4LjMgMzc3LjEsMjYyOCAzNjUuNSwyNjI4IDM0NS41IEMgMjYyOCAzMTcuOCwyNjI3LjggMzE0LjEsMjYyNi40IDMxMy42IEMgMjYyNC4zIDMxMi44LDI0MjQuMiAzMTIuOCwyNDIxLjIgMzEzLjYgTCAyNDE4LjkgMzE0LjIgMjQxOS4yIDY2My4zIEwgMjQxOS41IDEwMTIuNSAyNTIxLjggMTAxMi43IEMgMjU5My4yIDEwMTIuOSwyNjI0LjYgMTAxMi42LDI2MjUuNSAxMDExLjkgQyAyNjI2LjYgMTAxMS4wLDI2MjYuOCA5NzIuNiwyNjI2LjkgODEyLjEgQyAyNjI2LjkgNzAyLjksMjYyNy4yIDYxMS4yLDI2MjcuNSA2MDguNSBDIDI2MzMuOCA1NTMuNywyNjY4LjUgNTA2LjEsMjcxMy41IDQ5MC41IEMgMjczMy4zIDQ4My43LDI3NDQuOSA0ODEuOCwyNzY4IDQ4MS42IEMgMjc5MS4zIDQ4MS41LDI4MDIuMSA0ODMuMywyODIxLjkgNDkwLjUgQyAyODUwLjAgNTAwLjcsMjg3Ni4zIDUyNi4wLDI4ODcuOCA1NTQgQyAyODg5LjAgNTU3LjAsMjg5MC40IDU2MC40LDI4OTAuOSA1NjEuNSBDIDI4OTMuNSA1NjcuNiwyODk2LjkgNTc5LjksMjg5OS42IDU5MyBDIDI5MDEuMyA2MDAuOSwyOTAxLjUgNjE0LjYsMjkwMS45IDgwNyBMIDI5MDIuNSAxMDEyLjUgMzAwNC4zIDEwMTIuNyBDIDMwNzguOCAxMDEyLjksMzEwNi42IDEwMTIuNywzMTA3LjYgMTAxMS44IEMgMzEwOC43IDEwMTAuOSwzMTA4LjkgOTc0LjIsMzEwOC45IDc4Ni42IEMgMzEwOC45IDUyOS4xLDMxMDguOSA1MjguNSwzMTAwLjkgNDkyLjMgQyAzMDgzLjMgNDEzLjAsMzA0Ni45IDM1OC40LDI5ODguMiAzMjMuMSBDIDI5ODIuNSAzMTkuNywyOTc3LjcgMzE3LDI5NzcuNCAzMTcgQyAyOTc3LjIgMzE3LDI5NzQuOSAzMTUuNywyOTcyLjIgMzE0LjIgQyAyOTU2LjAgMzA0LjcsMjkyNS4xIDI5NS4wLDI4OTAuNSAyODguNSBDIDI4NzUuOCAyODUuNywyODQyLjEgMjgzLjUsMjgzMSAyODQuNiBNIDM3NC41IDQ1OS42IEMgMzYzLjcgNDYxLjcsMzQ4LjQgNDY1LjcsMzQwLjcgNDY4LjYgQyAzMDYuNiA0ODEuMiwyODEuOSA0OTcuNiwyNjAuMSA1MjIgQyAyMzUuOSA1NDkuMSwyMjEuNyA1NzUsMjE0LjUgNjA1LjUgQyAyMTEuMyA2MTguNiwyMTEuMCA2MjAuNSwyMDkuOCA2MzAgQyAyMDcuMSA2NTIuNiwyMDcuNyA2NjcuMSwyMTIuMSA2OTAgQyAyMjMuMyA3NDcuNiwyNjEuMiA3OTguMCwzMTIuNyA4MjMuOCBDIDM0MS4wIDgzOC4wLDM2Ny4xIDg0NC4yLDM5Ny45IDg0NC4xIEMgNDM4LjMgODQzLjksNDY4LjQgODM2LjAsNDk5LjEgODE3LjQgQyA1MzkuMyA3OTMuMCw1NzAuMyA3NTUuMyw1ODYuMiA3MTEuNSBDIDU4OS41IDcwMi40LDU5MC4yIDcwMC4zLDU5MC45IDY5NyBDIDU5MS40IDY5NS4wLDU5Mi4yIDY5MS40LDU5Mi44IDY4OSBDIDU5Ny40IDY3MC41LDU5OC43IDYzMy42LDU5NS40IDYxNy4yIEMgNTg2LjUgNTczLjEsNTcxLjEgNTQzLjAsNTQxLjkgNTEyLjggQyA1MTYuMyA0ODYuMyw0NzguMiA0NjcuMSw0MzcuNSA0NTkuOSBDIDQyMy40IDQ1Ny40LDM4Ny4wIDQ1Ny4zLDM3NC41IDQ1OS42IE0gMTkyNiA0NTkuMCBDIDE4OTMuNyA0NjQuNCwxODcyLjAgNDcyLjcsMTg0NS41IDQ4OS43IEMgMTgyMS4xIDUwNS40LDE3OTUuNyA1MzIuMSwxNzgxLjkgNTU2LjYgQyAxNzc5LjkgNTYwLjEsMTc3My40IDU3My4xLDE3NzEuMiA1NzggQyAxNzcwLjQgNTc5LjksMTc2OS4zIDU4Mi4yLDE3NjguOCA1ODMuMiBDIDE3NjUuMyA1OTAuMywxNzU5LjcgNjExLjYsMTc1Ny4zIDYyNi42IEMgMTc1My4wIDY1My45LDE3NTcuMSA2OTIuNywxNzY3LjAgNzE4IEMgMTc2OC4yIDcyMS4wLDE3NjkuNCA3MjQuMywxNzY5LjcgNzI1LjQgQyAxNzcwLjggNzI5LjAsMTc4My4xIDc1Mi40LDE3ODcuNiA3NTkuMyBDIDE4MDguMCA3OTAuOSwxODM2LjkgODE1LjIsMTg3My4xIDgzMS4zIEMgMTg5NC4xIDg0MC43LDE5MzAuMCA4NDcuNiwxOTUxLjggODQ2LjYgQyAxOTk0LjAgODQ0LjcsMjAyNy4xIDgzNC4xLDIwNjAuMSA4MTIuMCBDIDIxMDUuNiA3ODEuNSwyMTM1LjkgNzM1LjUsMjE0Ni42IDY4MC41IEMgMjE0OS41IDY2NS42LDIxNDkuMCA2MjguMCwyMTQ1LjYgNjEzLjUgQyAyMTQyLjQgNTk5LjAsMjE0MS4xIDU5NC4yLDIxNDAuMSA1OTIuMiBDIDIxMzkuMSA1OTAuMywyMTM3LjMgNTg1LjEsMjEzNS45IDU4MC40IEMgMjEzNC4yIDU3NC45LDIxMjEuOSA1NTEuNiwyMTE2LjQgNTQzLjUgQyAyMTA3LjIgNTMwLjEsMjA5NS44IDUxNi45LDIwODUuOSA1MDguMSBDIDIwNzcuMSA1MDAuNCwyMDY0LjcgNDkxLDIwNjMuMiA0OTEgQyAyMDYyLjkgNDkxLDIwNjEuOSA0OTAuMywyMDYxLjAgNDg5LjYgQyAyMDU3LjcgNDg2LjcsMjAzNS4zIDQ3NS4yLDIwMjcuNyA0NzIuNCBDIDE5OTUuOCA0NjAuOCwxOTc5LjkgNDU3LjksMTk1MC45IDQ1OC4xIEMgMTkzOS42IDQ1OC4yLDE5MjguNCA0NTguNiwxOTI2IDQ1OS4wIE0gMzUxNSA0NjAuMCBDIDM0ODUuNyA0NjUuNiwzNDY1LjkgNDczLjUsMzQ0MC41IDQ4OS44IEMgMzQyMy42IDUwMC42LDM0MDYuMSA1MTYuNywzMzkxLjkgNTM0LjYgQyAzMzc0LjggNTU2LjEsMzM2MC44IDU4Ni4yLDMzNTUuNSA2MTMgQyAzMzU0LjcgNjE3LjEsMzM1My41IDYyMi45LDMzNTIuOSA2MjYgQyAzMzQ4LjggNjQ1LjMsMzM1MS42IDY4Ni43LDMzNTguNyA3MDkuNSBDIDMzODAuOCA3ODEuMCwzNDM5LjQgODMyLjMsMzUxMS41IDg0My4xIEMgMzUyMy40IDg0NC45LDM1NTkuOSA4NDQuOSwzNTcwIDg0My4xIEMgMzYwMi44IDgzNy4yLDM2MTkuNSA4MzEuMywzNjQzLjMgODE3LjIgQyAzNjY3LjggODAyLjYsMzY4Ny42IDc4NC4yLDM3MDcuMiA3NTcuOCBDIDM3MTYuNSA3NDUuMywzNzMxLjAgNzEzLjksMzczNS4wIDY5OCBDIDM3NDAuNiA2NzUuMywzNzQyLjUgNjU4LjcsMzc0MS41IDY0MC41IEMgMzczNy41IDU2NS4xLDM2OTIuOSA1MDEuNiwzNjI0LjUgNDczLjUgQyAzNjA2LjAgNDY1LjksMzU5NC40IDQ2Mi42LDM1NzUuOSA0NTkuNSBDIDM1NjIuMSA0NTcuMywzNTI3LjggNDU3LjUsMzUxNSA0NjAuMCIvPjwvc3ZnPgo=");
+    --sans: Archivo, system-ui, sans-serif; --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  @page { size: 1920px 1080px; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #888; }
+  body { font-family: var(--sans); color: var(--text); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .slide { width: 1920px; height: 1080px; position: relative; overflow: hidden; background: var(--bg); padding: 112px 128px 96px; display: flex; flex-direction: column; page-break-after: always; break-after: page; margin: 0 auto 24px; }
+  @media print { html, body { background: none; } .slide { margin: 0; } }
+  .dark { background: var(--ink); color: var(--paper); }
+  .grid::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(to right, rgba(32,30,29,.05) 1px, transparent 1px); background-size: 160px 100%; pointer-events: none; }
+  .dark.grid::before { background-image: linear-gradient(to right, rgba(243,242,242,.06) 1px, transparent 1px); }
+  .photo { position: absolute; inset: 0; background-size: cover; background-position: center; }
+  .shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(12,11,10,.92) 0%, rgba(12,11,10,.7) 45%, rgba(12,11,10,.25) 100%); }
+  .z { position: relative; z-index: 1; }
+  .kicker { font-family: var(--mono); font-size: 22px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); display: flex; gap: 20px; align-items: baseline; }
+  .kicker b { color: var(--accent); font-weight: 500; }
+  .dark .kicker { color: var(--dmuted); } .dark .kicker b { color: var(--accent-t); }
+  .rule { width: 120px; height: 3px; background: var(--accent); margin: 30px 0 34px; }
+  .dark .rule { background: var(--accent-l); }
+  h1 { margin: 0; font-size: 108px; line-height: 1; font-weight: 800; letter-spacing: -.04em; }
+  h2 { margin: 0; font-size: 76px; line-height: 1.02; font-weight: 800; letter-spacing: -.035em; max-width: 1500px; }
+  h3 { margin: 0; font-size: 34px; line-height: 1.15; font-weight: 800; letter-spacing: -.02em; }
+  p { margin: 0; }
+  .lede { font-size: 32px; line-height: 1.38; color: var(--muted); max-width: 1180px; margin-top: 30px; }
+  .dark .lede { color: var(--dmuted); }
+  .foot { position: absolute; left: 128px; right: 128px; bottom: 52px; display: flex; justify-content: space-between; align-items: center; font-family: var(--mono); font-size: 16px; letter-spacing: .05em; text-transform: uppercase; color: var(--faint); z-index: 1; }
+  .dark .foot { color: var(--dfaint); }
+  .mark { width: 120px; height: 32px; background: var(--text); -webkit-mask: var(--wm) no-repeat left center / contain; mask: var(--wm) no-repeat left center / contain; }
+  .dark .mark { background: var(--paper); }
+  .src { font-family: var(--mono); font-size: 16px; color: var(--faint); letter-spacing: .02em; margin-top: auto; padding-bottom: 36px; }
+  .dark .src { color: var(--dfaint); }
+  .stats { display: grid; gap: 0; margin-top: 56px; border-top: 2px solid var(--line); }
+  .dark .stats { border-color: rgba(243,242,242,.35); }
+  .stat { padding: 34px 40px 0 0; }
+  .stat + .stat { padding-left: 40px; border-left: 2px solid var(--hair); }
+  .dark .stat + .stat { border-color: rgba(243,242,242,.14); }
+  .num { font-family: var(--mono); font-size: 112px; line-height: 1; letter-spacing: -.04em; font-weight: 500; }
+  .num small { font-size: 52px; }
+  .stat .lbl { font-size: 26px; line-height: 1.35; margin-top: 18px; color: var(--muted); max-width: 460px; }
+  .dark .stat .lbl { color: var(--dmuted); }
+  .accent { color: var(--accent); } .dark .accent { color: var(--accent-t); }
+  .green { color: var(--green); } .dark .green { color: var(--green-l); }
+  .red { color: var(--red); }
+  .cols { display: grid; gap: 48px; margin-top: 56px; }
+  .col { border-top: 2px solid var(--line); padding-top: 26px; }
+  .col .n { font-family: var(--mono); font-size: 18px; color: var(--accent); letter-spacing: .06em; }
+  .col h3 { margin-top: 14px; }
+  .col p { margin-top: 14px; font-size: 24px; line-height: 1.42; color: var(--muted); }
+  .shot { border: 2px solid var(--line); background: #fff; box-shadow: 0 30px 70px rgba(32,30,29,.16); overflow: hidden; }
+  .shot img { display: block; width: 100%; }
+  .cap { font-family: var(--mono); font-size: 16px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-top: 14px; }
+  table { border-collapse: collapse; width: 100%; font-size: 25px; }
+  th { text-align: left; font-family: var(--mono); font-weight: 500; font-size: 16px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding: 0 24px 14px 0; border-bottom: 2px solid var(--line); }
+  td { padding: 17px 24px 17px 0; border-bottom: 1px solid var(--hair); vertical-align: top; line-height: 1.32; }
+  td:first-child { font-weight: 700; white-space: nowrap; }
+  td code, .code { font-family: var(--mono); font-size: .86em; }
+  .pill { display: inline-block; font-family: var(--mono); font-size: 15px; letter-spacing: .05em; text-transform: uppercase; padding: 5px 10px; background: var(--surface); color: var(--muted); }
+  .pill.ok { background: oklch(0.93 0.05 150); color: var(--green); }
+</style>
+</head>
+<body>
+
+<!-- 1 · Cover -->
+<section class="slide dark">
+  <div class="photo" style="background-image:url(img/bg-b-1.jpg)"></div><div class="shade"></div>
+  <div class="z" style="margin-top:auto;margin-bottom:auto">
+    <div style="width:420px;height:112px;background:var(--paper);-webkit-mask:var(--wm) no-repeat left center/contain;mask:var(--wm) no-repeat left center/contain"></div>
+    <div class="rule"></div>
+    <h1>Private equity,<br>made accessible.</h1>
+    <p class="lede" style="max-width:1080px">Established manufacturers raise growth capital from verified investors worldwide, and pay them back from real profit. On Stellar.</p>
+  </div>
+  <div class="foot"><span>HackMeridian · Genesis · Stellar Unlocked</span><span>dvdnd.app</span></div>
+</section>
+
+<!-- 2 · Problem: companies -->
+<section class="slide grid">
+  <div class="kicker z"><b>01</b><span>The problem · companies</span></div>
+  <div class="rule z"></div>
+  <h2 class="z">Good businesses can't get the capital to grow.</h2>
+  <div class="stats z" style="grid-template-columns:1.25fr 1fr 1fr">
+    <div class="stat"><div class="num accent">40%</div><div class="lbl">of businesses globally can't access the growth capital they need</div></div>
+    <div class="stat"><div class="num">65M</div><div class="lbl">firms in developing economies are capital-constrained</div></div>
+    <div class="stat"><div class="num">$5.2T</div><div class="lbl">unmet financing need, every year</div></div>
+  </div>
+  <p class="lede z" style="margin-top:56px">A profitable parts maker that wants a new line chooses between bank debt and giving up control. Selling a share of future profit to outside investors is reserved for the few with access to private markets.</p>
+  <div class="src z">Source: IFC, MSME Finance Gap (2017)</div>
+  <div class="foot"><div class="mark"></div><span>02</span></div>
+</section>
+
+<!-- 3 · Problem: investors -->
+<section class="slide dark grid">
+  <div class="kicker z"><b>02</b><span>The problem · investors</span></div>
+  <div class="rule z"></div>
+  <h2 class="z">Capital is moving private. Most investors can't follow.</h2>
+  <div class="stats z" style="grid-template-columns:1fr 1fr 1fr">
+    <div class="stat"><div class="num accent">$2.1T</div><div class="lbl">private equity investment in 2025, as venture LP commitments hit a ten-year low</div></div>
+    <div class="stat"><div class="num" style="font-size:96px;white-space:nowrap">6<small>%</small><span style="color:var(--dfaint);font-size:44px"> vs </span>16<small>%</small></div><div class="lbl">PE distribution yield in 2025 against the 2015–2019 average: investors want cash back</div></div>
+    <div class="stat"><div class="num">~3,700</div><div class="lbl">US-listed companies, down from 8,000+ in 1996</div></div>
+  </div>
+  <p class="lede z" style="margin-top:48px">The best opportunities are abroad, unlisted, and expensive to find, check and buy into.</p>
+  <div class="src z">Sources: KPMG Pulse of Private Equity Q4'25 · PitchBook-NVCA Venture Monitor Q4 2025 · McKinsey Global Private Markets Report 2026 · CRSP via Doidge, Karolyi &amp; Stulz</div>
+  <div class="foot"><div class="mark"></div><span>03</span></div>
+</section>
+
+<!-- 4 · Crypto's answer -->
+<section class="slide grid">
+  <div class="kicker z"><b>03</b><span>Crypto's answer so far</span></div>
+  <div class="rule z"></div>
+  <h2 class="z">Launchpads tokenized speculation, not businesses.</h2>
+  <div class="stats z" style="grid-template-columns:1fr 1fr 1fr">
+    <div class="stat"><div class="num red">0.63%</div><div class="lbl">of pump.fun tokens graduated in September 2025 (1.89% lifetime)</div></div>
+    <div class="stat"><div class="num">~60%</div><div class="lbl">of active wallets lost money over six months</div></div>
+    <div class="stat"><div class="num">14.7×</div><div class="lbl">price gap between the first and last buyer on a bonding curve</div></div>
+  </div>
+  <p class="lede z" style="margin-top:56px">No cash flow behind the token, so returns come from later buyers. dvdnd keeps the rails and replaces the meme with a business: one price for everyone, and a payout funded by profit.</p>
+  <div class="src z">Sources: arXiv 2602.14860 (pump.fun, Sep 2025) · Dune via Solana Compass, CoinMarketCap · dvdnd research notes, Oct 2026</div>
+  <div class="foot"><div class="mark"></div><span>04</span></div>
+</section>
+
+<!-- 5 · Solution -->
+<section class="slide grid">
+  <div class="kicker z"><b>04</b><span>The solution</span></div>
+  <div class="rule z"></div>
+  <div class="z" style="display:grid;grid-template-columns:1fr 980px;gap:72px;flex:1">
+    <div>
+      <h2 style="font-size:58px">A share of real profit, as a token only verified investors can hold.</h2>
+      <div class="cols" style="grid-template-columns:1fr;gap:28px;margin-top:44px">
+        <div class="col"><div class="n">FIXED PRICE · ALL OR NOTHING</div><p style="margin-top:8px">Same price for every investor. Minimum missed: everyone is refunded, by code.</p></div>
+        <div class="col"><div class="n">ELIGIBLE BY PROOF · ANONYMOUS BY DESIGN</div><p style="margin-top:8px">One identity check, then a zero-knowledge proof. Stellar learns eligibility, not identity.</p></div>
+        <div class="col"><div class="n">PAID FROM PROFIT · IN USDC</div><p style="margin-top:8px">The company commits a share of yearly profit. Holders who stay locked are paid pro rata.</p></div>
+      </div>
+    </div>
+    <div style="align-self:center"><div class="shot"><img src="img/raise.png" alt=""></div><div class="cap">A live raise on Stellar testnet: Corvo Precision Parts, automotive parts, Braga</div></div>
+  </div>
+  <div class="foot"><div class="mark"></div><span>05</span></div>
+</section>
+
+<!-- 6 · How it works -->
+<section class="slide dark grid">
+  <div class="kicker z"><b>05</b><span>How it works</span></div>
+  <div class="rule z"></div>
+  <h2 class="z">From raise to dividend, on-chain.</h2>
+  <div class="cols z" style="grid-template-columns:repeat(6,1fr);gap:28px;margin-top:72px">
+    <div class="col" style="border-color:var(--accent-l)"><div class="n" style="color:var(--accent-t)">01 · LIST</div><h3 style="font-size:30px">Prove it's yours</h3><p style="color:var(--dmuted);font-size:21px">Register lookup fills the profile. DNS proof of domain. Profit-share agreement hashed on-chain.</p></div>
+    <div class="col" style="border-color:var(--accent-l)"><div class="n" style="color:var(--accent-t)">02 · RAISE</div><h3 style="font-size:30px">One price</h3><p style="color:var(--dmuted);font-size:21px">Min, max, deadline. Reg S, Rule 506(c) or both. Flat listing fee.</p></div>
+    <div class="col" style="border-color:var(--accent-l)"><div class="n" style="color:var(--accent-t)">03 · PROVE</div><h3 style="font-size:30px">Eligible, privately</h3><p style="color:var(--dmuted);font-size:21px">Didit identity check, then a Groth16 proof of non-US residence verified by Soroban.</p></div>
+    <div class="col" style="border-color:var(--accent-l)"><div class="n" style="color:var(--accent-t)">04 · CLOSE</div><h3 style="font-size:30px">Paid or refunded</h3><p style="color:var(--dmuted);font-size:21px">USDC in escrow goes to the company or back to investors. No other path.</p></div>
+    <div class="col" style="border-color:var(--accent-l)"><div class="n" style="color:var(--accent-t)">05 · EARN</div><h3 style="font-size:30px">Paid to the patient</h3><p style="color:var(--dmuted);font-size:21px">Tokens earn in the vault. Only full-period lockers share the dividend.</p></div>
+    <div class="col" style="border-color:var(--accent-l)"><div class="n" style="color:var(--accent-t)">06 · TRADE</div><h3 style="font-size:30px">Among the eligible</h3><p style="color:var(--dmuted);font-size:21px">After lock-up, Stellar's order book, restricted to authorized wallets.</p></div>
+  </div>
+  <p class="lede z" style="margin-top:auto;padding-bottom:40px">Money reaches the company once, at the raise, and flows back to holders as dividends. No bonding curve, no sniper advantage, no buyback.</p>
+  <div class="foot"><div class="mark"></div><span>06</span></div>
+</section>
+
+<!-- 7 · Product -->
+<section class="slide grid">
+  <div class="kicker z"><b>06</b><span>The product, live on testnet</span></div>
+  <div class="rule z"></div>
+  <div class="z" style="display:grid;grid-template-columns:repeat(3,1fr);gap:30px 44px;margin-top:-6px">
+    <div><div class="shot"><img src="img/onboard.png" alt=""></div><div class="cap">Find yourself: France's register and GLEIF fill the profile</div></div>
+    <div><div class="shot"><img src="img/prove.png" alt=""></div><div class="cap">ZK proof built in the browser, verified on Stellar</div></div>
+    <div><div class="shot"><img src="img/pay.png" alt=""></div><div class="cap">The company pays 50% of profit to locked holders</div></div>
+    <div><div class="shot"><img src="img/trade.png" alt=""></div><div class="cap">Order book, open only to eligible holders</div></div>
+    <div><div class="shot"><img src="img/compliance-c.png" alt=""></div><div class="cap">Per-raise freeze and clawback, each with a reason</div></div>
+    <div style="display:flex;flex-direction:column;justify-content:center"><h3 style="font-size:44px;line-height:1.08">Every flow runs for real: wallets, KYC, proofs, escrow, dividends, trades.</h3><p style="margin-top:20px;font-size:22px;color:var(--muted);line-height:1.4">Watch the 1:47 film at dvdnd.app/docs</p></div>
+  </div>
+  <div class="foot"><span></span><span>07</span></div>
+</section>
+
+<!-- 8 · Compliance by design -->
+<section class="slide grid">
+  <div class="kicker z"><b>07</b><span>Compliance by design</span></div>
+  <div class="rule z"></div>
+  <h2 class="z">No cut. No custody. No gatekeeper.</h2>
+  <table class="z" style="margin-top:52px">
+    <thead><tr><th style="width:420px">Rule</th><th>How dvdnd enforces it</th></tr></thead>
+    <tbody>
+      <tr><td>Securities Act §4(b)</td><td>A flat listing fee per raise. Never a share of capital raised: software, not a broker.</td></tr>
+      <tr><td>Customer funds</td><td>Escrowed USDC can only go to the company on success or back to investors. There's no withdraw button.</td></tr>
+      <tr><td>Regulation S</td><td>Non-US residence proven with a zero-knowledge proof, checked by the contract.</td></tr>
+      <tr><td>Rule 506(c)</td><td>Verified accredited investors, US included: an attestation, or $200k minimum ($1M for entities).</td></tr>
+      <tr><td>Rule 144 · §12(g)</td><td>One-year Reg D lock-up and a holder cap under 2,000, both enforced on-chain.</td></tr>
+      <tr><td>Who may hold</td><td>Stellar's <code>AUTH_REQUIRED</code> flags refuse transfers to unverified wallets, on every venue.</td></tr>
+    </tbody>
+  </table>
+  <div class="src z" style="padding-top:28px">SEC Release 33-11412, with the CFTC (17 March 2026): a tokenized security is still a security, so on-chain shares use the same proven exemptions as any private raise. Draft strategy, not legal advice.</div>
+  <div class="foot"><div class="mark"></div><span>08</span></div>
+</section>
+
+<!-- 9 · Why Stellar -->
+<section class="slide dark grid">
+  <div class="kicker z"><b>08</b><span>Architecture · why Stellar</span></div>
+  <div class="rule z"></div>
+  <h2 class="z">The protocol enforces the rules, not our servers.</h2>
+  <div class="z" style="display:grid;grid-template-columns:1.2fr 1fr;gap:80px;margin-top:56px">
+    <table style="color:var(--paper)">
+      <thead><tr><th style="color:var(--dmuted);border-color:rgba(243,242,242,.35)">Stellar feature</th><th style="color:var(--dmuted);border-color:rgba(243,242,242,.35)">Used for</th></tr></thead>
+      <tbody>
+        <tr><td style="border-color:rgba(243,242,242,.12)">BN254 host functions</td><td style="border-color:rgba(243,242,242,.12);color:var(--dmuted)">Groth16 residence proof verified on-chain, ~30M CPU instructions</td></tr>
+        <tr><td style="border-color:rgba(243,242,242,.12)">Poseidon host function</td><td style="border-color:rgba(243,242,242,.12);color:var(--dmuted)">Credential Merkle tree kept on-chain; wallet bound into the proof</td></tr>
+        <tr><td style="border-color:rgba(243,242,242,.12)">Asset auth flags</td><td style="border-color:rgba(243,242,242,.12);color:var(--dmuted)">Only authorized wallets can hold the share token, anywhere</td></tr>
+        <tr><td style="border-color:rgba(243,242,242,.12)">Stellar Asset Contract</td><td style="border-color:rgba(243,242,242,.12);color:var(--dmuted)">Escrow is the token admin: mints exactly what sold, never again</td></tr>
+        <tr><td style="border-color:rgba(243,242,242,.12)">SDEX + path payments</td><td style="border-color:rgba(243,242,242,.12);color:var(--dmuted)">Pay in XLM, receive USDC; secondary order book</td></tr>
+      </tbody>
+    </table>
+    <div>
+      <div class="cols" style="grid-template-columns:1fr;gap:26px;margin-top:0">
+        <div class="col" style="border-color:rgba(243,242,242,.35)"><div class="n" style="color:var(--accent-t)">5 SOROBAN CONTRACTS</div><p style="color:var(--dmuted);margin-top:8px"><span class="code" style="color:var(--paper)">registry · gate · offering · vault · timelock</span></p></div>
+        <div class="col" style="border-color:rgba(243,242,242,.35)"><div class="n" style="color:var(--accent-t)">GOVERNANCE</div><p style="color:var(--dmuted);margin-top:8px">2-of-3 council multisig, master key disabled, every admin change behind a timelock. No power over holders.</p></div>
+        <div class="col" style="border-color:rgba(243,242,242,.35)"><div class="n" style="color:var(--accent-t)">PRIVACY</div><p style="color:var(--dmuted);margin-top:8px">The KYC session is deleted once the proof is on-chain. One wallet per credential.</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div class="mark"></div><span>09</span></div>
+</section>
+
+<!-- 10 · Traction -->
+<section class="slide grid">
+  <div class="kicker z"><b>09</b><span>Built during HackMeridian</span></div>
+  <div class="rule z"></div>
+  <h2 class="z">Not a mock-up. Running on Stellar today.</h2>
+  <div class="stats z" style="grid-template-columns:repeat(4,1fr)">
+    <div class="stat"><div class="num accent">34<small>/48</small></div><div class="lbl">components of the plan built for real on testnet</div></div>
+    <div class="stat"><div class="num">5</div><div class="lbl">Soroban contracts deployed, with every transaction of a full cycle on record</div></div>
+    <div class="stat"><div class="num">6<small>+1</small></div><div class="lbl">national business registers plus GLEIF for company lookup</div></div>
+    <div class="stat"><div class="num">1:47</div><div class="lbl">film of the full lifecycle: list, raise, prove, invest, close, dividend</div></div>
+  </div>
+  <div class="cols z" style="grid-template-columns:repeat(4,1fr);gap:40px;margin-top:64px">
+    <div><span class="pill ok">Real</span><p style="margin-top:12px;font-size:23px;line-height:1.4;color:var(--muted)">KYC with Didit: ID, liveness and face match, first check passed 25 Oct</p></div>
+    <div><span class="pill ok">Real</span><p style="margin-top:12px;font-size:23px;line-height:1.4;color:var(--muted)">Groth16 proofs generated in the browser and verified on-chain</p></div>
+    <div><span class="pill ok">Real</span><p style="margin-top:12px;font-size:23px;line-height:1.4;color:var(--muted)">External wallets (xBull, Freighter, Lobstr), SEP-10 and SEP-24</p></div>
+    <div><span class="pill ok">Real</span><p style="margin-top:12px;font-size:23px;line-height:1.4;color:var(--muted)">OFAC wallet screening, audit log, order-book trades</p></div>
+  </div>
+  <div class="foot"><div class="mark"></div><span>10</span></div>
+</section>
+
+<!-- 11 · Market & model -->
+<section class="slide grid">
+  <div class="kicker z"><b>10</b><span>Who it's for · how it earns</span></div>
+  <div class="rule z"></div>
+  <h2 class="z">Established manufacturers, raising against real profit.</h2>
+  <div class="z" style="display:grid;grid-template-columns:1fr 1fr;gap:96px;margin-top:56px">
+    <div>
+      <div class="n" style="font-family:var(--mono);font-size:18px;color:var(--accent);letter-spacing:.06em">ILLUSTRATIVE · FROM PUBLIC FILINGS</div>
+      <h3 style="margin-top:14px;font-size:40px">An automotive-parts maker, 1987, 50–99 staff</h3>
+      <table style="margin-top:30px">
+        <tbody>
+          <tr><td>Revenue 2025</td><td class="code" style="text-align:right">€41.2M</td></tr>
+          <tr><td>Net profit 2025</td><td class="code" style="text-align:right">€4.6M</td></tr>
+          <tr><td>Commits 20% of profit</td><td class="code" style="text-align:right">€0.91M / yr to holders</td></tr>
+          <tr><td>At a 12% target yield</td><td class="code accent" style="text-align:right;font-weight:700">€7.6M raise</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:22px;font-size:20px;color:var(--faint);font-family:var(--mono)">Sorea, Sainte-Eulalie-en-Royans · Registre national des entreprises</p>
+    </div>
+    <div>
+      <div class="cols" style="grid-template-columns:1fr;gap:30px;margin-top:0">
+        <div class="col"><div class="n">TARGET</div><p style="margin-top:8px">Profitable industrial SMEs: auto parts, precision machining, components. Europe first, where the registers already plug in.</p></div>
+        <div class="col"><div class="n">REVENUE</div><p style="margin-top:8px">A flat listing fee per raise, never a percentage. Next: compliance tooling for transfer agents and portals.</p></div>
+        <div class="col"><div class="n">INVESTORS</div><p style="margin-top:8px">Non-US investors under Reg S, accredited US investors under 506(c), retail later through a Reg CF partner portal.</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div class="mark"></div><span>11</span></div>
+</section>
+
+<!-- 12 · Path to mainnet -->
+<section class="slide dark grid">
+  <div class="kicker z"><b>11</b><span>Path to mainnet</span></div>
+  <div class="rule z"></div>
+  <h2 class="z">The code is ready. Next: audit, counsel, pilot.</h2>
+  <div class="cols z" style="grid-template-columns:repeat(4,1fr);gap:36px;margin-top:64px">
+    <div class="col" style="border-color:var(--green-l)"><div class="n" style="color:var(--green-l)">NOW · DONE</div><h3 style="margin-top:12px">Testnet</h3><p style="color:var(--dmuted);font-size:22px">Full lifecycle live. Network switch and Circle mainnet USDC issuer already configured.</p></div>
+    <div class="col" style="border-color:var(--accent-l)"><div class="n" style="color:var(--accent-t)">PHASE 1</div><h3 style="margin-top:12px">Security</h3><p style="color:var(--dmuted);font-size:22px">Audit of contracts and circuit. Multi-party trusted setup (phase 1 has 80 contributors). Deploy behind council and timelock.</p></div>
+    <div class="col" style="border-color:var(--accent-l)"><div class="n" style="color:var(--accent-t)">PHASE 2</div><h3 style="margin-top:12px">Legal &amp; rails</h3><p style="color:var(--dmuted);font-size:22px">Counsel on §4(b) and code-held escrow. SPV or profit-participation wrapper. Accreditation service, Didit AML, Circle Mint, MoneyGram.</p></div>
+    <div class="col" style="border-color:var(--accent-l)"><div class="n" style="color:var(--accent-t)">PHASE 3</div><h3 style="margin-top:12px">Pilot, then scale</h3><p style="color:var(--dmuted);font-size:22px">One to three manufacturers under 506(c) + Reg S with Form D filings and a transfer agent. Then Reg CF via a partner portal.</p></div>
+  </div>
+  <p class="lede z" style="margin-top:auto;padding-bottom:40px">14 of 48 plan items remain, and 8 of them need a vendor or a lawyer rather than code.</p>
+  <div class="foot"><div class="mark"></div><span>12</span></div>
+</section>
+
+<!-- 13 · Close -->
+<section class="slide dark">
+  <div class="photo" style="background-image:url(img/bg-a-6.jpg)"></div><div class="shade"></div>
+  <div class="z" style="margin-top:auto;margin-bottom:auto">
+    <div style="width:300px;height:80px;background:var(--paper);-webkit-mask:var(--wm) no-repeat left center/contain;mask:var(--wm) no-repeat left center/contain"></div>
+    <div class="rule"></div>
+    <h1>Real businesses.<br>Real profit.<br>Paid in dollars.</h1>
+    <div style="display:flex;gap:56px;margin-top:56px;font-family:var(--mono);font-size:28px">
+      <span style="color:var(--accent-t)">dvdnd.app</span>
+      <span style="color:var(--dmuted)">dvdnd.app/docs</span>
+      <span style="color:var(--dmuted)">github.com/forever8896/dvdnd</span>
+    </div>
+  </div>
+  <div class="foot"><span>HackMeridian · Genesis · Stellar Unlocked</span><span>Testnet · not investment advice</span></div>
+</section>
+
+</body>
+</html>

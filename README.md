@@ -12,6 +12,7 @@
   <a href="https://dvdnd.app"><b>Live demo</b></a> ·
   <a href="https://dvdnd.app/docs"><b>Docs</b></a> ·
   <a href="https://www.dvdnd.app/clips/lifecycle.mp4"><b>Watch the 2-minute film</b></a> ·
+  <a href="docs/pitch/dvdnd-pitch.pdf">Pitch deck</a> ·
   <a href="deployments/evidence.md">On-chain evidence</a>
 </p>
 
