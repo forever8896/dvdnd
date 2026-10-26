@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { isEligible, useWallet } from "@/lib/wallet";
 import { Logo } from "./brand";
+import { DemoSwitcher } from "./demo-switcher";
 import { EligibilityPill, fmt } from "./ui";
 
 const INVESTOR_LINKS = [
@@ -48,6 +49,7 @@ export function Nav() {
         ))}
       </nav>
       <div className="nav-right">
+        <DemoSwitcher />
         {ready && !me && (
           <Link href="/signin" className="btn btn-primary btn-sm">
             Sign in

@@ -129,6 +129,23 @@ scripts/testnet/demo-investor.sh investor-ben 276 600       # Germany
 scripts/testnet/demo-lifecycle.sh ANDES company-andes investor-ana 600 investor-ben 400 80
 ```
 
+### Run a live demo with personas
+
+```sh
+cd app
+npx tsx --conditions=react-server --env-file=.env.local ../scripts/testnet/demo-personas.mts
+```
+
+This creates fresh testnet personas and saves their keys to `app/.env.local` as `DEMO_PERSONAS`. Set the same variable on the deployment and restart. Run it again before each demo for a clean slate.
+
+| Persona | Ready for |
+|---|---|
+| Lumen Coffee Roasters | Verified company with a signed agreement, ready to open a raise |
+| Ana Ribeiro (Portugal), Chloé Wagner (Germany) | Eligible under Reg S, 1,500 USDC each |
+| Ben Carter (United States) | Verified accredited investor for 506(c) raises, 1,500 USDC |
+
+The **Demo** menu in the nav (testnet only) switches between them in one click. On testnet the raise form can count durations in minutes, so a raise, its lock-up, a dividend and a trade fit in one demo: open a Reg S raise for 10 minutes with a 5-minute lock-up; once it's full the company can close it straight away.
+
 ### Click through it in the app
 
 Open https://dvdnd.vercel.app, or run it locally:
