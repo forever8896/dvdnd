@@ -95,7 +95,7 @@ Five Soroban contracts (`registry`, `gate`, `offering`, `vault`, `timelock`) are
 
 ## Try it
 
-Open **[dvdnd.app](https://dvdnd.app)**. On testnet, the **Demo** menu switches in one click between a ready company (Corvo Precision Parts, an automotive-parts maker) and verified investors in Portugal, Germany and the US, and raises can run in minutes, so a full raise, lock-up and dividend fit in one sitting. You can also connect your own Stellar wallet (xBull, Freighter, Lobstr…) and go through the real identity check.
+Open **[dvdnd.app](https://dvdnd.app)** and connect a Stellar wallet (xBull, Freighter, Lobstr…) or create a testnet wallet in the browser. Investors go through the real identity check and zero-knowledge proof; companies find themselves in the register and open a raise. On testnet, raises and lock-ups can run in minutes, so a full raise, lock-up and dividend fit in one sitting.
 
 <details>
 <summary><b>Run it locally</b></summary>
@@ -109,12 +109,6 @@ cd ../app && cp .env.example .env.local && pnpm install && pnpm dev
 ```
 
 In `app/.env.local`, set `DVDND_ADMIN_SECRET` (the testnet platform key: `stellar keys show admin`) and, for the identity check, `DIDIT_API_KEY`, `DIDIT_WORKFLOW_ID` and `NEXT_PUBLIC_DIDIT_ENABLED=1`. Contract IDs and endpoints default to testnet (`app/src/lib/config.ts`).
-
-Fresh demo personas, saved to `app/.env.local` as `DEMO_PERSONAS` (run before each demo for a clean slate):
-
-```sh
-cd app && npx tsx --conditions=react-server --env-file=.env.local ../scripts/testnet/demo-personas.mts
-```
 
 Live tests against testnet, with the app running: `LIVE=1 APP_URL=http://localhost:3000 pnpm vitest run` in `app/`.
 </details>
@@ -158,7 +152,7 @@ Every transaction of a complete testnet cycle (ZK eligibility, raise, listing fe
 | [`contracts/`](contracts/) | Soroban contracts in Rust (soroban-sdk 28) |
 | [`circuits/`](circuits/) | Circom residence circuit, trusted-setup ceremony and prover |
 | [`app/`](app/) | Next.js app: investor and company flows, docs, wired to the testnet contracts |
-| [`scripts/testnet/`](scripts/testnet/) | Deploy, demo and persona scripts |
+| [`scripts/testnet/`](scripts/testnet/) | Deploy and demo scripts |
 | [`deployments/`](deployments/) | Contract IDs and transaction evidence |
 | [`research_notes/`](research_notes/), [`reports/`](reports/) | The research behind the design |
 
