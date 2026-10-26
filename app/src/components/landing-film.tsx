@@ -26,6 +26,8 @@ type Beat = {
   /** Small print under the body: a source line or a legend. */
   note?: string;
   links?: { label: string; href: string }[];
+  /** Renders the eyebrow as a large coloured tag ("business" or "investor"). */
+  tag?: "business" | "investor";
   /** Renders the eyebrow as a large animated "flash" badge. */
   flash?: boolean;
   /** A highlighted source block, e.g. the regulation the beat refers to. */
@@ -78,7 +80,7 @@ export const FILM_A: Film = {
     },
     {
       eyebrow: "The problem · investors",
-      title: "Meanwhile investors are rushing from venture bets to steady private equity.",
+      title: "Meanwhile investors are rushing from venture bets to steady private equity...",
       body: "Venture LP commitments are at their lowest point in a decade, with private equity investment growing to $2.1 trillion in 2025.",
       note: "Sources: PitchBook-NVCA Venture Monitor Q4 2025 · KPMG Pulse of Private Equity Q4'25",
       sec: [27.6, 28.6, 34.4, 35.4],
@@ -113,6 +115,7 @@ export const FILM_B: Film = {
     },
     {
       eyebrow: "For businesses",
+      tag: "business",
       title: "Raise growth capital from verified investors worldwide.",
       body: "Offer a share of your profit as tokens through Reg D 506(c) and Reg S offerings, with the holding rules enforced by the token itself.",
       sec: [3.4, 4.1, 6.6, 7.3],
@@ -121,6 +124,7 @@ export const FILM_B: Film = {
     },
     {
       eyebrow: "For investors",
+      tag: "investor",
       title: "Own a share of profitable private businesses, internationally.",
       body: "Prove you're eligible once, invest at a fixed price, lock your tokens and receive your share of profit in USDC.",
       sec: [7.7, 8.4, 10.9, 11.6],
@@ -130,9 +134,9 @@ export const FILM_B: Film = {
     {
       eyebrow: "News flash",
       flash: true,
-      title: "Real businesses can now raise on-chain, inside the rules.",
+      title: "An on-chain equities model, made possible by new SEC guidance",
       callout: {
-        label: "SEC–CFTC interpretation · March 17, 2026",
+        label: "SEC guidance · March 17, 2026 & September 23, 2026",
         title: "Application of the federal securities laws to crypto assets",
         says: "A security represented as a token is still a security, whether it's recorded on-chain or off-chain.",
         means: "On-chain shares can use the same proven exemptions as any private raise: Reg D 506(c) and Reg S.",
@@ -176,12 +180,14 @@ function BeatCopy({ beat, onLight }: { beat: Beat; onLight?: boolean }) {
           <span className="film-flash-dot" aria-hidden="true" />
           {beat.eyebrow}
         </div>
+      ) : beat.tag ? (
+        <div className={`aud-tag aud-tag-${beat.tag}`}>{beat.eyebrow}</div>
       ) : (
         <div className="film-eyebrow" style={onLight ? { color: "var(--muted)" } : undefined}>
           {beat.eyebrow}
         </div>
       )}
-      <h2 className="film-title">{beat.title}</h2>
+      <h2 className={`film-title${beat.title.length > 80 ? " film-title-long" : ""}`}>{beat.title}</h2>
       {beat.body && (
         <p className="film-body" style={onLight ? { color: "var(--muted)" } : undefined}>
           {beat.body}
