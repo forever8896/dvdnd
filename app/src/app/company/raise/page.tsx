@@ -49,6 +49,9 @@ export default function RaiseSetup() {
   const [maxOverride, setMaxOverride] = useState<string | null>(null);
   const [exemption, setExemption] = useState<Exemption>(Exemption.RegS);
   const [lockupDays, setLockupDays] = useState("0");
+  // Testnet demos can run a raise and its lock-up in minutes; mainnet uses days.
+  const [unit, setUnit] = useState<"days" | "minutes">("days");
+  const unitSecs = unit === "minutes" ? 60 : 86400;
   const [maxHolders, setMaxHolders] = useState("500");
   const [minTicket, setMinTicket] = useState("0");
   const [compliance, setCompliance] = useState("");
@@ -72,7 +75,7 @@ export default function RaiseSetup() {
   const min = Math.round((max * Number(minPct)) / 100);
   const impliedYield = max > 0 ? pool / max : 0;
   const lockup = Number(lockupDays);
-  const minLockup = acceptsAccredited(exemption) ? REG_D_LOCKUP_DAYS : 0;
+  const minLockup = acceptsAccredited(exemption) ? (REG_D_LOCKUP_DAYS * 86400) / unitSecs : 0;
   const holders = Number(maxHolders);
   const complianceAccount = compliance.trim() || me.publicKey;
   const complianceValid = StrKey.isValidEd25519PublicKey(complianceAccount);
@@ -95,7 +98,7 @@ export default function RaiseSetup() {
         /* the issuer key is only needed for classic admin actions */
       }
       push("Opening the raise");
-      const deadline = Math.floor(Date.now() / 1000) + Number(days) * 86400;
+      const deadline = Math.floor(Date.now() / 1000) + Math.round(Number(days) * unitSecs);
       const res = await openRaise(me!, {
         companyId: company.id,
         token,
@@ -107,7 +110,7 @@ export default function RaiseSetup() {
           exemption,
           min_ticket: toUnits(Number(minTicket)),
           max_holders: holders,
-          lockup_until: BigInt(deadline + lockup * 86400),
+          lockup_until: BigInt(deadline + Math.round(lockup * unitSecs)),
           compliance: complianceAccount,
           verifier: acceptsAccredited(exemption) && acceptVerifier && testnetVerifier ? testnetVerifier : undefined,
         },
@@ -138,7 +141,29 @@ export default function RaiseSetup() {
           <Field id="targetYield" label="Target yield for investors" value={targetYield} onChange={(v) => { setTargetYield(v); setMaxOverride(null); }} suffix="%" hint="Sets the raise size: your yearly dividend pool divided by this yield." />
           <Field id="max" label="Maximum raise" value={String(max)} onChange={setMaxOverride} suffix="USDC" hint={`Suggested ${fmt(suggestedMax)} from ${fmt(pool)} USDC/yr of committed profit.`} />
           <Field id="minPct" label="Minimum, as share of maximum" value={minPct} onChange={setMinPct} suffix="%" />
-          <Field id="days" label="Raise open for" value={days} onChange={setDays} suffix="days" />
+          {IS_TESTNET && (
+            <div className="field">
+              <span>Durations</span>
+              <div className="seg seg-sm" role="group" aria-label="Duration unit" style={{ alignSelf: "flex-start" }}>
+                {(["days", "minutes"] as const).map((u) => (
+                  <button
+                    key={u}
+                    aria-pressed={unit === u}
+                    onClick={() => {
+                      const k = u === "minutes" ? 60 : 86400;
+                      setUnit(u);
+                      setDays(u === "minutes" ? "10" : "7");
+                      setLockupDays(String(acceptsAccredited(exemption) ? (REG_D_LOCKUP_DAYS * 86400) / k : u === "minutes" ? 5 : 0));
+                    }}
+                  >
+                    {u === "days" ? "Days" : "Minutes (testnet demo)"}
+                  </button>
+                ))}
+              </div>
+              <span className="small">Minutes let you open, close, pay a dividend and trade within one demo.</span>
+            </div>
+          )}
+          <Field id="days" label="Raise open for" value={days} onChange={setDays} suffix={unit} />
 
           <div className="field">
             <span>Who can invest</span>
@@ -149,7 +174,7 @@ export default function RaiseSetup() {
                   aria-pressed={exemption === e}
                   onClick={() => {
                     setExemption(e);
-                    setLockupDays(String(acceptsAccredited(e) ? REG_D_LOCKUP_DAYS : 0));
+                    setLockupDays(String(acceptsAccredited(e) ? (REG_D_LOCKUP_DAYS * 86400) / unitSecs : 0));
                   }}
                 >
                   {SHORT_LABEL[e]}
@@ -160,7 +185,7 @@ export default function RaiseSetup() {
               {EXEMPTION_HELP[exemption]}
             </span>
           </div>
-          <Field id="lockup" label="Lock-up after the deadline" value={lockupDays} onChange={setLockupDays} suffix="days" hint={acceptsAccredited(exemption) ? `Reg D shares are restricted for at least a year (Rule 144): minimum ${REG_D_LOCKUP_DAYS} days. Tokens earn dividends in the vault meanwhile but can't move.` : "Tokens earn dividends in the vault during lock-up but can't move. No new holders join until it ends."} />
+          <Field id="lockup" label="Lock-up after the deadline" value={lockupDays} onChange={setLockupDays} suffix={unit} hint={acceptsAccredited(exemption) ? `Reg D shares are restricted for at least a year (Rule 144): minimum ${REG_D_LOCKUP_DAYS} days${unit === "minutes" ? `, ${fmt(minLockup)} minutes. For a short demo, use Reg S` : ""}. Tokens earn dividends in the vault meanwhile but can't move.` : "Tokens earn dividends in the vault during lock-up but can't move. No new holders join until it ends."} />
           <Field id="maxHolders" label="Holder cap" value={maxHolders} onChange={setMaxHolders} suffix="holders" hint="Stays under the Exchange Act §12(g) registration trigger (at most 2,000)." />
           <Field id="minTicket" label="Minimum investment" value={minTicket} onChange={setMinTicket} suffix="USDC" />
           <label className="field">
@@ -188,7 +213,8 @@ export default function RaiseSetup() {
             ["You receive at maximum", `${fmt(max, 2)} USDC`],
             ["Listing fee, paid now", `${fmt(fee, 2)} USDC`],
             ["Exemption", EXEMPTION_LABEL[exemption]],
-            ["Lock-up ends", `${lockup} days after the deadline`],
+            ["Raise closes", `in ${days} ${unit}, or when full`],
+            ["Lock-up ends", `${lockup} ${unit} after the deadline`],
           ].map(([k, v]) => (
             <div key={k} style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid var(--hair)", paddingBottom: 8 }}>
               <span className="muted">{k}</span>

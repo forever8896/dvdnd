@@ -208,6 +208,24 @@ export function Toast({
   );
 }
 
+/** A date, with the time of day when it's within a day of now (minute-long testnet raises). */
+export function when(secs: bigint | number) {
+  const d = new Date(Number(secs) * 1000);
+  if (Math.abs(d.getTime() - Date.now()) < 86_400_000)
+    return d.toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+}
+
+/** Time until a deadline in its largest whole unit: days, then hours, then minutes. */
+export function timeLeft(deadline: bigint | number): { value: string; unit: string; short: string } {
+  const secs = Number(deadline) - Date.now() / 1000;
+  if (secs <= 0) return { value: "0", unit: "left", short: "—" };
+  if (secs >= 86400) { const d = Math.ceil(secs / 86400); return { value: String(d), unit: d === 1 ? "day left" : "days left", short: `${d}d` }; }
+  if (secs >= 3600) { const h = Math.ceil(secs / 3600); return { value: String(h), unit: h === 1 ? "hour left" : "hours left", short: `${h}h` }; }
+  const m = Math.ceil(secs / 60);
+  return { value: String(m), unit: m === 1 ? "minute left" : "minutes left", short: `${m}m` };
+}
+
 export function fmt(n: number, decimals = 0) {
   return n.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 }

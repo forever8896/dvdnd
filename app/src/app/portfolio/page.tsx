@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Lock } from "@/components/icons";
 import { LockModal } from "@/components/lock-modal";
-import { StatusPill, Toast, TxLink, fmt } from "@/components/ui";
+import { StatusPill, Toast, TxLink, fmt, when } from "@/components/ui";
 import { countryName, displayStatus, errorText, fromUnits, initials, lockedUp, offering, RaiseState, targetYield, vault } from "@/lib/chain";
 import { useAsync } from "@/lib/hooks";
 import { loadPortfolio, type Holding } from "@/lib/portfolio";
@@ -144,7 +144,7 @@ export default function PortfolioPage() {
                               {h.wallet > 0 && <span className="pill pill-outline">{fmt(h.wallet)} unlocked</span>}
                               {h.inOrders > 0 && <span className="pill pill-outline">{fmt(h.inOrders)} in sell orders</span>}
                               {lockedUp(h.listing.raise) && (
-                                <span className="pill pill-outline">Lock-up until {new Date(Number(h.listing.raise.terms.lockup_until) * 1000).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</span>
+                                <span className="pill pill-outline">Lock-up until {when(h.listing.raise.terms.lockup_until)}</span>
                               )}
                             </div>
                           </td>

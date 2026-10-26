@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { StrKey } from "@stellar/stellar-sdk";
-import { Toast, TxLink, fmt } from "@/components/ui";
+import { Toast, TxLink, fmt, when as at } from "@/components/ui";
 import { errorText, EXEMPTION_LABEL, lockedUp, offering, toUnits, type Listing } from "@/lib/chain";
 import { findMyCompany, myListings } from "@/lib/company";
 import { auditLog, holders, type Holder } from "@/lib/compliance";
@@ -104,7 +104,7 @@ function Console({ listing, me }: { listing: Listing; me: Signer }) {
         {[
           ["Exemption", EXEMPTION_LABEL[r.terms.exemption]],
           ["Holders", `${r.holders} of ${r.terms.max_holders}`],
-          ["Lock-up", inLockup ? `until ${new Date(Number(r.terms.lockup_until) * 1000).toLocaleDateString("en-GB")}` : "ended"],
+          ["Lock-up", inLockup ? `until ${at(r.terms.lockup_until)}` : "ended"],
           ["Compliance account", isCompliance ? "You" : short(r.terms.compliance)],
         ].map(([k, v]) => (
           <div key={k} style={{ padding: "14px 14px 14px 0" }}>

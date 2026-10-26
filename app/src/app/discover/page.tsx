@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { CountryChip, RaiseProgress, StatusPill, Stat, fmt } from "@/components/ui";
+import { CountryChip, RaiseProgress, StatusPill, Stat, fmt, timeLeft } from "@/components/ui";
 import { EXEMPTION_LABEL,
   countryName,
   displayStatus,
@@ -94,11 +94,6 @@ function byDeadline(a: Listing, b: Listing) {
   return Number(a.raise.deadline - b.raise.deadline);
 }
 
-function daysLeft(l: Listing) {
-  const s = Number(l.raise.deadline) - Date.now() / 1000;
-  if (s <= 0) return "—";
-  return s < 86400 ? `${Math.ceil(s / 3600)}h` : String(Math.ceil(s / 86400));
-}
 
 function RaiseCard({ l }: { l: Listing }) {
   const status = displayStatus(l.raise);
@@ -123,7 +118,7 @@ function RaiseCard({ l }: { l: Listing }) {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
         <Stat label="Target yield" value={`${(targetYield(l) * 100).toFixed(1)}%`} />
         <Stat label="Profit committed" value={`${l.company.payout_bps / 100}%`} />
-        <Stat label="Days left" value={daysLeft(l)} />
+        <Stat label="Closes in" value={timeLeft(l.raise.deadline).short} />
       </div>
       <RaiseProgress
         raised={fromUnits(l.raise.raised)}

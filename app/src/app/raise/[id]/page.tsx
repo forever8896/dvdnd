@@ -5,7 +5,7 @@ import { use, useState } from "react";
 import { ShieldCheck } from "@/components/icons";
 import { AccreditationBox, useAccreditation } from "@/components/accreditation";
 import { InvestModal } from "@/components/invest-modal";
-import { CountryChip, RaiseProgress, StatusPill, Toast, TxLink, fmt } from "@/components/ui";
+import { CountryChip, RaiseProgress, StatusPill, Toast, TxLink, fmt, timeLeft, when } from "@/components/ui";
 import { CONTRACTS, NETWORK } from "@/lib/config";
 import {
   contribution,
@@ -95,8 +95,7 @@ const period = (secs: bigint) => {
   if (d >= 85) return "Quarterly";
   return `Every ${Math.round(d)} days`;
 };
-const date = (secs: bigint | number) =>
-  new Date(Number(secs) * 1000).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+const date = when;
 
 function Header({ l }: { l: Listing }) {
   return (
@@ -402,8 +401,8 @@ function RaisePanel({ l, onChange }: { l: Listing; onChange: () => void }) {
       <div className="grid-cells" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
         {[
           [String(r.investors), "investors"],
-          [secsLeft > 0 ? (secsLeft < 86400 ? `${Math.ceil(secsLeft / 3600)}h` : String(Math.ceil(secsLeft / 86400))) : "0", secsLeft < 86400 && secsLeft > 0 ? "hours left" : "days left"],
-          [date(r.deadline).replace(/ \d{4}$/, ""), "deadline"],
+          [timeLeft(r.deadline).value, timeLeft(r.deadline).unit],
+          [secsLeft > 0 && secsLeft < 86400 ? new Date(Number(r.deadline) * 1000).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : date(r.deadline).replace(/ \d{4}$/, ""), "deadline"],
         ].map(([v, k]) => (
           <div key={k} style={{ padding: "10px 0", background: "var(--surface)" }}>
             <div className="num" style={{ fontSize: 18 }}>

@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { use, useState } from "react";
-import { Toast, TxLink, fmt } from "@/components/ui";
+import { Toast, TxLink, fmt, when } from "@/components/ui";
 import { errorText, getListing, lockedUp, offering, RaiseState } from "@/lib/chain";
 import { useAsync } from "@/lib/hooks";
 import { cancelOrder, myOffers, orderBook, placeOrder, recentTrades, shareToken, standing } from "@/lib/trade";
 import { useWallet } from "@/lib/wallet";
 
-const date = (secs: bigint | number) => new Date(Number(secs) * 1000).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+const date = when;
 
 export default function TradePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
