@@ -58,7 +58,7 @@ export default function DocsHome() {
           </ul>
         }
       />
-      <Clip name="lifecycle" caption="The whole lifecycle on testnet, using the demo switcher: Lumen Coffee Roasters opens a ten-minute raise, Ana and Chloé fill it, the company closes it and is paid, Ana's tokens go into the vault, the company pays a dividend and Ana claims it." />
+      <Clip name="lifecycle" caption="The whole lifecycle on testnet, in six scenes: a company finds itself in the register, opens a ten-minute raise, an investor proves eligibility and invests, the company closes the full raise and is paid, and profits come back as a USDC dividend." />
       <Callout title="Everything here is live on testnet">
         The clips on these pages were recorded on the deployed app against Stellar testnet. Every transaction they show is
         on the explorer, and the full log of demo transactions is in{" "}
