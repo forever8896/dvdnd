@@ -1,7 +1,9 @@
 "use client";
 
+import { motion, useReducedMotion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ease, Heading } from "@/components/onboard";
 import { Toast } from "@/components/ui";
 import { eligibleUntil } from "@/lib/chain";
 import { IS_TESTNET } from "@/lib/config";
@@ -9,15 +11,17 @@ import { isUserCancel, walletError } from "@/lib/kit";
 import type { Signer } from "@/lib/stellar";
 import { isEligible, useWallet, type Role } from "@/lib/wallet";
 
-const PATHS: { role: Role; title: string; body: string }[] = [
+const PATHS: { role: Role; kicker: string; title: string; body: string }[] = [
   {
     role: "investor",
-    title: "I'm an investor",
-    body: "Invest in profitable businesses at a fixed price and receive USDC dividends. Requires proof of residence outside the United States.",
+    kicker: "Investor",
+    title: "I'm investing.",
+    body: "Own a share of profitable businesses at a fixed price and get paid dividends in USDC. Open to people outside the US, and to accredited investors in the US.",
   },
   {
     role: "company",
-    title: "I'm raising for my company",
+    kicker: "Company",
+    title: "I'm raising.",
     body: "Verify your business, commit a share of profit, and raise USDC from investors worldwide in an all-or-nothing escrow.",
   },
 ];
@@ -31,6 +35,7 @@ export default function SignIn() {
   const [error, setError] = useState<string | null>(null);
   const [importing, setImporting] = useState<Role | null>(null);
   const [secret, setSecret] = useState("");
+  const still = useReducedMotion();
 
   async function go(role: Role, how: NonNullable<Busy>["how"]) {
     setBusy({ role, how });
@@ -48,23 +53,29 @@ export default function SignIn() {
   }
 
   return (
-    <main className="page" style={{ maxWidth: 960 }}>
-      <div>
-        <h1 className="h1">Sign in to dvdnd</h1>
-        <p className="muted" style={{ marginTop: 6, maxWidth: 680 }}>
-          {IS_TESTNET
+    <main className="page onb" style={{ maxWidth: 1040 }}>
+      <Heading
+        kicker="Sign in"
+        title="Welcome to dvdnd."
+        lede={
+          IS_TESTNET
             ? "Connect a Stellar wallet such as Freighter, xBull or Lobstr, set to Testnet. Or use a demo wallet created in this browser, with nothing to install."
-            : "Connect a Stellar wallet such as Freighter, xBull or Lobstr."}
-        </p>
-      </div>
-      <div className="grid-cells" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))" }}>
-        {PATHS.map((p) => {
+            : "Connect a Stellar wallet such as Freighter, xBull or Lobstr."
+        }
+      />
+      <div className="onb-roles">
+        {PATHS.map((p, i) => {
           const existing = signer[p.role];
           const mine = busy?.role === p.role;
           return (
-            <div key={p.role} style={{ padding: 28, display: "flex", flexDirection: "column", gap: 12 }}>
-              <div className="label">{p.role}</div>
-              <h2 className="h2">{p.title}</h2>
+            <motion.div
+              key={p.role}
+              className="onb-role"
+              initial={still ? false : { opacity: 0, y: 28 }}
+              animate={{ opacity: 1, y: 0, transition: { delay: still ? 0 : 0.1 + i * 0.12, duration: 0.55, ease } }}
+            >
+              <div className="label">{p.kicker}</div>
+              <h2 className="onb-role-title">{p.title}</h2>
               <p className="muted" style={{ flex: 1 }}>
                 {p.body}
               </p>
@@ -115,7 +126,7 @@ export default function SignIn() {
                   </>}
                 </>
               )}
-            </div>
+            </motion.div>
           );
         })}
       </div>

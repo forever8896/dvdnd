@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { AnimatePresence } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ShieldCheck } from "@/components/icons";
+import { Heading, Rail, Stage } from "@/components/onboard";
 import { EligibilityPill, Toast, TxLink } from "@/components/ui";
 import { countryName, gate } from "@/lib/chain";
 import { DIDIT_ENABLED } from "@/lib/config";
@@ -41,6 +43,8 @@ export default function Verify() {
   const [proof, setProof] = useState<SorobanProof | null>(null);
   // A credential this browser already holds but hasn't registered (e.g. the signature never happened).
   const [stored, setStored] = useState<Credential | null>(null);
+  // Asked first, so US residents go straight to the accredited route.
+  const [where, setWhere] = useState<"outside" | "us" | null>(null);
 
   useEffect(() => {
     if (ready && !investor) router.replace("/signin");
@@ -217,160 +221,174 @@ export default function Verify() {
   }
 
   return (
-    <main className="page" style={{ maxWidth: 880 }}>
-      <div>
-        <div className="label">Eligibility</div>
-        <h1 className="h1" style={{ marginTop: 6 }}>
-          Prove you live outside the United States
-        </h1>
-        <p className="muted" style={{ marginTop: 8, maxWidth: 640 }}>
-          Your identity is checked once, then your browser builds a zero-knowledge proof. Stellar verifies the proof
-          without learning who you are or where you live.
-        </p>
-      </div>
+    <main className="page onb">
+      <Heading
+        kicker="Eligibility"
+        title="Prove you live outside the US."
+        lede="Your identity is checked once, then your browser builds a zero-knowledge proof. Stellar verifies it without learning who you are or where you live."
+      />
+      <Rail labels={STEPS.map((s) => s.label)} step={activeIndex} />
 
-      <ol style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2, background: "var(--hair)" }}>
-        {STEPS.map((s, i) => {
-          const done = i < activeIndex;
-          const active = i === activeIndex;
-          return (
-            <li key={s.key} style={{ background: "var(--bg)", padding: "12px 14px", borderTop: `2px solid ${done ? "var(--green)" : active ? "var(--accent)" : "var(--line)"}` }}>
-              <div className="label" style={{ color: done ? "var(--green)" : active ? "var(--accent-text)" : undefined }}>
-                {String(i + 1).padStart(2, "0")}
+      <AnimatePresence mode="wait">
+        <Stage key={`${step}-${where}`}>
+          {alreadyEligible && (
+            <div className="banner banner-green">
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 800, color: "var(--green)" }}>You&apos;re already eligible</div>
+                <div>Valid until {new Date(eligibleUntil * 1000).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}.</div>
               </div>
-              <div style={{ fontWeight: 600, marginTop: 4 }}>{s.label}</div>
-            </li>
-          );
-        })}
-      </ol>
-
-      {alreadyEligible && (
-        <div className="banner banner-green">
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 800, color: "var(--green)" }}>You&apos;re already eligible</div>
-            <div>Valid until {new Date(eligibleUntil * 1000).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}.</div>
-          </div>
-          <Link href="/discover" className="btn btn-primary btn-sm">
-            Discover raises
-          </Link>
-        </div>
-      )}
-
-      {step === "form" && !alreadyEligible && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 14, maxWidth: 560 }}>
-          {resumable ? (
-            <>
-              <p style={{ margin: 0 }}>
-                You already have a verified credential for <b>{countryName(stored!.country)}</b> in this browser. Build the
-                proof and register it with {investor.label}.
-              </p>
-              <button className="btn btn-primary btn-wide" style={{ alignSelf: "flex-start" }} onClick={resume}>
-                Continue
-              </button>
-            </>
-          ) : DIDIT_ENABLED ? (
-            <>
-              <p style={{ margin: 0 }}>
-                A few minutes with your ID document and a live selfie, on your phone or computer. dvdnd only keeps your
-                verified country of residence.
-              </p>
-              <button className="btn btn-primary btn-wide" style={{ alignSelf: "flex-start" }} onClick={startDidit}>
-                Verify my identity
-              </button>
-              <p className="small" style={{ margin: 0 }}>
-                Verification by <a href="https://didit.me" target="_blank" rel="noreferrer">Didit</a>. Living in the US?
-                Accredited investors skip this step: open a raise marked 506(c).
-              </p>
-            </>
-          ) : (
-            <div className="empty">Identity checks aren&apos;t configured on this deployment.</div>
-          )}
-          {error && <Toast kind="error" title="Verification stopped">{error}</Toast>}
-        </div>
-      )}
-
-      {step === "kyc" && <Toast kind="pending" title="Opening the identity check" />}
-
-      {working && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 8, maxWidth: 560 }}>
-          {issued && (
-            <Toast kind="ok" title={`Credential issued for ${countryName(issued.country)}`}>
-              {issued.basis && <>Verified from your {issued.basis} · </>}
-              <TxLink hash={issued.hash} />
-            </Toast>
-          )}
-          {step === "issuing" && <Toast kind="pending" title="Reading your verified residence and issuing your credential" />}
-          {step === "proving" && (
-            <Toast kind="pending" title="Generating your private proof">
-              Your browser proves your country isn&apos;t the US, without revealing which country it is.
-            </Toast>
-          )}
-          {step === "verifying" && <Toast kind="pending" title="Verifying on Stellar" />}
-        </div>
-      )}
-
-      {step === "sign" && proof && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 560 }}>
-          <Toast kind="ok" title={`Proof ready${proofMs ? ` in ${(proofMs / 1000).toFixed(1)} s` : ""}`}>
-            One signature registers it on Stellar.
-          </Toast>
-          <button className="btn btn-primary btn-wide" style={{ alignSelf: "flex-start" }} onClick={signAndRegister}>
-            Sign with {investor.label}
-          </button>
-          {error && <Toast kind="error" title="Registration didn't go through">{error}</Toast>}
-        </div>
-      )}
-
-      {step === "done" && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 560 }}>
-          <div className="banner banner-green">
-            <span style={{ color: "var(--green)" }}>
-              <ShieldCheck size={22} />
-            </span>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 800, color: "var(--green)" }}>You&apos;re eligible</div>
-              <div>Your wallet can now hold dvdnd company tokens for the next 12 months.</div>
-            </div>
-          </div>
-          {verifiedTx && (
-            <div className="small">
-              Proof verified on-chain · <TxLink hash={verifiedTx} />
-            </div>
-          )}
-          {erased && <div className="small">Your identity check data was deleted at Didit. dvdnd keeps only your country.</div>}
-          <Link href="/discover" className="btn btn-primary btn-wide" style={{ alignSelf: "flex-start" }}>
-            Discover raises
-          </Link>
-        </div>
-      )}
-
-      {step === "ineligible" && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 560 }}>
-          <EligibilityPill state="ineligible" />
-          {usResident ? (
-            <>
-              <h2 className="h2">You can invest as an accredited investor</h2>
-              <p className="muted">
-                Reg S raises are only for people living outside the US. US residents can join raises marked{" "}
-                <b>Reg D 506(c)</b> or <b>Reg S + 506(c)</b> as accredited investors: sign the accreditation statement on the
-                raise page, then invest at least 200,000 USDC (1,000,000 for an entity), or less once a verification
-                service has confirmed you.
-              </p>
-              <Link href="/discover" className="btn btn-primary btn-sm" style={{ alignSelf: "flex-start" }}>
-                Find raises open to accredited investors
+              <Link href="/discover" className="btn btn-primary btn-sm">
+                Discover raises
               </Link>
-            </>
-          ) : (
-            <>
-              <h2 className="h2">dvdnd isn&apos;t available where you live</h2>
-              <p className="muted">
-                Residents of sanctioned countries (North Korea, Iran, Cuba and Syria) can&apos;t invest on dvdnd. No
-                credential was issued.
-              </p>
-            </>
+            </div>
           )}
-        </div>
-      )}
+
+          {step === "form" && !alreadyEligible && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 14, maxWidth: 760 }}>
+              {resumable ? (
+                <>
+                  <p style={{ margin: 0 }}>
+                    You already have a verified credential for <b>{countryName(stored!.country)}</b> in this browser. Build the
+                    proof and register it with {investor.label}.
+                  </p>
+                  <button className="btn btn-primary btn-wide" style={{ alignSelf: "flex-start" }} onClick={resume}>
+                    Continue
+                  </button>
+                </>
+              ) : where === null ? (
+                <>
+                  <h2 className="onb-q">Where do you live?</h2>
+                  <div className="onb-options">
+                    <button type="button" className="onb-option" onClick={() => setWhere("outside")}>
+                      <span className="onb-option-title">Outside the United States</span>
+                      <span className="small">Verify your identity once and invest in any raise under Regulation S.</span>
+                    </button>
+                    <button type="button" className="onb-option" onClick={() => setWhere("us")}>
+                      <span className="onb-option-title">In the United States</span>
+                      <span className="small">Invest as an accredited investor in raises marked 506(c). No identity check here.</span>
+                    </button>
+                  </div>
+                </>
+              ) : where === "us" ? (
+                <UsRoute onBack={() => setWhere(null)} />
+              ) : DIDIT_ENABLED ? (
+                <>
+                  <p style={{ margin: 0 }}>
+                    A few minutes with your ID document and a live selfie, on your phone or computer. dvdnd only keeps your
+                    verified country of residence.
+                  </p>
+                  <button className="btn btn-primary btn-wide" style={{ alignSelf: "flex-start" }} onClick={startDidit}>
+                    Verify my identity
+                  </button>
+                  <p className="small" style={{ margin: 0 }}>
+                    Verification by <a href="https://didit.me" target="_blank" rel="noreferrer">Didit</a>. Living in the US?
+                    Accredited investors skip this step: open a raise marked 506(c).
+                  </p>
+                </>
+              ) : (
+                <div className="empty">Identity checks aren&apos;t configured on this deployment.</div>
+              )}
+              {error && <Toast kind="error" title="Verification stopped">{error}</Toast>}
+            </div>
+          )}
+
+          {step === "kyc" && <Toast kind="pending" title="Opening the identity check" />}
+
+          {working && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, maxWidth: 560 }}>
+              {issued && (
+                <Toast kind="ok" title={`Credential issued for ${countryName(issued.country)}`}>
+                  {issued.basis && <>Verified from your {issued.basis} · </>}
+                  <TxLink hash={issued.hash} />
+                </Toast>
+              )}
+              {step === "issuing" && <Toast kind="pending" title="Reading your verified residence and issuing your credential" />}
+              {step === "proving" && (
+                <Toast kind="pending" title="Generating your private proof">
+                  Your browser proves your country isn&apos;t the US, without revealing which country it is.
+                </Toast>
+              )}
+              {step === "verifying" && <Toast kind="pending" title="Verifying on Stellar" />}
+            </div>
+          )}
+
+          {step === "sign" && proof && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 560 }}>
+              <Toast kind="ok" title={`Proof ready${proofMs ? ` in ${(proofMs / 1000).toFixed(1)} s` : ""}`}>
+                One signature registers it on Stellar.
+              </Toast>
+              <button className="btn btn-primary btn-wide" style={{ alignSelf: "flex-start" }} onClick={signAndRegister}>
+                Sign with {investor.label}
+              </button>
+              {error && <Toast kind="error" title="Registration didn't go through">{error}</Toast>}
+            </div>
+          )}
+
+          {step === "done" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 560 }}>
+              <div className="banner banner-green">
+                <span style={{ color: "var(--green)" }}>
+                  <ShieldCheck size={22} />
+                </span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 800, color: "var(--green)" }}>You&apos;re eligible</div>
+                  <div>Your wallet can now hold dvdnd company tokens for the next 12 months.</div>
+                </div>
+              </div>
+              {verifiedTx && (
+                <div className="small">
+                  Proof verified on-chain · <TxLink hash={verifiedTx} />
+                </div>
+              )}
+              {erased && <div className="small">Your identity check data was deleted at Didit. dvdnd keeps only your country.</div>}
+              <Link href="/discover" className="btn btn-primary btn-wide" style={{ alignSelf: "flex-start" }}>
+                Discover raises
+              </Link>
+            </div>
+          )}
+
+          {step === "ineligible" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 560 }}>
+              <EligibilityPill state="ineligible" />
+              {usResident ? (
+                <UsRoute />
+              ) : (
+                <>
+                  <h2 className="h2">dvdnd isn&apos;t available where you live</h2>
+                  <p className="muted">
+                    Residents of sanctioned countries (North Korea, Iran, Cuba and Syria) can&apos;t invest on dvdnd. No
+                    credential was issued.
+                  </p>
+                </>
+              )}
+            </div>
+          )}
+        </Stage>
+      </AnimatePresence>
     </main>
+  );
+}
+
+/** For US residents: Reg S isn't open to them, 506(c) raises are. */
+function UsRoute({ onBack }: { onBack?: () => void }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 600 }}>
+      <h2 className="onb-q">Invest as an accredited investor.</h2>
+      <p className="muted">
+        Reg S raises are only for people living outside the US. US residents can join raises marked <b>Reg D 506(c)</b> or{" "}
+        <b>Reg S + 506(c)</b> as accredited investors: sign the accreditation statement on the raise page, then invest at least
+        200,000 USDC (1,000,000 for an entity), or less once a verification service has confirmed you.
+      </p>
+      <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+        <Link href="/discover" className="btn btn-primary">
+          Find raises open to accredited investors
+        </Link>
+        {onBack && (
+          <button type="button" className="btn btn-link" onClick={onBack}>
+            ← I live outside the US
+          </button>
+        )}
+      </div>
+    </div>
   );
 }

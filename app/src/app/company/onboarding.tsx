@@ -6,6 +6,7 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ShieldCheck } from "@/components/icons";
+import { ease, Heading, Rail, Stage } from "@/components/onboard";
 import { Toast } from "@/components/ui";
 import { CompanyStatus, COUNTRY_OPTIONS, countryName, errorText, parseProfile, type Company, type Profile } from "@/lib/chain";
 import { PERIODS } from "@/lib/agreement";
@@ -16,7 +17,6 @@ import type { RegistryRecord } from "@/lib/registries";
 import { useWallet } from "@/lib/wallet";
 
 const STEPS = ["Find", "Details", "Ownership", "Agreement"];
-const ease = [0.22, 1, 0.36, 1] as const;
 
 /** Registries the lookup can search, by ISO numeric country. */
 const REGISTRY_COUNTRIES: { code: number; label: string }[] = [
@@ -34,7 +34,7 @@ export function Onboarding({ company, onChange }: { company: Company | null; onC
   const step = company ? (company.status === CompanyStatus.Pending ? 2 : 3) : found ? 1 : 0;
   return (
     <main className="page onb">
-      <Rail step={step} />
+      <Rail labels={STEPS} step={step} />
       <AnimatePresence mode="wait">
         <Stage key={step + (company ? `-${company.id}` : "")}>
           {step === 0 && <FindStep onPick={setFound} />}
@@ -54,46 +54,6 @@ export function Onboarding({ company, onChange }: { company: Company | null; onC
         </Stage>
       </AnimatePresence>
     </main>
-  );
-}
-
-function Rail({ step }: { step: number }) {
-  return (
-    <ol className="onb-rail" aria-label="Onboarding progress">
-      {STEPS.map((label, i) => (
-        <li key={label} data-state={i < step ? "done" : i === step ? "current" : "todo"} aria-current={i === step ? "step" : undefined}>
-          <span className="onb-rail-bar">
-            <motion.span initial={false} animate={{ scaleX: i < step ? 1 : i === step ? 0.35 : 0 }} transition={{ duration: 0.6, ease }} />
-          </span>
-          <span className="num">{String(i + 1).padStart(2, "0")}</span> {label}
-        </li>
-      ))}
-    </ol>
-  );
-}
-
-function Stage({ children }: { children: React.ReactNode }) {
-  const still = useReducedMotion();
-  return (
-    <motion.div
-      className="onb-stage"
-      initial={still ? false : { opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={still ? undefined : { opacity: 0, y: -16 }}
-      transition={{ duration: 0.45, ease }}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-function Heading({ kicker, title, lede }: { kicker: string; title: string; lede?: string }) {
-  return (
-    <header className="onb-head">
-      <div className="label">{kicker}</div>
-      <h1 className="onb-title">{title}</h1>
-      {lede && <p className="onb-lede">{lede}</p>}
-    </header>
   );
 }
 
