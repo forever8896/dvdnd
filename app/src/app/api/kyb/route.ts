@@ -8,6 +8,10 @@
 // Real, when the company gave an LEI: the GLEIF record must be active, issued,
 // in the company's country and under a matching legal name.
 //
+// Real, when the company was found in a national register at onboarding: the
+// register is queried again by number; the company must be active, in the
+// same country and under the same name.
+//
 // Self-declared otherwise: the registry number and director are recorded as
 // evidence. A production check would query the national registry (directors,
 // beneficial owners) and run a KYB vendor.
@@ -21,6 +25,7 @@ import { CONTRACTS, IS_TESTNET } from "@/lib/config";
 import { CompanyStatus, countryCode, getCompany, parseProfile, sc } from "@/lib/chain";
 import { checkDomain, normalizeDomain } from "@/lib/dns";
 import { checkLei, type LeiRecord } from "@/lib/gleif";
+import { lookupById, sameName, type RegistryRecord } from "@/lib/registries";
 import { invoke, Keypair, keypairSigner, TxError } from "@/lib/stellar";
 
 export async function POST(req: Request) {
@@ -50,6 +55,7 @@ export async function POST(req: Request) {
 
   const profile = parseProfile(company);
   let lei: LeiRecord | null = null;
+  let national: RegistryRecord | null = null;
   if (profile.lei) {
     try {
       const check = await checkLei(profile.lei, { name: company.name, countryAlpha2: countryCode(company.country) });
@@ -58,9 +64,24 @@ export async function POST(req: Request) {
     } catch (e) {
       return NextResponse.json({ error: e instanceof Error ? e.message : "GLEIF lookup failed." }, { status: 502 });
     }
+  } else if (profile.registry) {
+    // Found in a national register at onboarding: check it again at the source.
+    try {
+      national = await lookupById(profile.registry.source, profile.registry.id);
+    } catch (e) {
+      return NextResponse.json({ error: e instanceof Error ? e.message : "The company register didn't answer." }, { status: 502 });
+    }
+    const problems = !national
+      ? [`${profile.registry.idLabel} ${profile.registry.id} isn't in ${profile.registry.name}.`]
+      : [
+          ...(national.active ? [] : ["The register lists the company as closed."]),
+          ...(national.country === company.country ? [] : ["The register's country doesn't match the registration."]),
+          ...(sameName(national.name, company.name) ? [] : [`The register's name is "${national.name}", not "${company.name}".`]),
+        ];
+    if (problems.length) return NextResponse.json({ error: problems.join(" ") }, { status: 422 });
   } else if (!IS_TESTNET) {
-    // On mainnet the registry check must be real: an LEI matched against GLEIF.
-    return NextResponse.json({ error: "Register the company with its LEI to verify it on mainnet." }, { status: 422 });
+    // On mainnet the registry check must be real: GLEIF or a national register.
+    return NextResponse.json({ error: "Register the company through the company search, or with its LEI, to verify it on mainnet." }, { status: 422 });
   } else if (!registryNumber?.trim()) {
     return NextResponse.json({ error: "Enter the registry number." }, { status: 400 });
   }
@@ -87,8 +108,8 @@ export async function POST(req: Request) {
       dnsRecord: dns.expected,
       dnsFoundAt: dns.foundAt,
       lei: lei && { lei: lei.lei, legalName: lei.legalName, registeredAs: lei.registeredAs, country: lei.country },
-      registryNumber: lei?.registeredAs ?? registryNumber?.trim(),
-      registrySource: lei ? "GLEIF" : "self-declared",
+      registryNumber: lei?.registeredAs ?? national?.id ?? registryNumber?.trim(),
+      registrySource: lei ? "GLEIF" : national ? national.registry : "self-declared",
       director: director.trim(),
       checkedAt: new Date().toISOString(),
     });

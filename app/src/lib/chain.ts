@@ -52,6 +52,10 @@ export type Profile = {
   /** Last full year net profit in USD. */
   netProfit: number;
   code?: string;
+  /** The national registry entry the company was found in at onboarding. */
+  registry?: { source: string; name: string; id: string; idLabel: string; url: string };
+  founded?: string;
+  employees?: string;
 };
 
 export async function getCompany(id: number): Promise<Company> {

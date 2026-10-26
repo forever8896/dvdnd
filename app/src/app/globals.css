@@ -1461,3 +1461,267 @@ p {
     bottom: 6px;
   }
 }
+
+/* ── onboarding ───────────────────────────────────────────────────── */
+.page.onb {
+  max-width: 880px;
+  gap: 40px;
+  padding-top: 40px;
+}
+.onb-rail {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 10px;
+}
+.onb-rail li {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font: 600 11px/1.2 var(--font-sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.onb-rail li[data-state="current"],
+.onb-rail li[data-state="done"] {
+  color: var(--text);
+}
+.onb-rail .num {
+  color: var(--accent-text);
+  letter-spacing: 0;
+  margin-right: 4px;
+}
+.onb-rail-bar {
+  display: block;
+  height: 3px;
+  background: var(--hair);
+  overflow: hidden;
+}
+.onb-rail-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transform-origin: left;
+}
+.onb-rail li[data-state="done"] .onb-rail-bar > span {
+  background: var(--green);
+}
+.onb-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.onb-head {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.onb-title {
+  font: 800 clamp(42px, 7vw, 88px) / 0.95 var(--font-sans);
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+.onb-lede {
+  font-size: clamp(16px, 1.5vw, 19px);
+  line-height: 1.45;
+  color: var(--muted);
+  max-width: 54ch;
+}
+.onb-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-bottom: 3px solid var(--text);
+  transition: border-color 0.2s;
+}
+.onb-search:focus-within {
+  border-color: var(--accent);
+}
+.onb-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  padding: 10px 0;
+  font: 600 clamp(24px, 3.4vw, 38px) / 1.2 var(--font-sans);
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+.onb-search input::placeholder {
+  color: var(--faint);
+}
+.onb-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.onb-chips button {
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--text);
+  font: 13px var(--font-sans);
+  padding: 6px 12px;
+  border-radius: 99px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.onb-chips button[aria-pressed="true"] {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+.onb-results {
+  display: flex;
+  flex-direction: column;
+  min-height: 40px;
+}
+.onb-result {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas: "name id" "meta pill";
+  gap: 4px 16px;
+  align-items: baseline;
+  text-align: left;
+  border: 0;
+  border-top: 1px solid var(--hair);
+  background: transparent;
+  padding: 14px 4px;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  transition: background 0.15s, padding 0.2s;
+}
+.onb-result:hover:not(:disabled),
+.onb-result:focus-visible {
+  background: var(--surface);
+  padding-left: 14px;
+}
+.onb-result:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.onb-result-name {
+  grid-area: name;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+}
+.onb-result-meta {
+  grid-area: meta;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.onb-result-id {
+  grid-area: id;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.onb-result .pill {
+  grid-area: pill;
+  justify-self: end;
+}
+.onb-manual {
+  align-self: flex-start;
+  padding-left: 0;
+}
+.onb-sources {
+  max-width: 64ch;
+}
+.onb-card {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+  background: var(--surface);
+  border-left: 3px solid var(--green);
+}
+.onb-card-name {
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: -0.01em;
+}
+.onb-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  font-size: 12px;
+  color: var(--muted);
+  align-items: flex-end;
+}
+.onb-facts b {
+  display: block;
+  font: 500 18px var(--font-mono);
+  color: var(--text);
+}
+.onb-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px 20px;
+}
+.onb-form .input-wrap input,
+.onb-form .input-wrap select,
+.onb-form .input-wrap textarea {
+  flex: 1;
+  min-width: 0;
+  font: 15px var(--font-sans);
+  background: transparent;
+  border: 0;
+  padding: 10px 11px;
+  color: var(--text);
+}
+.onb-form .input-wrap input.mono {
+  font-family: var(--font-mono);
+}
+.onb-form textarea {
+  resize: vertical;
+}
+.onb-wide {
+  grid-column: 1 / -1;
+}
+.onb-tag {
+  display: inline-block;
+  margin-left: 8px;
+  font: 600 10px var(--font-sans);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--green);
+}
+.onb-tag-muted {
+  color: var(--faint);
+}
+.onb-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+.onb-cta {
+  font-size: 16px;
+  padding: 14px 28px;
+}
+@media (max-width: 560px) {
+  .page.onb {
+    padding-left: 16px;
+    padding-right: 16px;
+    gap: 28px;
+  }
+  .onb-rail li {
+    font-size: 9px;
+  }
+  .onb-result {
+    grid-template-columns: 1fr;
+    grid-template-areas: "name" "meta" "id" "pill";
+  }
+  .onb-result .pill {
+    justify-self: start;
+  }
+}

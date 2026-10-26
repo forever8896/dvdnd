@@ -132,6 +132,12 @@ function Header({ l }: { l: Listing }) {
               LEI verified · GLEIF ↗
             </a>
           )}
+          {l.company.kyb_hash && !l.profile.lei && l.profile.registry && (
+            <a className="pill pill-green" href={l.profile.registry.url} target="_blank" rel="noreferrer" style={{ textDecoration: "none" }}>
+              <ShieldCheck size={11} />
+              Registered · {l.profile.registry.idLabel} {l.profile.registry.id} ↗
+            </a>
+          )}
           {l.company.kyb_hash && normalizeDomain(l.profile.website) && (
             <span className="pill pill-green">
               <ShieldCheck size={11} />
