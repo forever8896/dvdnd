@@ -7,6 +7,7 @@ import { LockModal } from "@/components/lock-modal";
 import { StatusPill, Toast, TxLink, fmt, when } from "@/components/ui";
 import { countryName, displayStatus, errorText, fromUnits, initials, lockedUp, offering, RaiseState, targetYield, vault } from "@/lib/chain";
 import { useAsync } from "@/lib/hooks";
+import { downloadIcs, upcomingEvents } from "@/lib/ics";
 import { loadPortfolio, type Holding } from "@/lib/portfolio";
 import { useWallet } from "@/lib/wallet";
 
@@ -100,7 +101,14 @@ export default function PortfolioPage() {
           {actionError && <Toast kind="error" title="That didn't go through">{actionError}</Toast>}
 
           <section style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <h2 className="h2">Holdings</h2>
+            <div style={{ display: "flex", gap: 10, alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" }}>
+              <h2 className="h2">Holdings</h2>
+              {upcomingEvents(data.holdings).length > 0 && (
+                <button className="btn btn-secondary btn-sm" onClick={() => downloadIcs(data.holdings)}>
+                  Add to calendar
+                </button>
+              )}
+            </div>
             {data.holdings.length ? (
               <div className="table-wrap">
                 <table className="table">
