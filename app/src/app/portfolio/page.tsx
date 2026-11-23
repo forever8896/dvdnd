@@ -7,9 +7,18 @@ import { LockModal } from "@/components/lock-modal";
 import { StatusPill, Toast, TxLink, fmt, when } from "@/components/ui";
 import { countryName, displayStatus, errorText, fromUnits, initials, lockedUp, offering, RaiseState, targetYield, vault } from "@/lib/chain";
 import { useAsync } from "@/lib/hooks";
-import { downloadIcs, upcomingEvents } from "@/lib/ics";
+import { toIcs, upcomingEvents } from "@/lib/ics";
 import { loadPortfolio, type Holding } from "@/lib/portfolio";
 import { useWallet } from "@/lib/wallet";
+
+function downloadCalendar(holdings: Holding[]) {
+  const href = URL.createObjectURL(new Blob([toIcs(upcomingEvents(holdings))], { type: "text/calendar;charset=utf-8" }));
+  const a = document.createElement("a");
+  a.href = href;
+  a.download = "dvdnd-dividends.ics";
+  a.click();
+  URL.revokeObjectURL(href);
+}
 
 export default function PortfolioPage() {
   const { ready, signer, refresh } = useWallet();
@@ -104,7 +113,7 @@ export default function PortfolioPage() {
             <div style={{ display: "flex", gap: 10, alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" }}>
               <h2 className="h2">Holdings</h2>
               {upcomingEvents(data.holdings).length > 0 && (
-                <button className="btn btn-secondary btn-sm" onClick={() => downloadIcs(data.holdings)}>
+                <button className="btn btn-secondary btn-sm" onClick={() => downloadCalendar(data.holdings)}>
                   Add to calendar
                 </button>
               )}

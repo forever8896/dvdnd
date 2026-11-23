@@ -1,10 +1,10 @@
 // Upcoming dividend and lock-up dates as an iCalendar (RFC 5545) file.
 
-import type { Company, Pool, Raise } from "./chain";
+import type { Company, Pool, Raise, Terms } from "./chain";
 import { SITE_DOMAIN } from "./config";
 
 export type CalendarHolding = {
-  listing: { raise: Pick<Raise, "id"> & { terms: Pick<Raise["terms"], "lockup_until"> }; company: Pick<Company, "name" | "period_secs"> };
+  listing: { raise: Pick<Raise, "id"> & { terms: Pick<Terms, "lockup_until"> }; company: Pick<Company, "name" | "period_secs"> };
   pool: Pick<Pool, "period" | "last_distribution">;
 };
 
@@ -103,13 +103,4 @@ export function toIcs(events: CalendarEvent[], now = Date.now() / 1000): string 
   }
   lines.push("END:VCALENDAR");
   return lines.map(fold).join("\r\n") + "\r\n";
-}
-
-export function downloadIcs(holdings: CalendarHolding[], filename = "dvdnd-dividends.ics") {
-  const href = URL.createObjectURL(new Blob([toIcs(upcomingEvents(holdings))], { type: "text/calendar;charset=utf-8" }));
-  const a = document.createElement("a");
-  a.href = href;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(href);
 }
