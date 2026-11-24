@@ -4,10 +4,12 @@ import Link from "next/link";
 import { useState } from "react";
 import { StrKey } from "@stellar/stellar-sdk";
 import { Toast, TxLink, fmt, when as at } from "@/components/ui";
-import { errorText, EXEMPTION_LABEL, lockedUp, offering, toUnits, type Listing } from "@/lib/chain";
+import { errorText, EXEMPTION_LABEL, fromUnits, lockedUp, offering, toUnits, type Listing } from "@/lib/chain";
 import { findMyCompany, myListings } from "@/lib/company";
 import { auditLog, holders, type Holder } from "@/lib/compliance";
 import { NETWORK } from "@/lib/config";
+import { auditLogCsv, capTableCsv, type CsvRaise } from "@/lib/csv";
+import { download } from "@/lib/download";
 import { useAsync } from "@/lib/hooks";
 import type { Signer } from "@/lib/stellar";
 import { useWallet } from "@/lib/wallet";
@@ -15,6 +17,19 @@ import { useWallet } from "@/lib/wallet";
 const short = (a: string) => `${a.slice(0, 4)}…${a.slice(-4)}`;
 const when = (iso: string) => new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 const ACTION_LABEL = { freeze: "Frozen", unfreeze: "Unfrozen", clawback: "Clawed back", handover: "Role handed to" } as const;
+
+function downloadCsv(raise: CsvRaise, kind: "cap-table" | "audit-log", build: (now: Date) => string) {
+  const now = new Date();
+  download(`dvdnd-raise-${raise.id}-${kind}-${now.toISOString().slice(0, 10)}.csv`, `﻿${build(now)}`, "text/csv;charset=utf-8");
+}
+
+function ExportButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button className="btn btn-secondary btn-sm" onClick={onClick}>
+      Export CSV
+    </button>
+  );
+}
 
 export default function CompliancePage() {
   const { signer } = useWallet();
@@ -73,8 +88,10 @@ export default function CompliancePage() {
 
 function Console({ listing, me }: { listing: Listing; me: Signer }) {
   const r = listing.raise;
+  const csvRaise: CsvRaise = { id: r.id, company: listing.company.name, exemption: r.terms.exemption };
   const isCompliance = r.terms.compliance === me.publicKey;
-  const { data: list, reload: reloadHolders } = useAsync(() => holders(r), [r.id]);
+  const { data: capTable, reload: reloadHolders } = useAsync(() => holders(r), [r.id]);
+  const list = capTable?.holders;
   const { data: log, reload: reloadLog } = useAsync(() => auditLog(r, [r.terms.compliance, r.company]), [r.id]);
   const [action, setAction] = useState<{ holder: Holder; kind: "freeze" | "unfreeze" | "clawback" } | null>(null);
   const [agent, setAgent] = useState("");
@@ -121,7 +138,12 @@ function Console({ listing, me }: { listing: Listing; me: Signer }) {
       )}
 
       <section style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        <h2 className="h2">Holders</h2>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+          <h2 className="h2">Holders</h2>
+          {capTable && capTable.holders.length > 0 && (
+            <ExportButton onClick={() => downloadCsv(csvRaise, "cap-table", (now) => capTableCsv(csvRaise, capTable.asset, capTable.holders, now))} />
+          )}
+        </div>
         {!list ? (
           <div className="skeleton" style={{ height: 120 }} />
         ) : !list.length ? (
@@ -146,8 +168,8 @@ function Console({ listing, me }: { listing: Listing; me: Signer }) {
                         {short(h.account)} ↗
                       </a>
                     </td>
-                    <td className="r num">{fmt(h.wallet, 2)}</td>
-                    <td className="r num">{fmt(h.locked, 2)}</td>
+                    <td className="r num">{fmt(fromUnits(h.wallet), 2)}</td>
+                    <td className="r num">{fmt(fromUnits(h.locked), 2)}</td>
                     <td>
                       {h.authorized ? (
                         <span className="pill pill-green">Active</span>
@@ -164,7 +186,7 @@ function Console({ listing, me }: { listing: Listing; me: Signer }) {
                             Unfreeze
                           </button>
                         )}{" "}
-                        <button className="btn btn-secondary btn-sm" disabled={h.wallet <= 0} title={h.wallet <= 0 ? "Only tokens in the wallet can be clawed back" : undefined} onClick={() => setAction({ holder: h, kind: "clawback" })}>
+                        <button className="btn btn-secondary btn-sm" disabled={h.wallet <= 0n} title={h.wallet <= 0n ? "Only tokens in the wallet can be clawed back" : undefined} onClick={() => setAction({ holder: h, kind: "clawback" })}>
                           Claw back
                         </button>
                       </td>
@@ -191,7 +213,10 @@ function Console({ listing, me }: { listing: Listing; me: Signer }) {
       </section>
 
       <section style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        <h2 className="h2">Audit log</h2>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+          <h2 className="h2">Audit log</h2>
+          {log && log.length > 0 && <ExportButton onClick={() => downloadCsv(csvRaise, "audit-log", (now) => auditLogCsv(csvRaise, log, now))} />}
+        </div>
         {!log ? (
           <div className="skeleton" style={{ height: 80 }} />
         ) : !log.length ? (
@@ -214,7 +239,7 @@ function Console({ listing, me }: { listing: Listing; me: Signer }) {
                     <td className="num">{when(e.at)}</td>
                     <td>
                       {ACTION_LABEL[e.action]} {e.holder && <span className="mono">{short(e.holder)}</span>}
-                      {e.amount !== undefined && <> · {fmt(e.amount, 2)} tokens</>}
+                      {e.amount !== undefined && <> · {fmt(fromUnits(e.amount), 2)} tokens</>}
                     </td>
                     <td>{e.reason ?? "—"}</td>
                     <td className="mono">{short(e.by)}</td>
@@ -248,9 +273,9 @@ function Console({ listing, me }: { listing: Listing; me: Signer }) {
 
 function ActionForm({ holder, kind, busy, onCancel, onSubmit }: { holder: Holder; kind: "freeze" | "unfreeze" | "clawback"; busy: boolean; onCancel: () => void; onSubmit: (reason: string, amount: number) => void }) {
   const [reason, setReason] = useState("");
-  const [amount, setAmount] = useState(String(holder.wallet));
+  const [amount, setAmount] = useState(String(fromUnits(holder.wallet)));
   const amt = Number(amount);
-  const valid = reason.trim().length > 0 && (kind !== "clawback" || (amt > 0 && amt <= holder.wallet));
+  const valid = reason.trim().length > 0 && (kind !== "clawback" || (amt > 0 && amt <= fromUnits(holder.wallet)));
   return (
     <div style={{ background: "var(--surface)", padding: 16, display: "flex", flexDirection: "column", gap: 12, maxWidth: 560 }}>
       <div style={{ fontWeight: 700 }}>
@@ -258,7 +283,7 @@ function ActionForm({ holder, kind, busy, onCancel, onSubmit }: { holder: Holder
       </div>
       {kind === "clawback" && (
         <label className="field">
-          <span>Tokens (in wallet: {fmt(holder.wallet, 2)})</span>
+          <span>Tokens (in wallet: {fmt(fromUnits(holder.wallet), 2)})</span>
           <span className="input-wrap">
             <input id="clawAmount" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} />
           </span>

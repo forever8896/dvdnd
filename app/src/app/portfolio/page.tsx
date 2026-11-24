@@ -6,19 +6,14 @@ import { Lock } from "@/components/icons";
 import { LockModal } from "@/components/lock-modal";
 import { StatusPill, Toast, TxLink, fmt, when } from "@/components/ui";
 import { countryName, displayStatus, errorText, fromUnits, initials, lockedUp, offering, RaiseState, targetYield, vault } from "@/lib/chain";
+import { download } from "@/lib/download";
 import { useAsync } from "@/lib/hooks";
 import { toIcs, upcomingEvents } from "@/lib/ics";
 import { loadPortfolio, type Holding } from "@/lib/portfolio";
 import { useWallet } from "@/lib/wallet";
 
-function downloadCalendar(holdings: Holding[]) {
-  const href = URL.createObjectURL(new Blob([toIcs(upcomingEvents(holdings))], { type: "text/calendar;charset=utf-8" }));
-  const a = document.createElement("a");
-  a.href = href;
-  a.download = "dvdnd-dividends.ics";
-  a.click();
-  URL.revokeObjectURL(href);
-}
+const downloadCalendar = (holdings: Holding[]) =>
+  download("dvdnd-dividends.ics", toIcs(upcomingEvents(holdings)), "text/calendar;charset=utf-8");
 
 export default function PortfolioPage() {
   const { ready, signer, refresh } = useWallet();
