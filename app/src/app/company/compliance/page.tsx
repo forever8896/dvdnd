@@ -20,7 +20,7 @@ const ACTION_LABEL = { freeze: "Frozen", unfreeze: "Unfrozen", clawback: "Clawed
 
 function downloadCsv(raise: CsvRaise, kind: "cap-table" | "audit-log", build: (now: Date) => string) {
   const now = new Date();
-  download(`dvdnd-raise-${raise.id}-${kind}-${now.toISOString().slice(0, 10)}.csv`, `﻿${build(now)}`, "text/csv;charset=utf-8");
+  download(`dvdnd-raise-${raise.id}-${kind}-${now.toISOString().slice(0, 10)}.csv`, `\uFEFF${build(now)}`, "text/csv;charset=utf-8");
 }
 
 function ExportButton({ onClick }: { onClick: () => void }) {
@@ -28,6 +28,15 @@ function ExportButton({ onClick }: { onClick: () => void }) {
     <button className="btn btn-secondary btn-sm" onClick={onClick}>
       Export CSV
     </button>
+  );
+}
+
+function LoadError({ what, error, retry }: { what: string; error: string; retry: () => void }) {
+  return (
+    <div className="empty">
+      <div>Couldn&apos;t load {what}: {error}</div>
+      <button className="btn btn-secondary btn-sm" style={{ marginTop: 8 }} onClick={retry}>Retry</button>
+    </div>
   );
 }
 
@@ -90,9 +99,9 @@ function Console({ listing, me }: { listing: Listing; me: Signer }) {
   const r = listing.raise;
   const csvRaise: CsvRaise = { id: r.id, company: listing.company.name, exemption: r.terms.exemption };
   const isCompliance = r.terms.compliance === me.publicKey;
-  const { data: capTable, reload: reloadHolders } = useAsync(() => holders(r), [r.id]);
+  const { data: capTable, error: holdersError, reload: reloadHolders } = useAsync(() => holders(r), [r.id]);
   const list = capTable?.holders;
-  const { data: log, reload: reloadLog } = useAsync(() => auditLog(r, [r.terms.compliance, r.company]), [r.id]);
+  const { data: log, error: logError, reload: reloadLog } = useAsync(() => auditLog(r, [r.terms.compliance, r.company]), [r.id]);
   const [action, setAction] = useState<{ holder: Holder; kind: "freeze" | "unfreeze" | "clawback" } | null>(null);
   const [agent, setAgent] = useState("");
   const [busy, setBusy] = useState(false);
@@ -140,11 +149,13 @@ function Console({ listing, me }: { listing: Listing; me: Signer }) {
       <section style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
           <h2 className="h2">Holders</h2>
-          {capTable && capTable.holders.length > 0 && (
+          {capTable && capTable.holders.length > 0 && !holdersError && (
             <ExportButton onClick={() => downloadCsv(csvRaise, "cap-table", (now) => capTableCsv(csvRaise, capTable.asset, capTable.holders, now))} />
           )}
         </div>
-        {!list ? (
+        {holdersError ? (
+          <LoadError what="the holders" error={holdersError} retry={reloadHolders} />
+        ) : !list ? (
           <div className="skeleton" style={{ height: 120 }} />
         ) : !list.length ? (
           <div className="empty">No holders yet. They appear once investors claim their tokens.</div>
@@ -215,9 +226,11 @@ function Console({ listing, me }: { listing: Listing; me: Signer }) {
       <section style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
           <h2 className="h2">Audit log</h2>
-          {log && log.length > 0 && <ExportButton onClick={() => downloadCsv(csvRaise, "audit-log", (now) => auditLogCsv(csvRaise, log, now))} />}
+          {log && log.length > 0 && !logError && <ExportButton onClick={() => downloadCsv(csvRaise, "audit-log", (now) => auditLogCsv(csvRaise, log, now))} />}
         </div>
-        {!log ? (
+        {logError ? (
+          <LoadError what="the audit log" error={logError} retry={reloadLog} />
+        ) : !log ? (
           <div className="skeleton" style={{ height: 80 }} />
         ) : !log.length ? (
           <div className="empty">No compliance actions on this raise.</div>

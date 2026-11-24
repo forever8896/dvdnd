@@ -60,11 +60,11 @@ export async function holders(raise: Raise): Promise<{ asset: string; holders: H
     holders: await Promise.all(
       accounts.map(async (a) => {
         const line = a.balances.find((b) => b.asset_code === code && b.asset_issuer === issuer)!;
-        const [pos, until] = await Promise.all([position(raise.token, a.account_id).catch(() => null), eligibleUntil(a.account_id)]);
+        const [pos, until] = await Promise.all([position(raise.token, a.account_id), eligibleUntil(a.account_id)]);
         return {
           account: a.account_id,
           wallet: parseUnits(line.balance),
-          locked: pos ? pos.active + pos.pending : 0n,
+          locked: pos.active + pos.pending,
           authorized: Boolean(line.is_authorized),
           eligibleUntil: until,
         };
