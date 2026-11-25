@@ -6,6 +6,7 @@
 import { Address, hash as sha256, scValToNative, xdr } from "@stellar/stellar-sdk";
 import { CONTRACTS, NETWORK, PLATFORM_SCOPE } from "./config";
 import { read, server } from "./stellar";
+import { addIndexedLeaf, assertCredentialCount, assertCredentialLeaf, mergeCredentialLeaves, parseCredentialSnapshot, verifyCredentialLeaves } from "./credential-recovery";
 
 export const TREE_DEPTH = 16;
 export const FR_MODULUS = 21888242871839275222246405745257275088548364400416034343698204186575808495617n;
@@ -76,70 +77,141 @@ export async function merklePath(leaves: bigint[], index: number) {
   return { path_elements, path_indices, root: level[0] ?? zeros[TREE_DEPTH]! };
 }
 
-/** Leaves from the gate's `credential` events, or null if the RPC no longer holds them all. */
-async function leavesFromEvents(): Promise<bigint[] | null> {
-  const latest = await server.getLatestLedger();
-  // RPC keeps about a week of events; if the gate is older, events alone can't rebuild the tree.
-  const retentionFloor = latest.sequence - 120_000;
-  if (NETWORK.gateFromLedger < retentionFloor) return null;
+/** Indexed events in the RPC's actual retained window, including a late suffix. */
+async function leavesFromEvents(): Promise<Map<number, bigint>> {
+  const health = await server.getHealth();
+  const startLedger = Math.max(NETWORK.gateFromLedger, health.oldestLedger);
   const byIndex = new Map<number, bigint>();
+  if (startLedger > health.latestLedger) return byIndex;
   let cursor: string | undefined;
-  for (let page = 0; page < 50; page++) {
-    const res = await server.getEvents(
-      cursor
-        ? { cursor, filters: [{ type: "contract", contractIds: [CONTRACTS.gate] }], limit: 200 }
-        : { startLedger: NETWORK.gateFromLedger, filters: [{ type: "contract", contractIds: [CONTRACTS.gate] }], limit: 200 },
-    );
+  const seen = new Set<string>();
+  for (let page = 0; page < 1000; page++) {
+    const filters = [{ type: "contract" as const, contractIds: [CONTRACTS.gate] }];
+    const res = await server.getEvents(cursor
+      ? { cursor, filters, limit: 200 }
+      : { startLedger, filters, limit: 200 });
     for (const e of res.events) {
       const topics = e.topic.map((t) => scValToNative(t as xdr.ScVal));
       if (topics[0] === "gate" && topics[1] === "credential") {
         const value = scValToNative(e.value as xdr.ScVal) as { leaf: bigint };
-        byIndex.set(Number(topics[2]), BigInt(value.leaf));
+        addIndexedLeaf(byIndex, Number(topics[2]), BigInt(value.leaf));
       }
     }
-    if (res.events.length < 200) break;
+    if (res.events.length < 200) return byIndex;
+    if (!res.cursor || seen.has(res.cursor)) throw new Error("Credential event pagination did not advance.");
+    seen.add(res.cursor);
     cursor = res.cursor;
   }
-  const leaves: bigint[] = [];
-  for (let i = 0; byIndex.has(i); i++) leaves.push(byIndex.get(i)!);
-  return leaves;
+  throw new Error("Credential event scan exceeded its page limit.");
 }
 
-/**
- * Leaves from Horizon's history of the gate admin's `add_credential` calls,
- * in ledger order. Horizon keeps full history on testnet (unlike the RPC's
- * week of events); production would run its own indexer.
- */
+/** Historical candidate from Horizon, which acts as an indexer on the current deployment. */
 export async function leavesFromHistory(): Promise<bigint[]> {
   const admin = await read<string>(CONTRACTS.gate, "admin");
   const leaves: bigint[] = [];
   let url: string | null = `${NETWORK.horizonUrl}/accounts/${admin}/operations?order=asc&limit=200`;
+  const seen = new Set<string>();
   for (let page = 0; url && page < 500; page++) {
-    const body = (await (await fetch(url)).json()) as {
+    if (seen.has(url)) throw new Error("Credential history pagination did not advance.");
+    seen.add(url);
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Credential history request failed (${res.status}).`);
+    const body = (await res.json()) as {
       _embedded?: { records: { type: string; transaction_successful?: boolean; parameters?: { value: string }[] }[] };
       _links?: { next?: { href: string } };
     };
-    const records = body._embedded?.records ?? [];
+    const records = body._embedded?.records;
+    if (!Array.isArray(records)) throw new Error("Malformed credential history response.");
     for (const op of records) {
-      if (op.type !== "invoke_host_function" || op.transaction_successful === false || !op.parameters) continue;
-      const [contract, fn, leaf] = op.parameters.map((p) => scValToNative(xdr.ScVal.fromXDR(p.value, "base64")));
-      if (contract === CONTRACTS.gate && fn === "add_credential" && leaf !== undefined) leaves.push(BigInt(leaf as bigint));
+      if (op.type !== "invoke_host_function" || op.transaction_successful !== true || !op.parameters) continue;
+      const [contract, fn, leaf] = op.parameters.slice(0, 3).map((p) => scValToNative(xdr.ScVal.fromXDR(p.value, "base64")));
+      if (contract === CONTRACTS.gate && fn === "add_credential" && leaf !== undefined) {
+        const parsed = BigInt(leaf as bigint);
+        assertCredentialLeaf(parsed);
+        leaves.push(parsed);
+        assertCredentialCount(leaves.length);
+      }
     }
-    url = records.length === 200 ? (body._links?.next?.href ?? null) : null;
+    if (records.length < 200) return leaves;
+    const next = body._links?.next?.href;
+    if (!next) throw new Error("Credential history pagination is incomplete.");
+    if (new URL(next).origin !== new URL(NETWORK.horizonUrl).origin) throw new Error("Unexpected credential history origin.");
+    url = next;
   }
+  if (url) throw new Error("Credential history scan exceeded its page limit.");
   return leaves;
 }
 
-/** All credential leaves in index order, checked against the gate's own count. */
-export async function fetchLeaves(): Promise<bigint[]> {
-  const count = Number(await read<number>(CONTRACTS.gate, "next_index"));
-  const fromEvents = await leavesFromEvents().catch(() => null);
-  if (fromEvents && fromEvents.length === count) return fromEvents;
-  const fromHistory = await leavesFromHistory();
-  if (fromHistory.length !== count) {
-    throw new Error(`Couldn't rebuild the credential tree (found ${fromHistory.length} of ${count} credentials).`);
+const credentialRoot = async (leaves: bigint[]) => (await merklePath(leaves, 0)).root;
+
+/** Optional versioned public snapshot, independent of admin-account history. */
+async function leavesFromSnapshot(snapshot?: unknown): Promise<bigint[]> {
+  let input = snapshot;
+  if (input === undefined) {
+    const url = process.env.NEXT_PUBLIC_CREDENTIAL_SNAPSHOT_URL || "/credential-snapshot.json";
+    const response = await fetch(url, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Credential snapshot request failed (${response.status}).`);
+    input = await response.json();
   }
-  return fromHistory;
+  const { leaves, root } = parseCredentialSnapshot(input, NETWORK.name, CONTRACTS.gate);
+  return verifyCredentialLeaves(leaves, leaves.length, root, credentialRoot);
+}
+
+/** Reconstruct and authenticate every returned leaf against a stable on-chain root. */
+export async function fetchLeaves(snapshot?: unknown): Promise<bigint[]> {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const count = Number(await read<number>(CONTRACTS.gate, "next_index"));
+    const expectedRoot = await read<bigint>(CONTRACTS.gate, "root");
+    assertCredentialCount(count);
+    assertCredentialLeaf(expectedRoot);
+    const errors: string[] = [];
+    const events = await leavesFromEvents().catch((e: unknown) => {
+      errors.push(`RPC: ${String(e)}`);
+      return new Map<number, bigint>();
+    });
+    const sources: [string, () => Promise<bigint[]>][] = [
+      ["RPC events", async () => []],
+      ["snapshot", () => leavesFromSnapshot(snapshot)],
+      ["Horizon", leavesFromHistory],
+    ];
+    let verified: bigint[] | undefined;
+    for (const [name, load] of sources) {
+      try {
+        const prefix = await load();
+        try {
+          verified = await verifyCredentialLeaves(mergeCredentialLeaves(prefix, events, count), count, expectedRoot, credentialRoot);
+        } catch (error) {
+          if (name === "RPC events" || prefix.length < count) throw error;
+          verified = await verifyCredentialLeaves(prefix.slice(0, count), count, expectedRoot, credentialRoot);
+        }
+        break;
+      } catch (e) {
+        errors.push(`${name}: ${String(e)}`);
+      }
+    }
+    const latestRoot = await read<bigint>(CONTRACTS.gate, "root");
+    const latestCount = Number(await read<number>(CONTRACTS.gate, "next_index"));
+    if (latestCount !== count || latestRoot !== expectedRoot) continue;
+    if (verified) return verified;
+    throw new Error(`Couldn't rebuild and verify the credential tree. ${errors.join("; ")}`);
+  }
+  throw new Error("The credential tree changed during reconstruction; please retry.");
+}
+
+/** Generate a public, root-validated snapshot for the configured testnet gate.
+ * Pass the previous local snapshot (or null for bootstrap) to extend it without
+ * relying on an HTTP server. No credentials, signatures or writes to chain.
+ */
+export async function buildCredentialSnapshot(previous: unknown) {
+  if (NETWORK.name !== "testnet") throw new Error("Snapshot refresh is testnet only.");
+  const leaves = await fetchLeaves(previous);
+  return {
+    version: 1,
+    network: NETWORK.name,
+    gate: CONTRACTS.gate,
+    leaves: leaves.map(String),
+    root: String(await credentialRoot(leaves)),
+  };
 }
 
 /** A credential the investor keeps in this browser. Never sent anywhere. */
