@@ -11,8 +11,8 @@
 //! rather than through a call back into the contract.
 
 use soroban_sdk::{
-    contract, contracterror, contractevent, contractimpl, contracttype, panic_with_error, xdr::ToXdr,
-    Address, BytesN, Env, IntoVal, Symbol, TryIntoVal, Val, Vec,
+    contract, contracterror, contractevent, contractimpl, contracttype, panic_with_error,
+    xdr::ToXdr, Address, BytesN, Env, IntoVal, Symbol, TryIntoVal, Val, Vec,
 };
 
 const DAY_IN_LEDGERS: u32 = 17_280;
@@ -83,16 +83,34 @@ impl Timelock {
         let eta = env.ledger().timestamp() + delay(&env);
         // The id depends only on what is called, never on the time: storage keys
         // must be known when the transaction is simulated, before it lands.
-        let id: BytesN<32> = env.crypto().sha256(&(target.clone(), function.clone(), args.clone()).to_xdr(&env)).into();
-        let call = Call { target: target.clone(), function: function.clone(), args, eta };
+        let id: BytesN<32> = env
+            .crypto()
+            .sha256(&(target.clone(), function.clone(), args.clone()).to_xdr(&env))
+            .into();
+        let call = Call {
+            target: target.clone(),
+            function: function.clone(),
+            args,
+            eta,
+        };
         let key = DataKey::Call(id.clone());
         if env.storage().persistent().has(&key) {
             panic_with_error!(&env, Error::AlreadyScheduled);
         }
         env.storage().persistent().set(&key, &call);
-        env.storage().persistent().extend_ttl(&key, TTL_THRESHOLD, TTL_EXTEND_TO);
-        env.storage().instance().extend_ttl(TTL_THRESHOLD, TTL_EXTEND_TO);
-        Scheduled { id: id.clone(), target, function, eta }.publish(&env);
+        env.storage()
+            .persistent()
+            .extend_ttl(&key, TTL_THRESHOLD, TTL_EXTEND_TO);
+        env.storage()
+            .instance()
+            .extend_ttl(TTL_THRESHOLD, TTL_EXTEND_TO);
+        Scheduled {
+            id: id.clone(),
+            target,
+            function,
+            eta,
+        }
+        .publish(&env);
         id
     }
 
@@ -149,18 +167,24 @@ fn delay(env: &Env) -> u64 {
 
 /// A scheduled change to the timelock's own settings.
 fn apply_own(env: &Env, call: &Call) -> Val {
-    let arg = call.args.get(0).unwrap_or_else(|| panic_with_error!(env, Error::BadArgs));
+    let arg = call
+        .args
+        .get(0)
+        .unwrap_or_else(|| panic_with_error!(env, Error::BadArgs));
     if call.function == Symbol::new(env, "set_delay") {
-        let delay: u64 = arg.try_into_val(env).unwrap_or_else(|_| panic_with_error!(env, Error::BadArgs));
+        let delay: u64 = arg
+            .try_into_val(env)
+            .unwrap_or_else(|_| panic_with_error!(env, Error::BadArgs));
         env.storage().instance().set(&DataKey::Delay, &delay);
     } else if call.function == Symbol::new(env, "set_proposer") {
-        let proposer: Address = arg.try_into_val(env).unwrap_or_else(|_| panic_with_error!(env, Error::BadArgs));
+        let proposer: Address = arg
+            .try_into_val(env)
+            .unwrap_or_else(|_| panic_with_error!(env, Error::BadArgs));
         env.storage().instance().set(&DataKey::Proposer, &proposer);
     } else {
         panic_with_error!(env, Error::BadArgs);
     }
     ().into_val(env)
 }
-
 
 mod test;

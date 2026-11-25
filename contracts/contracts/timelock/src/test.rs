@@ -14,15 +14,24 @@ struct Target;
 #[contractimpl]
 impl Target {
     pub fn __constructor(env: Env, admin: Address) {
-        env.storage().instance().set(&symbol_short!("admin"), &admin);
+        env.storage()
+            .instance()
+            .set(&symbol_short!("admin"), &admin);
     }
     pub fn set_fee(env: Env, fee: i128) {
-        let admin: Address = env.storage().instance().get(&symbol_short!("admin")).unwrap();
+        let admin: Address = env
+            .storage()
+            .instance()
+            .get(&symbol_short!("admin"))
+            .unwrap();
         admin.require_auth();
         env.storage().instance().set(&symbol_short!("fee"), &fee);
     }
     pub fn fee(env: Env) -> i128 {
-        env.storage().instance().get(&symbol_short!("fee")).unwrap_or(0)
+        env.storage()
+            .instance()
+            .get(&symbol_short!("fee"))
+            .unwrap_or(0)
     }
 }
 
@@ -34,10 +43,18 @@ fn setup() -> (Env, TimelockClient<'static>, TargetClient<'static>, Address) {
     let council = Address::generate(&env);
     let lock = env.register(Timelock, (council.clone(), DELAY));
     let target = env.register(Target, (lock.clone(),));
-    (env.clone(), TimelockClient::new(&env, &lock), TargetClient::new(&env, &target), council)
+    (
+        env.clone(),
+        TimelockClient::new(&env, &lock),
+        TargetClient::new(&env, &target),
+        council,
+    )
 }
 
-fn failed_with<T>(r: Result<T, Result<soroban_sdk::Error, soroban_sdk::InvokeError>>, e: Error) -> bool {
+fn failed_with<T>(
+    r: Result<T, Result<soroban_sdk::Error, soroban_sdk::InvokeError>>,
+    e: Error,
+) -> bool {
     matches!(r, Err(Ok(x)) if x == soroban_sdk::Error::from_contract_error(e as u32))
 }
 
@@ -45,7 +62,11 @@ fn failed_with<T>(r: Result<T, Result<soroban_sdk::Error, soroban_sdk::InvokeErr
 fn admin_call_runs_only_after_the_delay() {
     let (env, lock, target, council) = setup();
     env.mock_all_auths();
-    let id = lock.schedule(&target.address, &Symbol::new(&env, "set_fee"), &vec![&env, 120i128.into_val(&env)]);
+    let id = lock.schedule(
+        &target.address,
+        &Symbol::new(&env, "set_fee"),
+        &vec![&env, 120i128.into_val(&env)],
+    );
     assert_eq!(env.auths()[0].0, council);
     assert_eq!(lock.call(&id).unwrap().eta, 1_000 + DELAY);
 
@@ -62,13 +83,23 @@ fn admin_call_runs_only_after_the_delay() {
 fn proposer_cancels_and_only_the_proposer_schedules() {
     let (env, lock, target, _) = setup();
     env.mock_all_auths();
-    let id = lock.schedule(&target.address, &Symbol::new(&env, "set_fee"), &vec![&env, 5i128.into_val(&env)]);
+    let id = lock.schedule(
+        &target.address,
+        &Symbol::new(&env, "set_fee"),
+        &vec![&env, 5i128.into_val(&env)],
+    );
     lock.cancel(&id);
     env.ledger().set_timestamp(1_000 + DELAY);
     assert!(failed_with(lock.try_execute(&id), Error::NotFound));
 
     env.set_auths(&[]);
-    assert!(lock.try_schedule(&target.address, &Symbol::new(&env, "set_fee"), &vec![&env, 7i128.into_val(&env)]).is_err());
+    assert!(lock
+        .try_schedule(
+            &target.address,
+            &Symbol::new(&env, "set_fee"),
+            &vec![&env, 7i128.into_val(&env)]
+        )
+        .is_err());
 }
 
 #[test]
@@ -84,7 +115,11 @@ fn the_target_refuses_anyone_but_the_timelock() {
 fn delay_changes_wait_out_the_current_delay() {
     let (env, lock, _, _) = setup();
     env.mock_all_auths();
-    let id = lock.schedule(&lock.address, &Symbol::new(&env, "set_delay"), &vec![&env, 60u64.into_val(&env)]);
+    let id = lock.schedule(
+        &lock.address,
+        &Symbol::new(&env, "set_delay"),
+        &vec![&env, 60u64.into_val(&env)],
+    );
     env.set_auths(&[]);
     assert!(failed_with(lock.try_execute(&id), Error::TooEarly));
     env.ledger().set_timestamp(1_000 + DELAY);
@@ -97,7 +132,11 @@ fn proposer_change_is_scheduled_too() {
     let (env, lock, _, _) = setup();
     env.mock_all_auths();
     let next = Address::generate(&env);
-    let id = lock.schedule(&lock.address, &Symbol::new(&env, "set_proposer"), &vec![&env, next.into_val(&env)]);
+    let id = lock.schedule(
+        &lock.address,
+        &Symbol::new(&env, "set_proposer"),
+        &vec![&env, next.into_val(&env)],
+    );
     env.ledger().set_timestamp(1_000 + DELAY);
     lock.execute(&id);
     assert_eq!(lock.proposer(), next);

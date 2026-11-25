@@ -6,7 +6,7 @@
 //! - Tokens locked during a period are *pending*; they start earning when the
 //!   next period begins (at the next `distribute`).
 //! - Tokens unlocked during a period earn nothing for that period.
-//! So locking right before a payout and selling right after earns nothing.
+//!   So locking right before a payout and selling right after earns nothing.
 //!
 //! Accounting is O(1) per call: a reward-per-token accumulator per share token,
 //! plus a snapshot of the accumulator at the start of each period.
@@ -137,7 +137,7 @@ impl Vault {
 
         token::TokenClient::new(&env, &token).transfer(
             &holder,
-            &env.current_contract_address(),
+            env.current_contract_address(),
             &amount,
         );
         pos.pending += amount;
@@ -146,7 +146,13 @@ impl Vault {
 
         save_pool(&env, &token, &pool);
         save_position(&env, &token, &holder, &pos);
-        Locked { token, holder, amount, earning_from_period: pool.period + 1 }.publish(&env);
+        Locked {
+            token,
+            holder,
+            amount,
+            earning_from_period: pool.period + 1,
+        }
+        .publish(&env);
     }
 
     /// Unlock share tokens at any time. Pending tokens are returned first.
@@ -175,7 +181,12 @@ impl Vault {
         );
         save_pool(&env, &token, &pool);
         save_position(&env, &token, &holder, &pos);
-        Unlocked { token, holder, amount }.publish(&env);
+        Unlocked {
+            token,
+            holder,
+            amount,
+        }
+        .publish(&env);
     }
 
     /// Starts the first earning period when nothing is earning yet (for
@@ -192,10 +203,16 @@ impl Vault {
         pool.pending_total = 0;
         let start_key = DataKey::PeriodStart(token.clone(), pool.period);
         env.storage().persistent().set(&start_key, &pool.acc);
-        env.storage().persistent().extend_ttl(&start_key, TTL_THRESHOLD, TTL_EXTEND_TO);
+        env.storage()
+            .persistent()
+            .extend_ttl(&start_key, TTL_THRESHOLD, TTL_EXTEND_TO);
         save_pool(&env, &token, &pool);
-        PeriodStarted { token, period: pool.period, eligible_tokens: pool.active_total }
-            .publish(&env);
+        PeriodStarted {
+            token,
+            period: pool.period,
+            eligible_tokens: pool.active_total,
+        }
+        .publish(&env);
         pool.period
     }
 
@@ -213,7 +230,7 @@ impl Vault {
         }
         token::TokenClient::new(&env, &usdc(&env)).transfer(
             &from,
-            &env.current_contract_address(),
+            env.current_contract_address(),
             &amount,
         );
 
@@ -228,10 +245,18 @@ impl Vault {
 
         let start_key = DataKey::PeriodStart(token.clone(), pool.period);
         env.storage().persistent().set(&start_key, &pool.acc);
-        env.storage().persistent().extend_ttl(&start_key, TTL_THRESHOLD, TTL_EXTEND_TO);
+        env.storage()
+            .persistent()
+            .extend_ttl(&start_key, TTL_THRESHOLD, TTL_EXTEND_TO);
         save_pool(&env, &token, &pool);
-        Distributed { token, from, period: paid_period, amount, eligible_tokens: eligible }
-            .publish(&env);
+        Distributed {
+            token,
+            from,
+            period: paid_period,
+            amount,
+            eligible_tokens: eligible,
+        }
+        .publish(&env);
     }
 
     /// Pay out all USDC dividends the holder has earned.
@@ -247,7 +272,12 @@ impl Vault {
                 &holder,
                 &amount,
             );
-            Claimed { token: token.clone(), holder: holder.clone(), amount }.publish(&env);
+            Claimed {
+                token: token.clone(),
+                holder: holder.clone(),
+                amount,
+            }
+            .publish(&env);
         }
         save_position(&env, &token, &holder, &pos);
         amount
@@ -297,8 +327,12 @@ fn load_pool(env: &Env, token: &Address) -> Pool {
 fn save_pool(env: &Env, token: &Address, pool: &Pool) {
     let key = DataKey::Pool(token.clone());
     env.storage().persistent().set(&key, pool);
-    env.storage().persistent().extend_ttl(&key, TTL_THRESHOLD, TTL_EXTEND_TO);
-    env.storage().instance().extend_ttl(TTL_THRESHOLD, TTL_EXTEND_TO);
+    env.storage()
+        .persistent()
+        .extend_ttl(&key, TTL_THRESHOLD, TTL_EXTEND_TO);
+    env.storage()
+        .instance()
+        .extend_ttl(TTL_THRESHOLD, TTL_EXTEND_TO);
 }
 
 fn load_position(env: &Env, token: &Address, holder: &Address) -> Position {
@@ -315,7 +349,9 @@ fn save_position(env: &Env, token: &Address, holder: &Address, pos: &Position) {
         return;
     }
     env.storage().persistent().set(&key, pos);
-    env.storage().persistent().extend_ttl(&key, TTL_THRESHOLD, TTL_EXTEND_TO);
+    env.storage()
+        .persistent()
+        .extend_ttl(&key, TTL_THRESHOLD, TTL_EXTEND_TO);
 }
 
 mod test;

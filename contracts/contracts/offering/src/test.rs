@@ -30,13 +30,16 @@ struct MockVault;
 impl MockVault {
     pub fn lock(env: Env, token: Address, holder: Address, amount: i128) {
         holder.require_auth();
-        TokenClient::new(&env, &token).transfer(&holder, &env.current_contract_address(), &amount);
+        TokenClient::new(&env, &token).transfer(&holder, env.current_contract_address(), &amount);
         let key = (token, holder);
         let prev: i128 = env.storage().persistent().get(&key).unwrap_or(0);
         env.storage().persistent().set(&key, &(prev + amount));
     }
     pub fn locked(env: Env, token: Address, holder: Address) -> i128 {
-        env.storage().persistent().get(&(token, holder)).unwrap_or(0)
+        env.storage()
+            .persistent()
+            .get(&(token, holder))
+            .unwrap_or(0)
     }
 }
 
@@ -92,13 +95,27 @@ fn setup() -> Setup {
     let usdc_sac = env.register_stellar_asset_contract_v2(Address::generate(&env));
     let share_issuer = Address::generate(&env);
     let share = env.register_stellar_asset_contract_v2(share_issuer);
-    share.issuer().set_flag(soroban_sdk::testutils::IssuerFlags::RequiredFlag);
-    share.issuer().set_flag(soroban_sdk::testutils::IssuerFlags::RevocableFlag);
-    share.issuer().set_flag(soroban_sdk::testutils::IssuerFlags::ClawbackEnabledFlag);
+    share
+        .issuer()
+        .set_flag(soroban_sdk::testutils::IssuerFlags::RequiredFlag);
+    share
+        .issuer()
+        .set_flag(soroban_sdk::testutils::IssuerFlags::RevocableFlag);
+    share
+        .issuer()
+        .set_flag(soroban_sdk::testutils::IssuerFlags::ClawbackEnabledFlag);
 
     let offering_id = env.register(
         Offering,
-        (admin, gate_id.clone(), registry_id, vault_id.clone(), usdc_sac.address(), treasury.clone(), FEE),
+        (
+            admin,
+            gate_id.clone(),
+            registry_id,
+            vault_id.clone(),
+            usdc_sac.address(),
+            treasury.clone(),
+            FEE,
+        ),
     );
     let share_sac = StellarAssetClient::new(&env, &share.address());
     share_sac.set_admin(&offering_id);
@@ -145,7 +162,8 @@ fn reg_d(s: &Setup) -> Terms {
 }
 
 fn open(s: &Setup, min: i128, max: i128, terms: &Terms) -> u32 {
-    s.offering.open_raise(&1, &s.share.address, &USDC, &min, &max, &DEADLINE, terms)
+    s.offering
+        .open_raise(&1, &s.share.address, &USDC, &min, &max, &DEADLINE, terms)
 }
 
 fn investor(s: &Setup, usdc: i128) -> Address {
@@ -394,7 +412,15 @@ fn configured_holder_cap_below_section_12g_limit_rejects_new_holders() {
 fn price_sets_token_amount() {
     let s = setup();
     // 2.5 USDC per token.
-    let id = s.offering.open_raise(&1, &s.share.address, &(25 * USDC / 10), &(100 * USDC), &(100 * USDC), &DEADLINE, &reg_s(&s));
+    let id = s.offering.open_raise(
+        &1,
+        &s.share.address,
+        &(25 * USDC / 10),
+        &(100 * USDC),
+        &(100 * USDC),
+        &DEADLINE,
+        &reg_s(&s),
+    );
     let a = investor(&s, 100 * USDC);
     s.offering.invest(&id, &a, &(100 * USDC));
     s.offering.finalize(&id);
@@ -410,10 +436,19 @@ fn rejects_ineligible_overflow_and_small_tickets() {
     let id = open(&s, 10 * USDC, 100 * USDC, &terms);
     let outsider = Address::generate(&s.env);
     s.usdc_admin.mint(&outsider, &(50 * USDC));
-    assert_eq!(s.offering.try_invest(&id, &outsider, &(50 * USDC)), Err(err(Error::NotEligible)));
+    assert_eq!(
+        s.offering.try_invest(&id, &outsider, &(50 * USDC)),
+        Err(err(Error::NotEligible))
+    );
     let a = investor(&s, 200 * USDC);
-    assert_eq!(s.offering.try_invest(&id, &a, &(101 * USDC)), Err(err(Error::OverMax)));
-    assert_eq!(s.offering.try_invest(&id, &a, &(19 * USDC)), Err(err(Error::BelowMinimum)));
+    assert_eq!(
+        s.offering.try_invest(&id, &a, &(101 * USDC)),
+        Err(err(Error::OverMax))
+    );
+    assert_eq!(
+        s.offering.try_invest(&id, &a, &(19 * USDC)),
+        Err(err(Error::BelowMinimum))
+    );
     // The minimum is on the investor's total, so a top-up below it is fine.
     s.offering.invest(&id, &a, &(20 * USDC));
     s.offering.invest(&id, &a, &(5 * USDC));
@@ -425,13 +460,46 @@ fn invalid_terms_are_refused() {
     let s = setup();
     let mut t = reg_s(&s);
     t.max_holders = 0;
-    assert_eq!(s.offering.try_open_raise(&1, &s.share.address, &USDC, &USDC, &(10 * USDC), &DEADLINE, &t), Err(err(Error::InvalidTerms)));
+    assert_eq!(
+        s.offering.try_open_raise(
+            &1,
+            &s.share.address,
+            &USDC,
+            &USDC,
+            &(10 * USDC),
+            &DEADLINE,
+            &t
+        ),
+        Err(err(Error::InvalidTerms))
+    );
     t.max_holders = MAX_HOLDERS + 1;
-    assert_eq!(s.offering.try_open_raise(&1, &s.share.address, &USDC, &USDC, &(10 * USDC), &DEADLINE, &t), Err(err(Error::InvalidTerms)));
+    assert_eq!(
+        s.offering.try_open_raise(
+            &1,
+            &s.share.address,
+            &USDC,
+            &USDC,
+            &(10 * USDC),
+            &DEADLINE,
+            &t
+        ),
+        Err(err(Error::InvalidTerms))
+    );
     // Reg D needs a lock-up of at least a year after the deadline.
     let mut d = reg_d(&s);
     d.lockup_until = DEADLINE + YEAR - 1;
-    assert_eq!(s.offering.try_open_raise(&1, &s.share.address, &USDC, &USDC, &(10 * USDC), &DEADLINE, &d), Err(err(Error::InvalidTerms)));
+    assert_eq!(
+        s.offering.try_open_raise(
+            &1,
+            &s.share.address,
+            &USDC,
+            &USDC,
+            &(10 * USDC),
+            &DEADLINE,
+            &d
+        ),
+        Err(err(Error::InvalidTerms))
+    );
 }
 
 #[test]
@@ -439,12 +507,30 @@ fn token_cannot_back_two_raises_and_needs_admin() {
     let s = setup();
     open(&s, 10 * USDC, 100 * USDC, &reg_s(&s));
     assert_eq!(
-        s.offering.try_open_raise(&1, &s.share.address, &USDC, &(10 * USDC), &(100 * USDC), &DEADLINE, &reg_s(&s)),
+        s.offering.try_open_raise(
+            &1,
+            &s.share.address,
+            &USDC,
+            &(10 * USDC),
+            &(100 * USDC),
+            &DEADLINE,
+            &reg_s(&s)
+        ),
         Err(err(Error::TokenInUse))
     );
-    let other = s.env.register_stellar_asset_contract_v2(Address::generate(&s.env));
+    let other = s
+        .env
+        .register_stellar_asset_contract_v2(Address::generate(&s.env));
     assert_eq!(
-        s.offering.try_open_raise(&1, &other.address(), &USDC, &(10 * USDC), &(100 * USDC), &DEADLINE, &reg_s(&s)),
+        s.offering.try_open_raise(
+            &1,
+            &other.address(),
+            &USDC,
+            &(10 * USDC),
+            &(100 * USDC),
+            &DEADLINE,
+            &reg_s(&s)
+        ),
         Err(err(Error::NotTokenAdmin))
     );
 }
@@ -467,15 +553,24 @@ fn lockup_keeps_tokens_in_the_vault_until_release() {
 
     // No new holders and no release before the date.
     let buyer = investor(&s, 0);
-    assert_eq!(s.offering.try_authorize_holder(&id, &buyer), Err(err(Error::LockedUp)));
+    assert_eq!(
+        s.offering.try_authorize_holder(&id, &buyer),
+        Err(err(Error::LockedUp))
+    );
     assert_eq!(s.offering.try_release(&id, &a), Err(err(Error::LockedUp)));
     let reason = soroban_sdk::String::from_str(&s.env, "Lock-up");
-    assert_eq!(s.offering.try_unfreeze_holder(&id, &a, &reason), Err(err(Error::LockedUp)));
+    assert_eq!(
+        s.offering.try_unfreeze_holder(&id, &a, &reason),
+        Err(err(Error::LockedUp))
+    );
 
     s.env.ledger().set_timestamp(DEADLINE + 1_000);
     s.offering.release(&id, &a);
     assert!(s.share_sac.authorized(&a));
-    assert_eq!(s.offering.try_release(&id, &a), Err(err(Error::NothingToClaim)));
+    assert_eq!(
+        s.offering.try_release(&id, &a),
+        Err(err(Error::NothingToClaim))
+    );
     s.offering.authorize_holder(&id, &buyer);
     assert!(s.share_sac.authorized(&buyer));
 }
@@ -491,12 +586,23 @@ fn compliance_freeze_outlasts_lockup() {
     s.offering.finalize(&id);
     s.offering.claim_tokens(&id, &a);
 
-    s.offering.freeze_holder(&id, &a, &soroban_sdk::String::from_str(&s.env, "Court order 2026/114"));
+    s.offering.freeze_holder(
+        &id,
+        &a,
+        &soroban_sdk::String::from_str(&s.env, "Court order 2026/114"),
+    );
     assert_eq!(s.env.auths()[0].0, s.compliance);
     s.env.ledger().set_timestamp(DEADLINE + 1_000);
-    assert_eq!(s.offering.try_release(&id, &a), Err(err(Error::NothingToClaim)));
+    assert_eq!(
+        s.offering.try_release(&id, &a),
+        Err(err(Error::NothingToClaim))
+    );
     assert!(!s.share_sac.authorized(&a));
-    s.offering.unfreeze_holder(&id, &a, &soroban_sdk::String::from_str(&s.env, "Order lifted"));
+    s.offering.unfreeze_holder(
+        &id,
+        &a,
+        &soroban_sdk::String::from_str(&s.env, "Order lifted"),
+    );
     assert!(s.share_sac.authorized(&a));
 }
 
@@ -509,7 +615,10 @@ fn reg_s_secondary_holders_need_the_gate() {
     s.offering.authorize_holder(&id, &buyer);
     assert!(s.share_sac.authorized(&buyer));
     let outsider = Address::generate(&s.env);
-    assert_eq!(s.offering.try_authorize_holder(&id, &outsider), Err(err(Error::NotEligible)));
+    assert_eq!(
+        s.offering.try_authorize_holder(&id, &outsider),
+        Err(err(Error::NotEligible))
+    );
 }
 
 #[test]
@@ -521,12 +630,21 @@ fn reg_d_self_certified_needs_the_high_minimum() {
     // Not gated by residence: a US investor without a gate proof.
     let us = Address::generate(&s.env);
     s.usdc_admin.mint(&us, &(300_000 * USDC));
-    assert_eq!(s.offering.try_invest(&id, &us, &(200_000 * USDC)), Err(err(Error::NotEligible)));
+    assert_eq!(
+        s.offering.try_invest(&id, &us, &(200_000 * USDC)),
+        Err(err(Error::NotEligible))
+    );
 
     let statement = BytesN::from_array(&s.env, &[7; 32]);
     s.offering.self_certify(&us, &statement, &false);
-    assert_eq!(s.offering.self_certification(&us).unwrap().statement, statement);
-    assert_eq!(s.offering.try_invest(&id, &us, &(199_999 * USDC)), Err(err(Error::NotEligible)));
+    assert_eq!(
+        s.offering.self_certification(&us).unwrap().statement,
+        statement
+    );
+    assert_eq!(
+        s.offering.try_invest(&id, &us, &(199_999 * USDC)),
+        Err(err(Error::NotEligible))
+    );
     s.offering.invest(&id, &us, &(200_000 * USDC));
     // Topping up stays eligible: the total is what counts.
     s.offering.invest(&id, &us, &(1_000 * USDC));
@@ -543,7 +661,10 @@ fn reg_d_verifier_attestation_allows_any_ticket_until_it_expires() {
     assert!(s.offering.is_eligible_for(&id, &a, &(50 * USDC)));
     s.offering.invest(&id, &a, &(50 * USDC));
     s.env.ledger().set_timestamp(1_500);
-    assert_eq!(s.offering.try_invest(&id, &a, &(50 * USDC)), Err(err(Error::NotEligible)));
+    assert_eq!(
+        s.offering.try_invest(&id, &a, &(50 * USDC)),
+        Err(err(Error::NotEligible))
+    );
     // Someone else's attestation doesn't count.
     let b = Address::generate(&s.env);
     let stranger = Address::generate(&s.env);
@@ -563,9 +684,15 @@ fn holder_cap_counts_primary_and_secondary() {
     s.offering.invest(&id, &a, &(10 * USDC));
     s.offering.invest(&id, &a, &(10 * USDC)); // same holder, counted once
     s.offering.invest(&id, &b, &(10 * USDC));
-    assert_eq!(s.offering.try_invest(&id, &c, &(10 * USDC)), Err(err(Error::HolderCap)));
+    assert_eq!(
+        s.offering.try_invest(&id, &c, &(10 * USDC)),
+        Err(err(Error::HolderCap))
+    );
     s.env.ledger().set_timestamp(DEADLINE);
-    assert_eq!(s.offering.try_authorize_holder(&id, &c), Err(err(Error::HolderCap)));
+    assert_eq!(
+        s.offering.try_authorize_holder(&id, &c),
+        Err(err(Error::HolderCap))
+    );
     assert_eq!(s.offering.raise(&id).holders, 2);
 }
 
@@ -584,8 +711,14 @@ fn raise_compliance_claws_back_with_a_reason_and_hands_over() {
     assert_eq!(s.env.auths()[0].0, s.compliance);
     assert_eq!(s.share.balance(&a), 70 * USDC);
     let empty = soroban_sdk::String::from_str(&s.env, "");
-    assert_eq!(s.offering.try_clawback(&id, &a, &USDC, &empty), Err(err(Error::InvalidTerms)));
-    assert_eq!(s.offering.try_clawback(&id, &a, &0, &reason), Err(err(Error::InvalidTerms)));
+    assert_eq!(
+        s.offering.try_clawback(&id, &a, &USDC, &empty),
+        Err(err(Error::InvalidTerms))
+    );
+    assert_eq!(
+        s.offering.try_clawback(&id, &a, &0, &reason),
+        Err(err(Error::InvalidTerms))
+    );
 
     let agent = Address::generate(&s.env);
     s.offering.set_raise_compliance(&id, &agent);
@@ -599,7 +732,10 @@ fn admin_sets_the_listing_fee() {
     let s = setup();
     s.offering.set_listing_fee(&0);
     assert_eq!(s.offering.config().listing_fee, 0);
-    assert_eq!(s.offering.try_set_listing_fee(&-1), Err(err(Error::InvalidTerms)));
+    assert_eq!(
+        s.offering.try_set_listing_fee(&-1),
+        Err(err(Error::InvalidTerms))
+    );
 }
 
 #[test]
@@ -610,9 +746,13 @@ fn an_entity_needs_the_one_million_minimum() {
     let id = open(&s, 10 * USDC, 2_000_000 * USDC, &terms);
     let fund = Address::generate(&s.env);
     s.usdc_admin.mint(&fund, &(1_500_000 * USDC));
-    s.offering.self_certify(&fund, &BytesN::from_array(&s.env, &[9; 32]), &true);
+    s.offering
+        .self_certify(&fund, &BytesN::from_array(&s.env, &[9; 32]), &true);
     assert!(s.offering.self_certification(&fund).unwrap().entity);
-    assert_eq!(s.offering.try_invest(&id, &fund, &(999_999 * USDC)), Err(err(Error::NotEligible)));
+    assert_eq!(
+        s.offering.try_invest(&id, &fund, &(999_999 * USDC)),
+        Err(err(Error::NotEligible))
+    );
     s.offering.invest(&id, &fund, &(1_000_000 * USDC));
 }
 
@@ -631,23 +771,43 @@ fn combined_raise_takes_residents_and_accredited_investors() {
     // US accredited investor without a gate proof: the self-certified minimum.
     let us = Address::generate(&s.env);
     s.usdc_admin.mint(&us, &(300_000 * USDC));
-    assert_eq!(s.offering.try_invest(&id, &us, &(100 * USDC)), Err(err(Error::NotEligible)));
-    s.offering.self_certify(&us, &BytesN::from_array(&s.env, &[7; 32]), &false);
-    assert_eq!(s.offering.try_invest(&id, &us, &(100 * USDC)), Err(err(Error::NotEligible)));
+    assert_eq!(
+        s.offering.try_invest(&id, &us, &(100 * USDC)),
+        Err(err(Error::NotEligible))
+    );
+    s.offering
+        .self_certify(&us, &BytesN::from_array(&s.env, &[7; 32]), &false);
+    assert_eq!(
+        s.offering.try_invest(&id, &us, &(100 * USDC)),
+        Err(err(Error::NotEligible))
+    );
     s.offering.invest(&id, &us, &(200_000 * USDC));
 
     // Neither: refused.
     let stranger = Address::generate(&s.env);
     s.usdc_admin.mint(&stranger, &(100 * USDC));
-    assert_eq!(s.offering.try_invest(&id, &stranger, &(100 * USDC)), Err(err(Error::NotEligible)));
+    assert_eq!(
+        s.offering.try_invest(&id, &stranger, &(100 * USDC)),
+        Err(err(Error::NotEligible))
+    );
 
     // It takes the Reg D lock-up.
     let mut short = terms.clone();
     short.lockup_until = DEADLINE;
-    let other = s.env.register_stellar_asset_contract_v2(Address::generate(&s.env));
+    let other = s
+        .env
+        .register_stellar_asset_contract_v2(Address::generate(&s.env));
     StellarAssetClient::new(&s.env, &other.address()).set_admin(&s.offering.address);
     assert_eq!(
-        s.offering.try_open_raise(&1, &other.address(), &USDC, &USDC, &(10 * USDC), &DEADLINE, &short),
+        s.offering.try_open_raise(
+            &1,
+            &other.address(),
+            &USDC,
+            &USDC,
+            &(10 * USDC),
+            &DEADLINE,
+            &short
+        ),
         Err(err(Error::InvalidTerms))
     );
 }

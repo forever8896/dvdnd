@@ -28,7 +28,12 @@ fn full_lifecycle() {
     reg.verify(&id, &BytesN::from_array(&env, &[1; 32]));
     assert_eq!(reg.owner_if_active(&id), None);
 
-    reg.sign_agreement(&id, &BytesN::from_array(&env, &[2; 32]), &5_000, &31_536_000);
+    reg.sign_agreement(
+        &id,
+        &BytesN::from_array(&env, &[2; 32]),
+        &5_000,
+        &31_536_000,
+    );
     assert_eq!(reg.owner_if_active(&id), Some(owner));
     let c = reg.company(&id);
     assert_eq!(c.status, Status::Active);
@@ -40,19 +45,39 @@ fn full_lifecycle() {
 fn cannot_sign_before_verification() {
     let (env, reg, _admin) = setup();
     let owner = Address::generate(&env);
-    let id = reg.register(&owner, &String::from_str(&env, "X"), &620, &String::from_str(&env, ""));
+    let id = reg.register(
+        &owner,
+        &String::from_str(&env, "X"),
+        &620,
+        &String::from_str(&env, ""),
+    );
     let res = reg.try_sign_agreement(&id, &BytesN::from_array(&env, &[2; 32]), &5_000, &1);
-    assert_eq!(res, Err(Ok(soroban_sdk::Error::from_contract_error(Error::NotVerified as u32))));
+    assert_eq!(
+        res,
+        Err(Ok(soroban_sdk::Error::from_contract_error(
+            Error::NotVerified as u32
+        )))
+    );
 }
 
 #[test]
 fn rejects_invalid_payout() {
     let (env, reg, _admin) = setup();
     let owner = Address::generate(&env);
-    let id = reg.register(&owner, &String::from_str(&env, "X"), &620, &String::from_str(&env, ""));
+    let id = reg.register(
+        &owner,
+        &String::from_str(&env, "X"),
+        &620,
+        &String::from_str(&env, ""),
+    );
     reg.verify(&id, &BytesN::from_array(&env, &[1; 32]));
     let res = reg.try_sign_agreement(&id, &BytesN::from_array(&env, &[2; 32]), &10_001, &1);
-    assert_eq!(res, Err(Ok(soroban_sdk::Error::from_contract_error(Error::InvalidPayout as u32))));
+    assert_eq!(
+        res,
+        Err(Ok(soroban_sdk::Error::from_contract_error(
+            Error::InvalidPayout as u32
+        )))
+    );
 }
 
 #[test]
@@ -63,7 +88,12 @@ fn roles_are_separate_and_reassignable() {
     assert_ne!(verifier, admin);
 
     let owner = Address::generate(&env);
-    let id = reg.register(&owner, &String::from_str(&env, "X"), &620, &String::from_str(&env, ""));
+    let id = reg.register(
+        &owner,
+        &String::from_str(&env, "X"),
+        &620,
+        &String::from_str(&env, ""),
+    );
     reg.verify(&id, &BytesN::from_array(&env, &[1; 32]));
     // verify() asked the verifier, not the admin, to authorize.
     assert_eq!(env.auths()[0].0, verifier);

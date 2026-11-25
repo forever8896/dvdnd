@@ -9,6 +9,10 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/SamixYasuke/dvdnd/actions/workflows/ci.yml"><img src="https://github.com/SamixYasuke/dvdnd/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI status"></a>
+</p>
+
+<p align="center">
   <a href="https://dvdnd.app"><b>Live demo</b></a> ·
   <a href="https://dvdnd.app/docs"><b>Docs</b></a> ·
   <a href="https://www.dvdnd.app/clips/lifecycle.mp4"><b>Watch the 2-minute film</b></a> ·

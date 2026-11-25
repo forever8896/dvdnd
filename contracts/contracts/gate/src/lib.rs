@@ -168,7 +168,13 @@ impl Gate {
         s.set(&DataKey::Roots, &vec![&env, root.clone()]);
         s.set(
             &DataKey::Tree,
-            &TreeState { next_index: 0, root_index: 0, zeros, filled, root },
+            &TreeState {
+                next_index: 0,
+                root_index: 0,
+                zeros,
+                filled,
+                root,
+            },
         );
     }
 
@@ -234,14 +240,21 @@ impl Gate {
         s.set(&DataKey::Tree, &t);
         bump_instance(&env);
 
-        CredentialAdded { index, leaf, root: cur }.publish(&env);
+        CredentialAdded {
+            index,
+            leaf,
+            root: cur,
+        }
+        .publish(&env);
         index
     }
 
     /// Remove an investor's eligibility.
     pub fn revoke(env: Env, investor: Address) {
         require_admin(&env);
-        env.storage().persistent().remove(&DataKey::Eligible(investor.clone()));
+        env.storage()
+            .persistent()
+            .remove(&DataKey::Eligible(investor.clone()));
         Revoked { investor }.publish(&env);
     }
 
@@ -262,7 +275,9 @@ impl Gate {
     }
 
     pub fn is_nullifier_used(env: Env, nullifier: U256) -> bool {
-        env.storage().persistent().has(&DataKey::Nullifier(nullifier))
+        env.storage()
+            .persistent()
+            .has(&DataKey::Nullifier(nullifier))
     }
 
     /// Timestamp until which `investor` is eligible (0 if never registered / revoked).
@@ -342,7 +357,12 @@ impl Gate {
         p.extend_ttl(&ekey, PERSISTENT_THRESHOLD, PERSISTENT_BUMP);
         bump_instance(&env);
 
-        Registered { investor, nullifier, eligible_until: until }.publish(&env);
+        Registered {
+            investor,
+            nullifier,
+            eligible_until: until,
+        }
+        .publish(&env);
         until
     }
 }
@@ -359,7 +379,9 @@ fn tree(env: &Env) -> TreeState {
 }
 
 fn bump_instance(env: &Env) {
-    env.storage().instance().extend_ttl(INSTANCE_THRESHOLD, INSTANCE_BUMP);
+    env.storage()
+        .instance()
+        .extend_ttl(INSTANCE_THRESHOLD, INSTANCE_BUMP);
 }
 
 fn check_vk(env: &Env, vk: &VerifyingKey) {
@@ -398,7 +420,13 @@ fn verify_groth16(env: &Env, vk: &VerifyingKey, proof: &Proof, inputs: &Vec<Bn25
     }
     let vk_x = bn.g1_add(&vk.ic.get_unchecked(0), &bn.g1_msm(points, inputs.clone()));
 
-    let g1 = vec![env, -proof.a.clone(), vk.alpha.clone(), vk_x, proof.c.clone()];
+    let g1 = vec![
+        env,
+        -proof.a.clone(),
+        vk.alpha.clone(),
+        vk_x,
+        proof.c.clone(),
+    ];
     let g2 = vec![
         env,
         proof.b.clone(),

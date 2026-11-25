@@ -1,0 +1,137 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+  # stellar/stellar-cli verifies the release attestation before installing.
+  attestations: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contracts:
+    name: Contracts
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contracts
+    steps:
+      - uses: actions/checkout@v4
+
+      # Pinned so rustfmt/clippy results are reproducible; bump deliberately.
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@1.94.1
+        with:
+          targets: wasm32v1-none
+          components: rustfmt, clippy
+
+      - name: Cache cargo registry and target
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: contracts -> target
+
+      - name: Format
+        run: cargo fmt --check
+
+      - name: Clippy
+        run: cargo clippy --all-targets -- -D warnings
+
+      - name: Test
+        run: cargo test
+
+      - name: Install Stellar CLI
+        uses: stellar/stellar-cli@v28.1.0
+
+      - name: Build contracts
+        run: stellar contract build
+
+  circuits:
+    name: Circuits
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: circuits
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.22.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: circuits/pnpm-lock.yaml
+
+      - name: Cache circom
+        id: circom-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/bin/circom
+          key: circom-2.2.3-${{ runner.os }}
+
+      - name: Install circom
+        if: steps.circom-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          curl -fsSL --retry 3 -o "$HOME/.local/bin/circom" \
+            https://github.com/iden3/circom/releases/download/v2.2.3/circom-linux-amd64
+          chmod +x "$HOME/.local/bin/circom"
+
+      - name: Add circom to PATH
+        run: |
+          chmod +x "$HOME/.local/bin/circom"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Check circom
+        run: circom --version
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify sample proof off-chain
+        run: pnpm fixture
+
+  app:
+    name: App
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.22.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: app/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # app/package.json has no "typecheck" script, so run the compiler directly.
+      - name: Typecheck
+        run: pnpm exec tsc --noEmit
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Test
+        run: pnpm vitest run --exclude '**/*.live.test.ts'
+
+      - name: Build
+        run: |
+          cp .env.example .env
+          pnpm build

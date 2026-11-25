@@ -73,7 +73,11 @@ fn setup<'a>() -> Setup<'a> {
         client.add_credential(&u256(&env, leaf));
     }
     let investor = Address::from_str(&env, fx::INVESTOR);
-    Setup { env, client, investor }
+    Setup {
+        env,
+        client,
+        investor,
+    }
 }
 
 fn register(s: &Setup) -> Result<u64, ()> {
@@ -162,7 +166,8 @@ fn real_snarkjs_proof_verifies_and_registers() {
     let res = s.env.cost_estimate().resources();
     std::println!(
         "verify_and_register (native test contract): {} CPU instructions, {} bytes mem",
-        res.instructions, res.mem_bytes
+        res.instructions,
+        res.mem_bytes
     );
 
     assert!(s.client.is_eligible(&s.investor));
@@ -250,9 +255,18 @@ fn wrong_public_inputs_fail() {
     };
     let nul = u256(e, fx::NULLIFIER);
     let scope = u256(e, fx::SCOPE);
-    assert_err(call(fx::NOW + 1, nul.clone(), scope.clone()), Error::InvalidProof);
-    assert_err(call(fx::NOW, U256::from_u32(e, 7), scope.clone()), Error::InvalidProof);
-    assert_err(call(fx::NOW, nul.clone(), U256::from_u32(e, 2)), Error::WrongScope);
+    assert_err(
+        call(fx::NOW + 1, nul.clone(), scope.clone()),
+        Error::InvalidProof,
+    );
+    assert_err(
+        call(fx::NOW, U256::from_u32(e, 7), scope.clone()),
+        Error::InvalidProof,
+    );
+    assert_err(
+        call(fx::NOW, nul.clone(), U256::from_u32(e, 2)),
+        Error::WrongScope,
+    );
 }
 
 #[test]

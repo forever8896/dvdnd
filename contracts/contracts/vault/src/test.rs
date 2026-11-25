@@ -55,7 +55,10 @@ fn first_period_needs_explicit_start() {
     let p = s.vault.pool(&s.share);
     assert_eq!((p.period, p.active_total, p.pending_total), (0, 0, 300 * U));
     // Nothing is eligible yet, so a payout is refused rather than stranded.
-    assert!(s.vault.try_distribute(&s.share, &s.company, &(10 * U)).is_err());
+    assert!(s
+        .vault
+        .try_distribute(&s.share, &s.company, &(10 * U))
+        .is_err());
 
     assert_eq!(s.vault.start_period(&s.share), 1);
     assert_eq!(s.vault.pool(&s.share).active_total, 300 * U);
@@ -98,7 +101,10 @@ fn dividend_flow_across_periods() {
     s.vault.unlock(&s.share, &a, &(300 * U));
     assert_eq!(s.share_balance(&a), 300 * U);
     let p = s.vault.pool(&s.share);
-    assert_eq!((p.period, p.active_total, p.total_distributed), (3, 450 * U, 145 * U));
+    assert_eq!(
+        (p.period, p.active_total, p.total_distributed),
+        (3, 450 * U, 145 * U)
+    );
 }
 
 #[test]

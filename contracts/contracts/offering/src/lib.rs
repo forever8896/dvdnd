@@ -1,4 +1,7 @@
 #![no_std]
+// Soroban entry points are part of the contract ABI; their argument lists are
+// fixed by the interface rather than chosen for Rust ergonomics.
+#![allow(clippy::too_many_arguments)]
 //! Fixed-price, all-or-nothing raises for company share tokens, each under a
 //! securities exemption with its own rules.
 //!
@@ -296,7 +299,15 @@ impl Offering {
         if listing_fee < 0 {
             panic_with_error!(&env, Error::InvalidTerms);
         }
-        let config = Config { admin, gate, registry, vault, usdc, treasury, listing_fee };
+        let config = Config {
+            admin,
+            gate,
+            registry,
+            vault,
+            usdc,
+            treasury,
+            listing_fee,
+        };
         env.storage().instance().set(&DataKey::Config, &config);
         env.storage().instance().set(&DataKey::NextId, &1u32);
     }
@@ -394,8 +405,21 @@ impl Offering {
     pub fn self_certify(env: Env, investor: Address, statement: BytesN<32>, entity: bool) {
         investor.require_auth();
         let at = env.ledger().timestamp();
-        set_persistent(&env, &DataKey::SelfCertified(investor.clone()), &Accreditation { statement, entity, at });
-        AccreditationRecorded { investor: investor.clone(), by: investor, until: u64::MAX }.publish(&env);
+        set_persistent(
+            &env,
+            &DataKey::SelfCertified(investor.clone()),
+            &Accreditation {
+                statement,
+                entity,
+                at,
+            },
+        );
+        AccreditationRecorded {
+            investor: investor.clone(),
+            by: investor,
+            until: u64::MAX,
+        }
+        .publish(&env);
     }
 
     /// An accreditation verifier attests an investor until `until`.
@@ -404,8 +428,17 @@ impl Offering {
         if until <= env.ledger().timestamp() {
             panic_with_error!(&env, Error::InvalidTerms);
         }
-        set_persistent(&env, &DataKey::Attested(verifier.clone(), investor.clone()), &until);
-        AccreditationRecorded { investor, by: verifier, until }.publish(&env);
+        set_persistent(
+            &env,
+            &DataKey::Attested(verifier.clone(), investor.clone()),
+            &until,
+        );
+        AccreditationRecorded {
+            investor,
+            by: verifier,
+            until,
+        }
+        .publish(&env);
     }
 
     /// An eligible investor deposits USDC into escrow at the fixed price.
@@ -436,13 +469,19 @@ impl Offering {
 
         token::TokenClient::new(&env, &config.usdc).transfer(
             &investor,
-            &env.current_contract_address(),
+            env.current_contract_address(),
             &amount,
         );
         set_persistent(&env, &key, &total);
         raise.raised += amount;
         save_raise(&env, &raise);
-        Invested { raise_id, investor, amount, raised: raise.raised }.publish(&env);
+        Invested {
+            raise_id,
+            investor,
+            amount,
+            raised: raise.raised,
+        }
+        .publish(&env);
     }
 
     /// Anyone can close a raise once it is full or past its deadline.
@@ -471,7 +510,12 @@ impl Offering {
             raise.state = RaiseState::Failed;
         }
         save_raise(&env, &raise);
-        RaiseClosed { raise_id, succeeded, raised: raise.raised }.publish(&env);
+        RaiseClosed {
+            raise_id,
+            succeeded,
+            raised: raise.raised,
+        }
+        .publish(&env);
         raise.state
     }
 
@@ -496,9 +540,19 @@ impl Offering {
         if locked_up {
             VaultClient::new(&env, &config.vault).lock(&raise.token, &investor, &tokens);
             sac.set_authorized(&investor, &false);
-            set_persistent(&env, &DataKey::LockupFrozen(raise_id, investor.clone()), &true);
+            set_persistent(
+                &env,
+                &DataKey::LockupFrozen(raise_id, investor.clone()),
+                &true,
+            );
         }
-        TokensClaimed { raise_id, investor, tokens, locked_up }.publish(&env);
+        TokensClaimed {
+            raise_id,
+            investor,
+            tokens,
+            locked_up,
+        }
+        .publish(&env);
         tokens
     }
 
@@ -517,7 +571,12 @@ impl Offering {
         check_eligible(&env, &config, &raise, &holder, 0);
         env.storage().persistent().remove(&frozen);
         token::StellarAssetClient::new(&env, &raise.token).set_authorized(&holder, &true);
-        HolderAuthorized { token: raise.token, holder, authorized: true }.publish(&env);
+        HolderAuthorized {
+            token: raise.token,
+            holder,
+            authorized: true,
+        }
+        .publish(&env);
     }
 
     /// After a failed raise, the investor gets their USDC back in full.
@@ -533,7 +592,12 @@ impl Offering {
             &investor,
             &amount,
         );
-        Refunded { raise_id, investor, amount }.publish(&env);
+        Refunded {
+            raise_id,
+            investor,
+            amount,
+        }
+        .publish(&env);
         amount
     }
 
@@ -553,7 +617,12 @@ impl Offering {
         let sac = token::StellarAssetClient::new(&env, &raise.token);
         sac.trust(&holder);
         sac.set_authorized(&holder, &true);
-        HolderAuthorized { token: raise.token, holder, authorized: true }.publish(&env);
+        HolderAuthorized {
+            token: raise.token,
+            holder,
+            authorized: true,
+        }
+        .publish(&env);
     }
 
     /// The raise's compliance account freezes a holder (e.g. they moved to
@@ -564,8 +633,17 @@ impl Offering {
         require_reason(&env, &reason);
         token::StellarAssetClient::new(&env, &raise.token).set_authorized(&holder, &false);
         // A compliance freeze outlasts lock-up: `release` must not lift it.
-        env.storage().persistent().remove(&DataKey::LockupFrozen(raise_id, holder.clone()));
-        ComplianceAction { token: raise.token, holder, action: symbol_short!("freeze"), amount: 0, reason }.publish(&env);
+        env.storage()
+            .persistent()
+            .remove(&DataKey::LockupFrozen(raise_id, holder.clone()));
+        ComplianceAction {
+            token: raise.token,
+            holder,
+            action: symbol_short!("freeze"),
+            amount: 0,
+            reason,
+        }
+        .publish(&env);
     }
 
     /// The raise's compliance account lifts a freeze (not during lock-up).
@@ -577,7 +655,14 @@ impl Offering {
             panic_with_error!(&env, Error::LockedUp);
         }
         token::StellarAssetClient::new(&env, &raise.token).set_authorized(&holder, &true);
-        ComplianceAction { token: raise.token, holder, action: symbol_short!("unfreeze"), amount: 0, reason }.publish(&env);
+        ComplianceAction {
+            token: raise.token,
+            holder,
+            action: symbol_short!("unfreeze"),
+            amount: 0,
+            reason,
+        }
+        .publish(&env);
     }
 
     /// The raise's compliance account claws back (burns) tokens from a
@@ -591,7 +676,14 @@ impl Offering {
             panic_with_error!(&env, Error::InvalidTerms);
         }
         token::StellarAssetClient::new(&env, &raise.token).clawback(&holder, &amount);
-        ComplianceAction { token: raise.token, holder, action: symbol_short!("clawback"), amount, reason }.publish(&env);
+        ComplianceAction {
+            token: raise.token,
+            holder,
+            action: symbol_short!("clawback"),
+            amount,
+            reason,
+        }
+        .publish(&env);
     }
 
     /// The current compliance account hands the role on (e.g. to a transfer agent).
@@ -600,7 +692,12 @@ impl Offering {
         raise.terms.compliance.require_auth();
         raise.terms.compliance = new_compliance.clone();
         save_raise(&env, &raise);
-        RoleChanged { role: symbol_short!("comply"), account: new_compliance, raise_id }.publish(&env);
+        RoleChanged {
+            role: symbol_short!("comply"),
+            account: new_compliance,
+            raise_id,
+        }
+        .publish(&env);
     }
 
     pub fn set_admin(env: Env, new_admin: Address) {
@@ -608,7 +705,12 @@ impl Offering {
         c.admin.require_auth();
         c.admin = new_admin.clone();
         env.storage().instance().set(&DataKey::Config, &c);
-        RoleChanged { role: symbol_short!("admin"), account: new_admin, raise_id: 0 }.publish(&env);
+        RoleChanged {
+            role: symbol_short!("admin"),
+            account: new_admin,
+            raise_id: 0,
+        }
+        .publish(&env);
     }
 
     /// The admin changes the flat listing fee for future raises.
@@ -624,11 +726,19 @@ impl Offering {
 
     /// Whether `investor` meets the raise's exemption for a total of `amount`.
     pub fn is_eligible_for(env: Env, raise_id: u32, investor: Address, amount: i128) -> bool {
-        eligible(&env, &config(&env), &load_raise(&env, raise_id), &investor, amount)
+        eligible(
+            &env,
+            &config(&env),
+            &load_raise(&env, raise_id),
+            &investor,
+            amount,
+        )
     }
 
     pub fn self_certification(env: Env, investor: Address) -> Option<Accreditation> {
-        env.storage().persistent().get(&DataKey::SelfCertified(investor))
+        env.storage()
+            .persistent()
+            .get(&DataKey::SelfCertified(investor))
     }
 
     pub fn raise(env: Env, raise_id: u32) -> Raise {
@@ -681,15 +791,28 @@ fn accredited(env: &Env, raise: &Raise, investor: &Address, amount: i128) -> boo
             .storage()
             .persistent()
             .get::<_, Accreditation>(&DataKey::SelfCertified(investor.clone()))
-            .is_some_and(|a| amount >= if a.entity { ENTITY_SELF_CERTIFIED_MINIMUM } else { SELF_CERTIFIED_MINIMUM })
+            .is_some_and(|a| {
+                amount
+                    >= if a.entity {
+                        ENTITY_SELF_CERTIFIED_MINIMUM
+                    } else {
+                        SELF_CERTIFIED_MINIMUM
+                    }
+            })
 }
 
 fn check_eligible(env: &Env, config: &Config, raise: &Raise, investor: &Address, amount: i128) {
     // A self-certified 506(c) holder who already met the minimum in the raise stays eligible.
     let met_minimum = raise.terms.exemption != Exemption::RegS
         && amount == 0
-        && env.storage().persistent().has(&DataKey::Holder(raise.id, investor.clone()))
-        && env.storage().persistent().has(&DataKey::SelfCertified(investor.clone()));
+        && env
+            .storage()
+            .persistent()
+            .has(&DataKey::Holder(raise.id, investor.clone()))
+        && env
+            .storage()
+            .persistent()
+            .has(&DataKey::SelfCertified(investor.clone()));
     if !met_minimum && !eligible(env, config, raise, investor, amount) {
         panic_with_error!(env, Error::NotEligible);
     }
@@ -709,7 +832,7 @@ fn count_holder(env: &Env, raise: &mut Raise, holder: &Address) {
 }
 
 fn require_reason(env: &Env, reason: &String) {
-    if reason.len() == 0 {
+    if reason.is_empty() {
         panic_with_error!(env, Error::InvalidTerms);
     }
 }
@@ -721,13 +844,17 @@ fn load_raise(env: &Env, id: u32) -> Raise {
         .persistent()
         .get(&key)
         .unwrap_or_else(|| panic_with_error!(env, Error::RaiseNotFound));
-    env.storage().persistent().extend_ttl(&key, TTL_THRESHOLD, TTL_EXTEND_TO);
+    env.storage()
+        .persistent()
+        .extend_ttl(&key, TTL_THRESHOLD, TTL_EXTEND_TO);
     raise
 }
 
 fn save_raise(env: &Env, raise: &Raise) {
     set_persistent(env, &DataKey::Raise(raise.id), raise);
-    env.storage().instance().extend_ttl(TTL_THRESHOLD, TTL_EXTEND_TO);
+    env.storage()
+        .instance()
+        .extend_ttl(TTL_THRESHOLD, TTL_EXTEND_TO);
 }
 
 fn take_contribution(env: &Env, raise_id: u32, investor: &Address) -> i128 {
@@ -745,7 +872,9 @@ where
     V: soroban_sdk::IntoVal<Env, soroban_sdk::Val>,
 {
     env.storage().persistent().set(key, value);
-    env.storage().persistent().extend_ttl(key, TTL_THRESHOLD, TTL_EXTEND_TO);
+    env.storage()
+        .persistent()
+        .extend_ttl(key, TTL_THRESHOLD, TTL_EXTEND_TO);
 }
 
 mod test;

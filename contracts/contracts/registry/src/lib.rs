@@ -6,8 +6,8 @@
 //! the *admin* (a multisig council) suspends companies and reassigns roles.
 
 use soroban_sdk::{
-    contract, contracterror, contractevent, contractimpl, contracttype, panic_with_error, symbol_short,
-    Address, BytesN, Env, String, Symbol,
+    contract, contracterror, contractevent, contractimpl, contracttype, panic_with_error,
+    symbol_short, Address, BytesN, Env, String, Symbol,
 };
 
 const DAY_IN_LEDGERS: u32 = 17_280;
@@ -176,7 +176,13 @@ impl Registry {
         company.payout_bps = payout_bps;
         company.period_secs = period_secs;
         save(&env, &company);
-        AgreementSigned { id, agreement_hash, payout_bps, period_secs }.publish(&env);
+        AgreementSigned {
+            id,
+            agreement_hash,
+            payout_bps,
+            period_secs,
+        }
+        .publish(&env);
     }
 
     pub fn suspend(env: Env, id: u32) {
@@ -190,13 +196,23 @@ impl Registry {
     pub fn set_admin(env: Env, new_admin: Address) {
         admin(&env).require_auth();
         env.storage().instance().set(&DataKey::Admin, &new_admin);
-        RoleChanged { role: symbol_short!("admin"), account: new_admin }.publish(&env);
+        RoleChanged {
+            role: symbol_short!("admin"),
+            account: new_admin,
+        }
+        .publish(&env);
     }
 
     pub fn set_verifier(env: Env, new_verifier: Address) {
         admin(&env).require_auth();
-        env.storage().instance().set(&DataKey::Verifier, &new_verifier);
-        RoleChanged { role: symbol_short!("verifier"), account: new_verifier }.publish(&env);
+        env.storage()
+            .instance()
+            .set(&DataKey::Verifier, &new_verifier);
+        RoleChanged {
+            role: symbol_short!("verifier"),
+            account: new_verifier,
+        }
+        .publish(&env);
     }
 
     pub fn admin(env: Env) -> Address {
@@ -239,7 +255,9 @@ fn load(env: &Env, id: u32) -> Company {
     let key = DataKey::Company(id);
     match env.storage().persistent().get(&key) {
         Some(c) => {
-            env.storage().persistent().extend_ttl(&key, TTL_THRESHOLD, TTL_EXTEND_TO);
+            env.storage()
+                .persistent()
+                .extend_ttl(&key, TTL_THRESHOLD, TTL_EXTEND_TO);
             c
         }
         None => panic_with_error!(env, Error::NotFound),
@@ -249,8 +267,12 @@ fn load(env: &Env, id: u32) -> Company {
 fn save(env: &Env, company: &Company) {
     let key = DataKey::Company(company.id);
     env.storage().persistent().set(&key, company);
-    env.storage().persistent().extend_ttl(&key, TTL_THRESHOLD, TTL_EXTEND_TO);
-    env.storage().instance().extend_ttl(TTL_THRESHOLD, TTL_EXTEND_TO);
+    env.storage()
+        .persistent()
+        .extend_ttl(&key, TTL_THRESHOLD, TTL_EXTEND_TO);
+    env.storage()
+        .instance()
+        .extend_ttl(TTL_THRESHOLD, TTL_EXTEND_TO);
 }
 
 mod test;
