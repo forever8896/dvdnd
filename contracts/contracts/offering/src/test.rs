@@ -232,7 +232,10 @@ fn investments_at_and_after_deadline_leave_escrow_unchanged() {
     // The investment window is exclusive of the deadline, even before finalize.
     for at in [DEADLINE, DEADLINE + 1] {
         s.env.ledger().set_timestamp(at);
-        assert_eq!(s.offering.try_invest(&id, &a, &USDC), Err(err(Error::NotOpen)));
+        assert_eq!(
+            s.offering.try_invest(&id, &a, &USDC),
+            Err(err(Error::NotOpen))
+        );
         assert_eq!(s.offering.contribution(&id, &a), 10 * USDC);
         assert_eq!(s.offering.raise(&id).raised, 10 * USDC);
         assert_eq!(s.usdc.balance(&a), 90 * USDC);
@@ -297,7 +300,10 @@ fn exceeding_maximum_by_one_stroop_is_rejected_not_capped() {
     s.offering.invest(&id, &a, &(60 * USDC));
 
     // An oversubscribing investment is rejected in full, never partially accepted.
-    assert_eq!(s.offering.try_invest(&id, &b, &(40 * USDC + 1)), Err(err(Error::OverMax)));
+    assert_eq!(
+        s.offering.try_invest(&id, &b, &(40 * USDC + 1)),
+        Err(err(Error::OverMax))
+    );
     assert_eq!(s.usdc.balance(&b), 40 * USDC + 1);
     assert_eq!(s.usdc.balance(&s.offering.address), 60 * USDC);
     assert_eq!(s.offering.contribution(&id, &b), 0);
@@ -323,7 +329,10 @@ fn duplicate_refund_cannot_spend_another_investors_escrow() {
     s.offering.refund(&id, &a);
 
     // A refunded contribution is consumed once, while other deposits remain refundable.
-    assert_eq!(s.offering.try_refund(&id, &a), Err(err(Error::NothingToClaim)));
+    assert_eq!(
+        s.offering.try_refund(&id, &a),
+        Err(err(Error::NothingToClaim))
+    );
     assert_eq!(s.usdc.balance(&a), 10 * USDC);
     assert_eq!(s.usdc.balance(&s.offering.address), 20 * USDC);
     assert_eq!(s.offering.contribution(&id, &b), 20 * USDC);
@@ -341,9 +350,15 @@ fn failed_close_never_mints_share_tokens() {
     s.offering.finalize(&id);
 
     // Failed raises cannot mint, either before or after refunding the contribution.
-    assert_eq!(s.offering.try_claim_tokens(&id, &a), Err(err(Error::WrongState)));
+    assert_eq!(
+        s.offering.try_claim_tokens(&id, &a),
+        Err(err(Error::WrongState))
+    );
     s.offering.refund(&id, &a);
-    assert_eq!(s.offering.try_claim_tokens(&id, &a), Err(err(Error::WrongState)));
+    assert_eq!(
+        s.offering.try_claim_tokens(&id, &a),
+        Err(err(Error::WrongState))
+    );
     assert_eq!(s.share.balance(&a), 0);
     assert_eq!(s.share.balance(&s.vault.address), 0);
 }
@@ -362,11 +377,23 @@ fn successful_close_mints_only_sold_tokens_once() {
 
     // Close permits settlement of sold tokens; consumed/absent contributions cannot mint again.
     assert_eq!(s.offering.claim_tokens(&id, &a), 60 * USDC);
-    assert_eq!(s.offering.try_claim_tokens(&id, &a), Err(err(Error::NothingToClaim)));
+    assert_eq!(
+        s.offering.try_claim_tokens(&id, &a),
+        Err(err(Error::NothingToClaim))
+    );
     assert_eq!(s.offering.claim_tokens(&id, &b), 40 * USDC);
-    assert_eq!(s.offering.try_claim_tokens(&id, &b), Err(err(Error::NothingToClaim)));
-    assert_eq!(s.offering.try_claim_tokens(&id, &outsider), Err(err(Error::NothingToClaim)));
-    assert_eq!(s.offering.try_invest(&id, &outsider, &USDC), Err(err(Error::NotOpen)));
+    assert_eq!(
+        s.offering.try_claim_tokens(&id, &b),
+        Err(err(Error::NothingToClaim))
+    );
+    assert_eq!(
+        s.offering.try_claim_tokens(&id, &outsider),
+        Err(err(Error::NothingToClaim))
+    );
+    assert_eq!(
+        s.offering.try_invest(&id, &outsider, &USDC),
+        Err(err(Error::NotOpen))
+    );
     assert_eq!(s.offering.try_finalize(&id), Err(err(Error::WrongState)));
     assert_eq!(s.share_sac.admin(), s.offering.address);
 
@@ -394,7 +421,10 @@ fn configured_holder_cap_below_section_12g_limit_rejects_new_holders() {
 
     // At a configured cap below the statutory limit, top-ups are allowed, new holders are not.
     s.offering.invest(&id, &a, &(10 * USDC));
-    assert_eq!(s.offering.try_invest(&id, &c, &(10 * USDC)), Err(err(Error::HolderCap)));
+    assert_eq!(
+        s.offering.try_invest(&id, &c, &(10 * USDC)),
+        Err(err(Error::HolderCap))
+    );
     assert_eq!(s.offering.raise(&id).holders, 2);
     assert_eq!(s.offering.raise(&id).investors, 2);
     assert_eq!(s.offering.raise(&id).raised, 30 * USDC);
@@ -403,7 +433,10 @@ fn configured_holder_cap_below_section_12g_limit_rejects_new_holders() {
     assert_eq!(s.usdc.balance(&s.offering.address), 30 * USDC);
     s.env.ledger().set_timestamp(DEADLINE);
     s.offering.finalize(&id);
-    assert_eq!(s.offering.try_authorize_holder(&id, &c), Err(err(Error::HolderCap)));
+    assert_eq!(
+        s.offering.try_authorize_holder(&id, &c),
+        Err(err(Error::HolderCap))
+    );
     assert!(!s.share_sac.authorized(&c));
     assert_eq!(s.offering.raise(&id).holders, 2);
 }
