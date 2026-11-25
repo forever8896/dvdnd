@@ -204,6 +204,193 @@ fn failed_raise_refunds_in_full() {
 }
 
 #[test]
+fn investments_at_and_after_deadline_leave_escrow_unchanged() {
+    let s = setup();
+    let id = open(&s, 50 * USDC, 100 * USDC, &reg_s(&s));
+    let a = investor(&s, 100 * USDC);
+    s.env.ledger().set_timestamp(DEADLINE - 1);
+    s.offering.invest(&id, &a, &(10 * USDC));
+
+    // The investment window is exclusive of the deadline, even before finalize.
+    for at in [DEADLINE, DEADLINE + 1] {
+        s.env.ledger().set_timestamp(at);
+        assert_eq!(s.offering.try_invest(&id, &a, &USDC), Err(err(Error::NotOpen)));
+        assert_eq!(s.offering.contribution(&id, &a), 10 * USDC);
+        assert_eq!(s.offering.raise(&id).raised, 10 * USDC);
+        assert_eq!(s.usdc.balance(&a), 90 * USDC);
+        assert_eq!(s.usdc.balance(&s.offering.address), 10 * USDC);
+    }
+}
+
+#[test]
+fn exactly_minimum_succeeds_and_pays_company_once() {
+    let s = setup();
+    let minimum = 50 * USDC;
+    let id = open(&s, minimum, 100 * USDC, &reg_s(&s));
+    let a = investor(&s, minimum);
+    s.offering.invest(&id, &a, &minimum);
+    let company_before = s.usdc.balance(&s.company);
+    s.env.ledger().set_timestamp(DEADLINE);
+
+    // Reaching the minimum exactly succeeds at the deadline, without filling the raise.
+    assert_eq!(s.offering.finalize(&id), RaiseState::Succeeded);
+    assert_eq!(s.usdc.balance(&s.company), company_before + minimum);
+    assert_eq!(s.usdc.balance(&s.offering.address), 0);
+    assert_eq!(s.offering.try_refund(&id, &a), Err(err(Error::WrongState)));
+    assert_eq!(s.offering.try_finalize(&id), Err(err(Error::WrongState)));
+    assert_eq!(s.usdc.balance(&s.company), company_before + minimum);
+    assert_eq!(s.offering.claim_tokens(&id, &a), minimum);
+}
+
+#[test]
+fn one_stroop_below_minimum_refunds_every_investor() {
+    let s = setup();
+    let minimum = 50 * USDC;
+    let id = open(&s, minimum, 100 * USDC, &reg_s(&s));
+    let a_amount = 20 * USDC;
+    let b_amount = minimum - a_amount - 1;
+    let a = investor(&s, a_amount);
+    let b = investor(&s, b_amount);
+    s.offering.invest(&id, &a, &a_amount);
+    s.offering.invest(&id, &b, &b_amount);
+    let company_before = s.usdc.balance(&s.company);
+    s.env.ledger().set_timestamp(DEADLINE);
+
+    // One stroop short fails the entire raise: every investor gets their full deposit.
+    assert_eq!(s.offering.raise(&id).raised, minimum - 1);
+    assert_eq!(s.offering.finalize(&id), RaiseState::Failed);
+    assert_eq!(s.offering.refund(&id, &a), a_amount);
+    assert_eq!(s.offering.refund(&id, &b), b_amount);
+    assert_eq!(s.usdc.balance(&a), a_amount);
+    assert_eq!(s.usdc.balance(&b), b_amount);
+    assert_eq!(s.usdc.balance(&s.company), company_before);
+    assert_eq!(s.usdc.balance(&s.offering.address), 0);
+    assert_eq!(s.offering.contribution(&id, &a), 0);
+    assert_eq!(s.offering.contribution(&id, &b), 0);
+}
+
+#[test]
+fn exceeding_maximum_by_one_stroop_is_rejected_not_capped() {
+    let s = setup();
+    let maximum = 100 * USDC;
+    let id = open(&s, 50 * USDC, maximum, &reg_s(&s));
+    let a = investor(&s, 60 * USDC);
+    let b = investor(&s, 40 * USDC + 1);
+    s.offering.invest(&id, &a, &(60 * USDC));
+
+    // An oversubscribing investment is rejected in full, never partially accepted.
+    assert_eq!(s.offering.try_invest(&id, &b, &(40 * USDC + 1)), Err(err(Error::OverMax)));
+    assert_eq!(s.usdc.balance(&b), 40 * USDC + 1);
+    assert_eq!(s.usdc.balance(&s.offering.address), 60 * USDC);
+    assert_eq!(s.offering.contribution(&id, &b), 0);
+    assert_eq!(s.offering.raise(&id).raised, 60 * USDC);
+    assert_eq!(s.offering.raise(&id).investors, 1);
+    assert_eq!(s.offering.raise(&id).holders, 1);
+    s.offering.invest(&id, &b, &(40 * USDC));
+    assert_eq!(s.offering.raise(&id).raised, maximum);
+    assert_eq!(s.usdc.balance(&b), 1);
+    assert_eq!(s.offering.finalize(&id), RaiseState::Succeeded);
+}
+
+#[test]
+fn duplicate_refund_cannot_spend_another_investors_escrow() {
+    let s = setup();
+    let id = open(&s, 50 * USDC, 100 * USDC, &reg_s(&s));
+    let a = investor(&s, 10 * USDC);
+    let b = investor(&s, 20 * USDC);
+    s.offering.invest(&id, &a, &(10 * USDC));
+    s.offering.invest(&id, &b, &(20 * USDC));
+    s.env.ledger().set_timestamp(DEADLINE);
+    s.offering.finalize(&id);
+    s.offering.refund(&id, &a);
+
+    // A refunded contribution is consumed once, while other deposits remain refundable.
+    assert_eq!(s.offering.try_refund(&id, &a), Err(err(Error::NothingToClaim)));
+    assert_eq!(s.usdc.balance(&a), 10 * USDC);
+    assert_eq!(s.usdc.balance(&s.offering.address), 20 * USDC);
+    assert_eq!(s.offering.contribution(&id, &b), 20 * USDC);
+    assert_eq!(s.offering.refund(&id, &b), 20 * USDC);
+    assert_eq!(s.usdc.balance(&s.offering.address), 0);
+}
+
+#[test]
+fn failed_close_never_mints_share_tokens() {
+    let s = setup();
+    let id = open(&s, 50 * USDC, 100 * USDC, &reg_s(&s));
+    let a = investor(&s, 10 * USDC);
+    s.offering.invest(&id, &a, &(10 * USDC));
+    s.env.ledger().set_timestamp(DEADLINE);
+    s.offering.finalize(&id);
+
+    // Failed raises cannot mint, either before or after refunding the contribution.
+    assert_eq!(s.offering.try_claim_tokens(&id, &a), Err(err(Error::WrongState)));
+    s.offering.refund(&id, &a);
+    assert_eq!(s.offering.try_claim_tokens(&id, &a), Err(err(Error::WrongState)));
+    assert_eq!(s.share.balance(&a), 0);
+    assert_eq!(s.share.balance(&s.vault.address), 0);
+}
+
+#[test]
+fn successful_close_mints_only_sold_tokens_once() {
+    let s = setup();
+    let id = open(&s, 50 * USDC, 100 * USDC, &reg_s(&s));
+    let a = investor(&s, 60 * USDC);
+    let b = investor(&s, 40 * USDC);
+    let outsider = investor(&s, USDC);
+    s.offering.invest(&id, &a, &(60 * USDC));
+    s.offering.invest(&id, &b, &(40 * USDC));
+    s.env.ledger().set_timestamp(DEADLINE);
+    s.offering.finalize(&id);
+
+    // Close permits settlement of sold tokens; consumed/absent contributions cannot mint again.
+    assert_eq!(s.offering.claim_tokens(&id, &a), 60 * USDC);
+    assert_eq!(s.offering.try_claim_tokens(&id, &a), Err(err(Error::NothingToClaim)));
+    assert_eq!(s.offering.claim_tokens(&id, &b), 40 * USDC);
+    assert_eq!(s.offering.try_claim_tokens(&id, &b), Err(err(Error::NothingToClaim)));
+    assert_eq!(s.offering.try_claim_tokens(&id, &outsider), Err(err(Error::NothingToClaim)));
+    assert_eq!(s.offering.try_invest(&id, &outsider, &USDC), Err(err(Error::NotOpen)));
+    assert_eq!(s.offering.try_finalize(&id), Err(err(Error::WrongState)));
+    assert_eq!(s.share_sac.admin(), s.offering.address);
+
+    // Disable blanket auth mocking: callers cannot impersonate the offering's SAC admin.
+    s.env.mock_auths(&[]);
+    assert!(s.share_sac.try_mint(&a, &USDC).is_err());
+    assert_eq!(s.share.balance(&a), 60 * USDC);
+    assert_eq!(s.share.balance(&b), 40 * USDC);
+    assert_eq!(s.share.balance(&outsider), 0);
+    assert_eq!(s.share.balance(&s.vault.address), 0);
+}
+
+#[test]
+fn configured_holder_cap_below_section_12g_limit_rejects_new_holders() {
+    let s = setup();
+    let mut terms = reg_s(&s);
+    terms.max_holders = 2;
+    assert!(terms.max_holders < MAX_HOLDERS);
+    let id = open(&s, 10 * USDC, 100 * USDC, &terms);
+    let a = investor(&s, 20 * USDC);
+    let b = investor(&s, 10 * USDC);
+    let c = investor(&s, 10 * USDC);
+    s.offering.invest(&id, &a, &(10 * USDC));
+    s.offering.invest(&id, &b, &(10 * USDC));
+
+    // At a configured cap below the statutory limit, top-ups are allowed, new holders are not.
+    s.offering.invest(&id, &a, &(10 * USDC));
+    assert_eq!(s.offering.try_invest(&id, &c, &(10 * USDC)), Err(err(Error::HolderCap)));
+    assert_eq!(s.offering.raise(&id).holders, 2);
+    assert_eq!(s.offering.raise(&id).investors, 2);
+    assert_eq!(s.offering.raise(&id).raised, 30 * USDC);
+    assert_eq!(s.offering.contribution(&id, &c), 0);
+    assert_eq!(s.usdc.balance(&c), 10 * USDC);
+    assert_eq!(s.usdc.balance(&s.offering.address), 30 * USDC);
+    s.env.ledger().set_timestamp(DEADLINE);
+    s.offering.finalize(&id);
+    assert_eq!(s.offering.try_authorize_holder(&id, &c), Err(err(Error::HolderCap)));
+    assert!(!s.share_sac.authorized(&c));
+    assert_eq!(s.offering.raise(&id).holders, 2);
+}
+
+#[test]
 fn price_sets_token_amount() {
     let s = setup();
     // 2.5 USDC per token.
