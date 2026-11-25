@@ -20,6 +20,23 @@ export const sc = {
 export const toUnits = (amount: number) => BigInt(Math.round(amount * 1e7));
 export const fromUnits = (units: bigint | number) => Number(units) / Number(UNIT);
 
+const DECIMALS = String(UNIT).length - 1;
+
+/** The exact decimal string of an amount in units, e.g. 12345678n → "1.2345678". */
+export function toDecimal(units: bigint): string {
+  const abs = units < 0n ? -units : units;
+  return `${units < 0n ? "-" : ""}${abs / UNIT}.${String(abs % UNIT).padStart(DECIMALS, "0")}`;
+}
+
+/** Units from an exact decimal string such as Horizon's balance "12.3456789". */
+export function parseUnits(decimal: string): bigint {
+  const negative = decimal.startsWith("-");
+  const [whole, fraction = ""] = (negative ? decimal.slice(1) : decimal).split(".");
+  if (fraction.length > DECIMALS) throw new RangeError(`More than ${DECIMALS} decimals: ${decimal}`);
+  const units = BigInt(whole || "0") * UNIT + BigInt(fraction.padEnd(DECIMALS, "0"));
+  return negative ? -units : units;
+}
+
 // ── registry ──────────────────────────────────────────────────────────
 export enum CompanyStatus {
   Pending = 0,
@@ -141,6 +158,16 @@ export const EXEMPTION_LABEL: Record<Exemption, string> = {
 export const acceptsAccredited = (e: Exemption) => e !== Exemption.RegS;
 /** Whether proven non-US residents can join (Reg S alone or alongside 506(c)). */
 export const acceptsResidents = (e: Exemption) => e !== Exemption.RegD506c;
+
+/**
+ * The exemption a holder is on the cap table under. In a combined raise the contract doesn't record
+ * which route a holder took, so a holder with a residence proof on record counts as Reg S, others as 506(c).
+ */
+export function holderExemption(e: Exemption, eligibleUntil: number): "Reg S" | "506(c)" {
+  if (e === Exemption.RegS) return "Reg S";
+  if (e === Exemption.RegD506c) return "506(c)";
+  return eligibleUntil > 0 ? "Reg S" : "506(c)";
+}
 
 /** Rule 506(c) high-minimum route: a self-certified person puts in at least this much... */
 export const SELF_CERTIFIED_MINIMUM = 200_000n * UNIT;

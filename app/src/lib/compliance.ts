@@ -3,24 +3,27 @@
 // from Horizon, which keeps full history, rather than the RPC's week of events.
 
 import { scValToNative, xdr } from "@stellar/stellar-sdk";
-import { fromUnits, position, type Raise } from "./chain";
+import { eligibleUntil, parseUnits, position, type Raise } from "./chain";
 import { CONTRACTS, NETWORK } from "./config";
 import { read } from "./stellar";
 
 export type Holder = {
   account: string;
-  /** Tokens in the wallet (can be clawed back). */
-  wallet: number;
-  /** Tokens locked in the dividend vault. */
-  locked: number;
+  /** Tokens in the wallet, in units (can be clawed back). */
+  wallet: bigint;
+  /** Tokens locked in the dividend vault, in units. */
+  locked: bigint;
   /** The trustline is authorized; a frozen holder can't send or receive. */
   authorized: boolean;
+  /** Unix seconds the holder's residence proof lasts until; 0 if they never proved residence. */
+  eligibleUntil: number;
 };
 
 export type ComplianceEntry = {
   action: "freeze" | "unfreeze" | "clawback" | "handover";
   holder?: string;
-  amount?: number;
+  /** Tokens clawed back, in units. */
+  amount?: bigint;
   reason?: string;
   by: string;
   at: string;
@@ -47,23 +50,27 @@ export async function shareAsset(token: string) {
   return { code: code!, issuer: issuer! };
 }
 
-/** Every account with a trustline to the raise's share token. */
-export async function holders(raise: Raise): Promise<Holder[]> {
+/** Every account with a trustline to the raise's share token, and the token's classic asset ("CODE:ISSUER"). */
+export async function holders(raise: Raise): Promise<{ asset: string; holders: Holder[] }> {
   const { code, issuer } = await shareAsset(raise.token);
   type Account = { account_id: string; balances: { asset_code?: string; asset_issuer?: string; balance: string; is_authorized?: boolean }[] };
   const accounts = await pages<Account>(`${NETWORK.horizonUrl}/accounts?asset=${code}:${issuer}&limit=200`);
-  return Promise.all(
-    accounts.map(async (a) => {
-      const line = a.balances.find((b) => b.asset_code === code && b.asset_issuer === issuer)!;
-      const pos = await position(raise.token, a.account_id).catch(() => null);
-      return {
-        account: a.account_id,
-        wallet: Number(line.balance),
-        locked: pos ? fromUnits(pos.active + pos.pending) : 0,
-        authorized: Boolean(line.is_authorized),
-      };
-    }),
-  );
+  return {
+    asset: `${code}:${issuer}`,
+    holders: await Promise.all(
+      accounts.map(async (a) => {
+        const line = a.balances.find((b) => b.asset_code === code && b.asset_issuer === issuer)!;
+        const [pos, until] = await Promise.all([position(raise.token, a.account_id), eligibleUntil(a.account_id)]);
+        return {
+          account: a.account_id,
+          wallet: parseUnits(line.balance),
+          locked: pos.active + pos.pending,
+          authorized: Boolean(line.is_authorized),
+          eligibleUntil: until,
+        };
+      }),
+    ),
+  };
 }
 
 const ACTIONS: Record<string, ComplianceEntry["action"]> = {
@@ -94,7 +101,7 @@ export async function auditLog(raise: Raise, accounts: string[]): Promise<Compli
     if (contract !== CONTRACTS.offering || !action || Number(args[0]) !== raise.id) continue;
     const base = { action, by: op.source_account, at: op.created_at, hash: op.transaction_hash };
     if (action === "handover") entries.push({ ...base, holder: String(args[1]) });
-    else if (action === "clawback") entries.push({ ...base, holder: String(args[1]), amount: fromUnits(BigInt(args[2] as bigint)), reason: String(args[3]) });
+    else if (action === "clawback") entries.push({ ...base, holder: String(args[1]), amount: BigInt(args[2] as bigint), reason: String(args[3]) });
     else entries.push({ ...base, holder: String(args[1]), reason: String(args[2]) });
   }
   return entries.sort((a, b) => b.at.localeCompare(a.at));
